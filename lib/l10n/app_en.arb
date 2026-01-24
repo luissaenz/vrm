@@ -1,0 +1,56 @@
+{
+  "@@locale": "en",
+  "appTitle": "VRM App",
+  "goodMorning": "GOOD MORNING,",
+  "creator": "Alex Rivera",
+  "streak": "Streak",
+  "days": "{count} Days",
+  "@days": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "clips": "Clips",
+  "newProject": "New Project",
+  "voiceControlActive": "Voice control active",
+  "recentProjects": "Recent Projects",
+  "viewAll": "View all",
+  "readyToCreate": "Ready to create?",
+  "captureIdeas": "Capture your ideas, one fragment at a time.",
+  "streakLabel": "RECORDING\nSTREAK",
+  "fragments": "FRAGMENTS",
+  "calendar": "Calendar",
+  "panel": "PANEL",
+  "videos": "VIDEOS",
+  "script": "SCRIPT",
+  "profile": "PROFILE",
+  "draft": "DRAFT",
+  "ready": "READY",
+  "wed": "WED",
+  "thu": "THU",
+  "fri": "FRI",
+  "sat": "SAT",
+  "progressLabel": "PROGRESS",
+  "editedYesterday": "Edited yesterday",
+  "editedHoursAgo": "Edited {count} hours ago",
+  "@editedHoursAgo": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "fragmentCount": "{current}/{total} Fragments",
+  "@fragmentCount": {
+    "placeholders": {
+      "current": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  }
+}
