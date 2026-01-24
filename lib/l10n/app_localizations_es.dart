@@ -203,4 +203,22 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get reRecord => 'REGRABAR';
+
+  @override
+  String get preparation => 'PREPARACIÓN';
+
+  @override
+  String get listening => 'ESCUCHANDO...';
+
+  @override
+  String get systemReads => 'EL SISTEMA LEE EL GUION:';
+
+  @override
+  String get getReady => 'PREPÁRATE';
+
+  @override
+  String get repeat => 'REPETIR';
+
+  @override
+  String get record => 'GRABAR';
 }

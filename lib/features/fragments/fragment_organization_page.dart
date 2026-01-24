@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../shared/widgets/header.dart';
 import '../../shared/widgets/step_indicator.dart';
+import '../preparation/preparation_page.dart';
 import '../../l10n/app_localizations.dart';
 
 class Fragment {
@@ -128,7 +129,14 @@ class _FragmentOrganizationPageState extends State<FragmentOrganizationPage> {
           mainAxisSize: MainAxisSize.min,
           children: [
             ElevatedButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const PreparationPage(),
+                  ),
+                );
+              },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF2A4844),
                 foregroundColor: Colors.white,

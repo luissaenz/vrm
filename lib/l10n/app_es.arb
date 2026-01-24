@@ -110,5 +110,11 @@
   "poweredByAi": "POTENCIADO POR IA DE ÚLTIMA GENERACIÓN",
   "step2Title": "PASO 2: VALIDA LOS FRAGMENTOS",
   "next": "SIGUIENTE",
-  "reRecord": "REGRABAR"
+  "reRecord": "REGRABAR",
+  "preparation": "PREPARACIÓN",
+  "listening": "ESCUCHANDO...",
+  "systemReads": "EL SISTEMA LEE EL GUION:",
+  "getReady": "PREPÁRATE",
+  "repeat": "REPETIR",
+  "record": "GRABAR"
 }

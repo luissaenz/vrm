@@ -451,6 +451,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'RE-RECORD'**
   String get reRecord;
+
+  /// No description provided for @preparation.
+  ///
+  /// In en, this message translates to:
+  /// **'PREPARATION'**
+  String get preparation;
+
+  /// No description provided for @listening.
+  ///
+  /// In en, this message translates to:
+  /// **'LISTENING...'**
+  String get listening;
+
+  /// No description provided for @systemReads.
+  ///
+  /// In en, this message translates to:
+  /// **'THE SYSTEM READS THE SCRIPT:'**
+  String get systemReads;
+
+  /// No description provided for @getReady.
+  ///
+  /// In en, this message translates to:
+  /// **'GET READY'**
+  String get getReady;
+
+  /// No description provided for @repeat.
+  ///
+  /// In en, this message translates to:
+  /// **'REPEAT'**
+  String get repeat;
+
+  /// No description provided for @record.
+  ///
+  /// In en, this message translates to:
+  /// **'RECORD'**
+  String get record;
 }
 
 class _AppLocalizationsDelegate

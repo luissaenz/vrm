@@ -110,5 +110,11 @@
   "poweredByAi": "POWERED BY LATEST GENERATION AI",
   "step2Title": "STEP 2: VALIDATE THE FRAGMENTS",
   "next": "NEXT",
-  "reRecord": "RE-RECORD"
+  "reRecord": "RE-RECORD",
+  "preparation": "PREPARATION",
+  "listening": "LISTENING...",
+  "systemReads": "THE SYSTEM READS THE SCRIPT:",
+  "getReady": "GET READY",
+  "repeat": "REPEAT",
+  "record": "RECORD"
 }

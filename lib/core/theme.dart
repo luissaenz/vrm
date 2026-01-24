@@ -24,7 +24,6 @@ class AppTheme {
         primary: primaryGreen,
         secondary: accentOrange,
         surface: surface,
-        background: background,
       ),
       textTheme: const TextTheme(
         displayLarge: TextStyle(

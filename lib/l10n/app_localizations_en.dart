@@ -201,4 +201,22 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reRecord => 'RE-RECORD';
+
+  @override
+  String get preparation => 'PREPARATION';
+
+  @override
+  String get listening => 'LISTENING...';
+
+  @override
+  String get systemReads => 'THE SYSTEM READS THE SCRIPT:';
+
+  @override
+  String get getReady => 'GET READY';
+
+  @override
+  String get repeat => 'REPEAT';
+
+  @override
+  String get record => 'RECORD';
 }
