@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:vrm_app/l10n/app_localizations.dart';
 import 'package:vrm_app/core/theme.dart';
 import 'package:vrm_app/features/dashboard/dashboard_page.dart';
 
@@ -15,6 +17,14 @@ class VRMApp extends StatelessWidget {
       title: 'VRM App - Cámara Atómica',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      locale: const Locale('en'),
+      supportedLocales: const [Locale('en'), Locale('es')],
       home: const DashboardPage(),
     );
   }

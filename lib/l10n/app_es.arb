@@ -1,0 +1,56 @@
+{
+  "@@locale": "es",
+  "appTitle": "VRM App",
+  "goodMorning": "BUENOS DÍAS,",
+  "creator": "Alex Rivera",
+  "streak": "Racha",
+  "days": "{count} Días",
+  "@days": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "clips": "Clips",
+  "newProject": "Nuevo Proyecto",
+  "voiceControlActive": "Control por voz activado",
+  "recentProjects": "Proyectos Recientes",
+  "viewAll": "Ver todos",
+  "readyToCreate": "¿Listo para crear?",
+  "captureIdeas": "Captura tus ideas, un fragmento a la vez.",
+  "streakLabel": "RACHA DE\nGRABACIÓN",
+  "fragments": "FRAGMENTOS",
+  "calendar": "Calendario",
+  "panel": "PANEL",
+  "videos": "VIDEOS",
+  "script": "SCRIPT",
+  "profile": "PERFIL",
+  "draft": "BORRADOR",
+  "ready": "LISTO",
+  "wed": "MIE",
+  "thu": "JUE",
+  "fri": "VIE",
+  "sat": "SAB",
+  "progressLabel": "PROGRESO",
+  "editedYesterday": "Editado ayer",
+  "editedHoursAgo": "Editado hace {count} horas",
+  "@editedHoursAgo": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "fragmentCount": "{current}/{total} Fragmentos",
+  "@fragmentCount": {
+    "placeholders": {
+      "current": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  }
+}

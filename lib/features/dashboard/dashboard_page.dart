@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:vrm_app/l10n/app_localizations.dart';
 import 'package:vrm_app/shared/widgets/section_header.dart';
 import 'package:vrm_app/shared/widgets/stat_card.dart';
 import 'package:vrm_app/shared/widgets/action_card.dart';
@@ -11,8 +12,9 @@ class DashboardPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      bottomNavigationBar: _buildBottomNav(),
+      bottomNavigationBar: _buildBottomNav(l10n),
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(
@@ -25,15 +27,15 @@ class DashboardPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildTopBar(),
+                  _buildTopBar(l10n),
                   const SizedBox(height: 28),
-                  _buildMainGreeting(),
+                  _buildMainGreeting(l10n),
                   const SizedBox(height: 28),
-                  _buildStatsSection(),
+                  _buildStatsSection(l10n),
                   const SizedBox(height: 20),
                   VRMActionCard(
-                    title: 'Nuevo Proyecto',
-                    subtitle: 'Control por voz activado',
+                    title: l10n.newProject,
+                    subtitle: l10n.voiceControlActive,
                     icon: Icons.mic,
                     onTap: () {
                       // TODO: Navegar a grabación
@@ -42,7 +44,7 @@ class DashboardPage extends StatelessWidget {
                   const SizedBox(height: 36),
                   const _RecentProjectsSection(),
                   const SizedBox(height: 36),
-                  _buildCalendarSection(),
+                  _buildCalendarSection(l10n),
                 ],
               ),
             ),
@@ -52,7 +54,7 @@ class DashboardPage extends StatelessWidget {
     );
   }
 
-  Widget _buildTopBar() {
+  Widget _buildTopBar(AppLocalizations l10n) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -65,12 +67,12 @@ class DashboardPage extends StatelessWidget {
               ),
             ),
             const SizedBox(width: 8),
-            const Column(
+            Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'BUENOS DÍAS,',
-                  style: TextStyle(
+                  l10n.goodMorning,
+                  style: const TextStyle(
                     fontSize: 8.5,
                     fontWeight: FontWeight.bold,
                     color: AppTheme.textMuted,
@@ -79,8 +81,8 @@ class DashboardPage extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  'Alex Rivera',
-                  style: TextStyle(
+                  l10n.creator,
+                  style: const TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.bold,
                     color: AppTheme.textMain,
@@ -104,13 +106,13 @@ class DashboardPage extends StatelessWidget {
     );
   }
 
-  Widget _buildMainGreeting() {
-    return const Column(
+  Widget _buildMainGreeting(AppLocalizations l10n) {
+    return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '¿Listo para crear?',
-          style: TextStyle(
+          l10n.readyToCreate,
+          style: const TextStyle(
             fontSize: 26,
             fontWeight: FontWeight.w800,
             color: AppTheme.textMain,
@@ -118,10 +120,10 @@ class DashboardPage extends StatelessWidget {
             inherit: true,
           ),
         ),
-        SizedBox(height: 1),
+        const SizedBox(height: 1),
         Text(
-          'Captura tus ideas, un fragmento a la vez.',
-          style: TextStyle(
+          l10n.captureIdeas,
+          style: const TextStyle(
             fontSize: 12.5,
             color: AppTheme.textMuted,
             inherit: true,
@@ -131,21 +133,21 @@ class DashboardPage extends StatelessWidget {
     );
   }
 
-  Widget _buildStatsSection() {
-    return const IntrinsicHeight(
+  Widget _buildStatsSection(AppLocalizations l10n) {
+    return IntrinsicHeight(
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           VRMStatCard(
-            value: '5 Días',
-            label: 'RACHA DE\nGRABACIÓN',
+            value: l10n.days('5'),
+            label: l10n.streakLabel,
             icon: Icons.local_fire_department,
             color: AppTheme.accentOrange,
           ),
-          SizedBox(width: 16),
+          const SizedBox(width: 16),
           VRMStatCard(
             value: '42',
-            label: 'FRAGMENTOS',
+            label: l10n.fragments,
             icon: Icons.mic,
             color: AppTheme.accentTeal,
           ),
@@ -154,35 +156,35 @@ class DashboardPage extends StatelessWidget {
     );
   }
 
-  Widget _buildCalendarSection() {
+  Widget _buildCalendarSection(AppLocalizations l10n) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const VRMSectionHeader(title: 'Calendario', icon: Icons.calendar_month),
+        VRMSectionHeader(title: l10n.calendar, icon: Icons.calendar_month),
         const SizedBox(height: 16),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             VRMCalendarDay(
-              day: 'MIE',
+              day: l10n.wed,
               date: '24',
               isSelected: true,
               onTap: () {},
             ),
             VRMCalendarDay(
-              day: 'JUE',
+              day: l10n.thu,
               date: '25',
               isSelected: false,
               onTap: () {},
             ),
             VRMCalendarDay(
-              day: 'VIE',
+              day: l10n.fri,
               date: '26',
               isSelected: false,
               onTap: () {},
             ),
             VRMCalendarDay(
-              day: 'SAB',
+              day: l10n.sat,
               date: '27',
               isSelected: false,
               onTap: () {},
@@ -193,7 +195,7 @@ class DashboardPage extends StatelessWidget {
     );
   }
 
-  Widget _buildBottomNav() {
+  Widget _buildBottomNav(AppLocalizations l10n) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12),
       decoration: BoxDecoration(
@@ -205,10 +207,10 @@ class DashboardPage extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _buildNavItem(Icons.grid_view_sharp, 'PANEL', true),
-          _buildNavItem(Icons.play_circle_outline, 'VIDEOS', false),
-          _buildNavItem(Icons.mic_none_outlined, 'SCRIPT', false),
-          _buildNavItem(Icons.person_outline, 'PERFIL', false),
+          _buildNavItem(Icons.grid_view_sharp, l10n.panel, true),
+          _buildNavItem(Icons.play_circle_outline, l10n.videos, false),
+          _buildNavItem(Icons.mic_none_outlined, l10n.script, false),
+          _buildNavItem(Icons.person_outline, l10n.profile, false),
         ],
       ),
     );
@@ -247,37 +249,39 @@ class _RecentProjectsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         VRMSectionHeader(
-          title: 'Proyectos Recientes',
-          actionLabel: 'Ver todos',
+          title: l10n.recentProjects,
+          actionLabel: l10n.viewAll,
           onActionPressed: () {
             // TODO: Ver todos los proyectos
           },
         ),
         const SizedBox(height: 16),
-        const VRMProjectCard(
+        VRMProjectCard(
           title: 'Reseña Tech: iPhone 15',
-          time: 'Editado hace 2 horas',
+          time: l10n.editedHoursAgo('2'),
           progress: 0.3,
-          statusText: '3/10 Fragmentos',
-          badgeText: 'BORRADOR',
+          statusText: l10n.fragmentCount('3', '10'),
+          badgeText: l10n.draft,
+          progressLabel: l10n.progressLabel,
           icon: Icons.smartphone,
-          badgeBg: Color(0xFFFFF7ED), // Light orange background
-          badgeTextCol: AppTheme.accentOrange, // Exact theme orange
+          badgeBg: const Color(0xFFFFF7ED),
+          badgeTextCol: AppTheme.accentOrange,
         ),
-        const VRMProjectCard(
+        VRMProjectCard(
           title: 'Vlog Japón: Día 1',
-          time: 'Editado ayer',
+          time: l10n.editedYesterday,
           progress: 1.0,
-          statusText: '12/12 Fragmentos',
-          badgeText: 'LISTO',
+          statusText: l10n.fragmentCount('12', '12'),
+          badgeText: l10n.ready,
+          progressLabel: l10n.progressLabel,
           icon: Icons.airplanemode_active,
-          badgeBg: Color(0xFFECFDF5),
-          badgeTextCol:
-              AppTheme.primaryGreen, // Mismo verde que el botón principal
+          badgeBg: const Color(0xFFECFDF5),
+          badgeTextCol: AppTheme.primaryGreen,
         ),
       ],
     );

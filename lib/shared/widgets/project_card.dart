@@ -10,6 +10,7 @@ class VRMProjectCard extends StatelessWidget {
   final IconData icon;
   final Color badgeBg;
   final Color badgeTextCol;
+  final String progressLabel;
   final VoidCallback? onTap;
 
   const VRMProjectCard({
@@ -22,6 +23,7 @@ class VRMProjectCard extends StatelessWidget {
     required this.icon,
     required this.badgeBg,
     required this.badgeTextCol,
+    required this.progressLabel,
     this.onTap,
   });
 
@@ -107,8 +109,8 @@ class VRMProjectCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'PROGRESO',
+                Text(
+                  progressLabel,
                   style: TextStyle(
                     fontSize: 8,
                     fontWeight: FontWeight.bold,
