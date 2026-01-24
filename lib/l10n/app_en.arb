@@ -118,5 +118,9 @@
   "repeat": "REPEAT",
   "record": "RECORD",
   "waiting": "WAITING...",
-  "voiceControlDisabled": "Voice control disabled"
+  "voiceControlDisabled": "Voice control disabled",
+  "recordingStatus": "RECORDING",
+  "listeningToAdvance": "Listening for voice to advance...",
+  "gridLabel": "GRID",
+  "ghostLabel": "GHOST"
 }

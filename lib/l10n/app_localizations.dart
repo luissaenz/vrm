@@ -499,6 +499,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Voice control disabled'**
   String get voiceControlDisabled;
+
+  /// No description provided for @recordingStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'RECORDING'**
+  String get recordingStatus;
+
+  /// No description provided for @listeningToAdvance.
+  ///
+  /// In en, this message translates to:
+  /// **'Listening for voice to advance...'**
+  String get listeningToAdvance;
+
+  /// No description provided for @gridLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'GRID'**
+  String get gridLabel;
+
+  /// No description provided for @ghostLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'GHOST'**
+  String get ghostLabel;
 }
 
 class _AppLocalizationsDelegate

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../../l10n/app_localizations.dart';
+import '../recording/recording_page.dart';
 
 class PreparationPage extends StatefulWidget {
   const PreparationPage({super.key});
@@ -534,7 +535,14 @@ class _PreparationPageState extends State<PreparationPage> {
             color: Colors.transparent,
             child: InkWell(
               borderRadius: BorderRadius.circular(999),
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const RecordingPage(),
+                  ),
+                );
+              },
               child: const Icon(
                 Icons.fiber_manual_record,
                 color: surfaceLight,

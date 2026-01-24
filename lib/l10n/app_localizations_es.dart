@@ -227,4 +227,16 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get voiceControlDisabled => 'Control por voz desactivado';
+
+  @override
+  String get recordingStatus => 'GRABANDO';
+
+  @override
+  String get listeningToAdvance => 'Escuchando voz para avanzar...';
+
+  @override
+  String get gridLabel => 'GRID';
+
+  @override
+  String get ghostLabel => 'GHOST';
 }

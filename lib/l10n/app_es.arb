@@ -118,5 +118,9 @@
   "repeat": "REPETIR",
   "record": "GRABAR",
   "waiting": "ESPERANDO...",
-  "voiceControlDisabled": "Control por voz desactivado"
+  "voiceControlDisabled": "Control por voz desactivado",
+  "recordingStatus": "GRABANDO",
+  "listeningToAdvance": "Escuchando voz para avanzar...",
+  "gridLabel": "GRID",
+  "ghostLabel": "GHOST"
 }
