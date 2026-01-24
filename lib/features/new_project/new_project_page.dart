@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../shared/widgets/header.dart';
 import '../../shared/widgets/step_indicator.dart';
+import '../../shared/widgets/script_editor.dart';
+import '../assistant/assistant_page.dart';
 import '../../l10n/app_localizations.dart';
 
 class NewProjectPage extends StatefulWidget {
@@ -82,129 +84,40 @@ class _NewProjectPageState extends State<NewProjectPage> {
   }
 
   Widget _buildScriptInput(AppLocalizations l10n) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.03),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(20),
-            child: TextField(
-              controller: _scriptController,
-              maxLines: 8,
-              decoration: const InputDecoration(
-                hintText: '...',
-                border: InputBorder.none,
-              ),
-              style: const TextStyle(
-                fontSize: 16,
-                height: 1.5,
-                color: Color(0xFF4B5563),
-              ),
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            decoration: const BoxDecoration(
-              color: Colors.white, // Fondo blanco puro
-              borderRadius: BorderRadius.only(
-                bottomLeft: Radius.circular(24),
-                bottomRight: Radius.circular(24),
-              ),
-            ),
-            child: Row(
-              children: [
-                _buildToolbarButton(
-                  onPressed: () async {
-                    final data = await Clipboard.getData(Clipboard.kTextPlain);
-                    if (data?.text != null) {
-                      _scriptController.text = data!.text!;
-                    }
-                  },
-                  icon: Icons.paste_outlined,
-                  label: l10n.paste,
-                ),
-                const SizedBox(width: 8), // Espacio reducido entre botones
-                _buildToolbarIcon(
-                  onPressed: () {},
-                  icon: Icons.file_upload_outlined,
-                ),
-                const SizedBox(width: 8), // Espacio reducido entre botones
-                _buildToolbarIcon(
-                  onPressed: () {},
-                  icon: Icons.mic_none_outlined,
-                ),
-                const Spacer(),
-                _buildActionButton(
-                  onPressed: () {},
-                  icon: Icons.auto_awesome,
-                  label: l10n.assistant,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildToolbarButton({
-    required VoidCallback onPressed,
-    required IconData icon,
-    required String label,
-  }) {
-    return InkWell(
-      onTap: onPressed,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          color: const Color(0xFFF3F4F6), // Gris muy claro para el botón Pegar
-          borderRadius: BorderRadius.circular(12),
+    return VRMScriptEditor(
+      controller: _scriptController,
+      hintText: '...',
+      actions: [
+        VRMScriptEditor.actionButton(
+          onPressed: () async {
+            final data = await Clipboard.getData(Clipboard.kTextPlain);
+            if (data?.text != null) {
+              _scriptController.text = data!.text!;
+            }
+          },
+          icon: Icons.paste_outlined,
+          label: l10n.paste,
         ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 14, color: const Color(0xFF2A4844)),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: const TextStyle(
-                color: Color(0xFF2A4844),
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
+        VRMScriptEditor.actionIcon(
+          onPressed: () {},
+          icon: Icons.file_upload_outlined,
         ),
-      ),
-    );
-  }
-
-  Widget _buildToolbarIcon({
-    required VoidCallback onPressed,
-    required IconData icon,
-  }) {
-    return InkWell(
-      onTap: onPressed,
-      borderRadius: BorderRadius.circular(10),
-      child: Container(
-        padding: const EdgeInsets.all(8),
-        decoration: const BoxDecoration(
-          color: Colors.transparent, // Fondo transparente
-          shape: BoxShape.circle,
+        VRMScriptEditor.actionIcon(
+          onPressed: () {},
+          icon: Icons.mic_none_outlined,
         ),
-        child: Icon(icon, size: 16, color: const Color(0xFF2A4844)),
-      ),
+        VRMScriptEditor.actionButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const AssistantPage()),
+            );
+          },
+          icon: Icons.auto_awesome,
+          label: l10n.assistant,
+          backgroundColor: Colors.transparent,
+        ),
+      ],
     );
   }
 
@@ -234,36 +147,6 @@ class _NewProjectPageState extends State<NewProjectPage> {
           style: TextStyle(fontSize: 13, color: Colors.grey[400]),
         ),
       ],
-    );
-  }
-
-  Widget _buildActionButton({
-    required VoidCallback onPressed,
-    required IconData icon,
-    required String label,
-  }) {
-    return InkWell(
-      onTap: onPressed,
-      borderRadius: BorderRadius.circular(10),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 14, color: const Color(0xFF2A4844)),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: const TextStyle(
-                color: Color(0xFF2A4844),
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 0.5,
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

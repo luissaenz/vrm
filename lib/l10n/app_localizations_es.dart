@@ -144,4 +144,54 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get segment => 'SEGMENTAR';
+
+  @override
+  String get scriptAssistantTitle => 'Asistente de Guion';
+
+  @override
+  String get defineIdea => 'Define tu Idea';
+
+  @override
+  String get iaHelperText =>
+      'La IA te ayudará a estructurar el contenido perfecto.';
+
+  @override
+  String get videoIdeaLabel => 'IDEA DEL VIDEO';
+
+  @override
+  String get videoIdeaPlaceholder =>
+      'Ej: Un video sobre cómo organizar tu escritorio para ser más productivo en 5 pasos...';
+
+  @override
+  String get suggestedStructures => 'Estructuras sugeridas';
+
+  @override
+  String get premiumAi => 'PREMIUM AI';
+
+  @override
+  String get hookTitle => 'Introducción / Hook';
+
+  @override
+  String get hookDesc =>
+      'Engancha a tu audiencia en los primeros 3 segundos con un problema común.';
+
+  @override
+  String get valueTitle => 'Desarrollo de Valor';
+
+  @override
+  String get valueDesc =>
+      'Divide tu explicación en 3 puntos clave accionables y fáciles de seguir.';
+
+  @override
+  String get ctaTitle => 'Cierre (CTA)';
+
+  @override
+  String get ctaDesc =>
+      'Pide a tus seguidores que den like y compartan el contenido.';
+
+  @override
+  String get generateFullScript => 'Generar Guion Completo';
+
+  @override
+  String get poweredByAi => 'POTENCIADO POR IA DE ÚLTIMA GENERACIÓN';
 }

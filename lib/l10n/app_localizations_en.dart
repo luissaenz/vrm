@@ -144,4 +144,52 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get segment => 'SEGMENT';
+
+  @override
+  String get scriptAssistantTitle => 'Script Assistant';
+
+  @override
+  String get defineIdea => 'Define your Idea';
+
+  @override
+  String get iaHelperText => 'AI will help you structure the perfect content.';
+
+  @override
+  String get videoIdeaLabel => 'VIDEO IDEA';
+
+  @override
+  String get videoIdeaPlaceholder =>
+      'Ej: A video about how to organize your desk to be more productive in 5 steps...';
+
+  @override
+  String get suggestedStructures => 'Suggested Structures';
+
+  @override
+  String get premiumAi => 'PREMIUM AI';
+
+  @override
+  String get hookTitle => 'Introduction / Hook';
+
+  @override
+  String get hookDesc =>
+      'Hook your audience in the first 3 seconds with a common problem.';
+
+  @override
+  String get valueTitle => 'Value Development';
+
+  @override
+  String get valueDesc =>
+      'Divide your explanation into 3 actionable and easy-to-follow key points.';
+
+  @override
+  String get ctaTitle => 'Close (CTA)';
+
+  @override
+  String get ctaDesc => 'Ask your followers to like and share the content.';
+
+  @override
+  String get generateFullScript => 'Generate Full Script';
+
+  @override
+  String get poweredByAi => 'POWERED BY LATEST GENERATION AI';
 }

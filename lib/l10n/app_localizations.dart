@@ -343,6 +343,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'SEGMENT'**
   String get segment;
+
+  /// No description provided for @scriptAssistantTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Script Assistant'**
+  String get scriptAssistantTitle;
+
+  /// No description provided for @defineIdea.
+  ///
+  /// In en, this message translates to:
+  /// **'Define your Idea'**
+  String get defineIdea;
+
+  /// No description provided for @iaHelperText.
+  ///
+  /// In en, this message translates to:
+  /// **'AI will help you structure the perfect content.'**
+  String get iaHelperText;
+
+  /// No description provided for @videoIdeaLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'VIDEO IDEA'**
+  String get videoIdeaLabel;
+
+  /// No description provided for @videoIdeaPlaceholder.
+  ///
+  /// In en, this message translates to:
+  /// **'Ej: A video about how to organize your desk to be more productive in 5 steps...'**
+  String get videoIdeaPlaceholder;
+
+  /// No description provided for @suggestedStructures.
+  ///
+  /// In en, this message translates to:
+  /// **'Suggested Structures'**
+  String get suggestedStructures;
+
+  /// No description provided for @premiumAi.
+  ///
+  /// In en, this message translates to:
+  /// **'PREMIUM AI'**
+  String get premiumAi;
+
+  /// No description provided for @hookTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Introduction / Hook'**
+  String get hookTitle;
+
+  /// No description provided for @hookDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Hook your audience in the first 3 seconds with a common problem.'**
+  String get hookDesc;
+
+  /// No description provided for @valueTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Value Development'**
+  String get valueTitle;
+
+  /// No description provided for @valueDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Divide your explanation into 3 actionable and easy-to-follow key points.'**
+  String get valueDesc;
+
+  /// No description provided for @ctaTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Close (CTA)'**
+  String get ctaTitle;
+
+  /// No description provided for @ctaDesc.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask your followers to like and share the content.'**
+  String get ctaDesc;
+
+  /// No description provided for @generateFullScript.
+  ///
+  /// In en, this message translates to:
+  /// **'Generate Full Script'**
+  String get generateFullScript;
+
+  /// No description provided for @poweredByAi.
+  ///
+  /// In en, this message translates to:
+  /// **'POWERED BY LATEST GENERATION AI'**
+  String get poweredByAi;
 }
 
 class _AppLocalizationsDelegate

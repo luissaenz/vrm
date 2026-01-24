@@ -92,5 +92,20 @@
   },
   "splitIntoFragments": "Split into Fragments",
   "paste": "Paste",
-  "segment": "SEGMENT"
+  "segment": "SEGMENT",
+  "scriptAssistantTitle": "Script Assistant",
+  "defineIdea": "Define your Idea",
+  "iaHelperText": "AI will help you structure the perfect content.",
+  "videoIdeaLabel": "VIDEO IDEA",
+  "videoIdeaPlaceholder": "Ej: A video about how to organize your desk to be more productive in 5 steps...",
+  "suggestedStructures": "Suggested Structures",
+  "premiumAi": "PREMIUM AI",
+  "hookTitle": "Introduction / Hook",
+  "hookDesc": "Hook your audience in the first 3 seconds with a common problem.",
+  "valueTitle": "Value Development",
+  "valueDesc": "Divide your explanation into 3 actionable and easy-to-follow key points.",
+  "ctaTitle": "Close (CTA)",
+  "ctaDesc": "Ask your followers to like and share the content.",
+  "generateFullScript": "Generate Full Script",
+  "poweredByAi": "POWERED BY LATEST GENERATION AI"
 }

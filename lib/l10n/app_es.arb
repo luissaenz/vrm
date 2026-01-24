@@ -92,5 +92,20 @@
   },
   "splitIntoFragments": "Dividir en Fragmentos",
   "paste": "Pegar",
-  "segment": "SEGMENTAR"
+  "segment": "SEGMENTAR",
+  "scriptAssistantTitle": "Asistente de Guion",
+  "defineIdea": "Define tu Idea",
+  "iaHelperText": "La IA te ayudará a estructurar el contenido perfecto.",
+  "videoIdeaLabel": "IDEA DEL VIDEO",
+  "videoIdeaPlaceholder": "Ej: Un video sobre cómo organizar tu escritorio para ser más productivo en 5 pasos...",
+  "suggestedStructures": "Estructuras sugeridas",
+  "premiumAi": "PREMIUM AI",
+  "hookTitle": "Introducción / Hook",
+  "hookDesc": "Engancha a tu audiencia en los primeros 3 segundos con un problema común.",
+  "valueTitle": "Desarrollo de Valor",
+  "valueDesc": "Divide tu explicación en 3 puntos clave accionables y fáciles de seguir.",
+  "ctaTitle": "Cierre (CTA)",
+  "ctaDesc": "Pide a tus seguidores que den like y compartan el contenido.",
+  "generateFullScript": "Generar Guion Completo",
+  "poweredByAi": "POTENCIADO POR IA DE ÚLTIMA GENERACIÓN"
 }

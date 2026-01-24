@@ -3,8 +3,14 @@ import 'package:flutter/material.dart';
 class VRMHeader extends StatelessWidget {
   final String title;
   final VoidCallback onBack;
+  final IconData icon;
 
-  const VRMHeader({super.key, required this.title, required this.onBack});
+  const VRMHeader({
+    super.key,
+    required this.title,
+    required this.onBack,
+    this.icon = Icons.close_rounded,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -34,11 +40,7 @@ class VRMHeader extends StatelessWidget {
                     ),
                   ],
                 ),
-                child: const Icon(
-                  Icons.close_rounded,
-                  size: 20,
-                  color: Color(0xFF2A4844),
-                ),
+                child: Icon(icon, size: 20, color: const Color(0xFF2A4844)),
               ),
             ),
           ),
