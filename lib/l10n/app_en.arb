@@ -107,5 +107,8 @@
   "ctaTitle": "Close (CTA)",
   "ctaDesc": "Ask your followers to like and share the content.",
   "generateFullScript": "Generate Full Script",
-  "poweredByAi": "POWERED BY LATEST GENERATION AI"
+  "poweredByAi": "POWERED BY LATEST GENERATION AI",
+  "step2Title": "STEP 2: VALIDATE THE FRAGMENTS",
+  "next": "NEXT",
+  "reRecord": "RE-RECORD"
 }

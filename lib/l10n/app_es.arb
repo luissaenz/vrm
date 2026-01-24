@@ -107,5 +107,8 @@
   "ctaTitle": "Cierre (CTA)",
   "ctaDesc": "Pide a tus seguidores que den like y compartan el contenido.",
   "generateFullScript": "Generar Guion Completo",
-  "poweredByAi": "POTENCIADO POR IA DE ÚLTIMA GENERACIÓN"
+  "poweredByAi": "POTENCIADO POR IA DE ÚLTIMA GENERACIÓN",
+  "step2Title": "PASO 2: VALIDA LOS FRAGMENTOS",
+  "next": "SIGUIENTE",
+  "reRecord": "REGRABAR"
 }

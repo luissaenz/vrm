@@ -110,7 +110,9 @@ class _AssistantPageState extends State<AssistantPage> {
           mainAxisSize: MainAxisSize.min,
           children: [
             ElevatedButton.icon(
-              onPressed: _ideaController.text.trim().isEmpty ? null : () {},
+              onPressed: _ideaController.text.trim().isEmpty
+                  ? null
+                  : () => Navigator.pop(context), // Volver para llenar el guion
               icon: const Icon(Icons.auto_awesome, size: 20),
               label: Text(l10n.generateFullScript),
               style: ElevatedButton.styleFrom(

@@ -192,4 +192,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get poweredByAi => 'POWERED BY LATEST GENERATION AI';
+
+  @override
+  String get step2Title => 'STEP 2: VALIDATE THE FRAGMENTS';
+
+  @override
+  String get next => 'NEXT';
+
+  @override
+  String get reRecord => 'RE-RECORD';
 }

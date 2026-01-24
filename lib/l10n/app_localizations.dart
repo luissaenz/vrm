@@ -433,6 +433,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'POWERED BY LATEST GENERATION AI'**
   String get poweredByAi;
+
+  /// No description provided for @step2Title.
+  ///
+  /// In en, this message translates to:
+  /// **'STEP 2: VALIDATE THE FRAGMENTS'**
+  String get step2Title;
+
+  /// No description provided for @next.
+  ///
+  /// In en, this message translates to:
+  /// **'NEXT'**
+  String get next;
+
+  /// No description provided for @reRecord.
+  ///
+  /// In en, this message translates to:
+  /// **'RE-RECORD'**
+  String get reRecord;
 }
 
 class _AppLocalizationsDelegate

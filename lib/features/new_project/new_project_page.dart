@@ -4,6 +4,7 @@ import '../../shared/widgets/header.dart';
 import '../../shared/widgets/step_indicator.dart';
 import '../../shared/widgets/script_editor.dart';
 import '../assistant/assistant_page.dart';
+import '../fragments/fragment_organization_page.dart';
 import '../../l10n/app_localizations.dart';
 
 class NewProjectPage extends StatefulWidget {
@@ -67,7 +68,12 @@ class _NewProjectPageState extends State<NewProjectPage> {
           onPressed: _scriptController.text.trim().isEmpty
               ? null
               : () {
-                  // TODO: Proceed to split
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const FragmentOrganizationPage(),
+                    ),
+                  );
                 },
           icon: const Icon(Icons.auto_awesome_mosaic_outlined, size: 20),
           label: Text(l10n.splitIntoFragments),
