@@ -487,6 +487,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'RECORD'**
   String get record;
+
+  /// No description provided for @waiting.
+  ///
+  /// In en, this message translates to:
+  /// **'WAITING...'**
+  String get waiting;
+
+  /// No description provided for @voiceControlDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Voice control disabled'**
+  String get voiceControlDisabled;
 }
 
 class _AppLocalizationsDelegate

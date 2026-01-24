@@ -26,7 +26,6 @@ class VRMSectionHeader extends StatelessWidget {
             fontSize: 18,
             fontWeight: FontWeight.bold,
             color: AppTheme.textMain,
-            inherit: true,
           ),
         ),
         if (actionLabel != null)
@@ -35,15 +34,23 @@ class VRMSectionHeader extends StatelessWidget {
             child: Text(
               actionLabel!,
               style: const TextStyle(
-                fontSize: 12,
+                fontSize: 14,
                 fontWeight: FontWeight.bold,
-                color: AppTheme.accentTealDark,
-                inherit: true,
+                color: AppTheme.forest,
               ),
             ),
           )
         else if (icon != null)
-          Icon(icon, color: AppTheme.textMuted, size: 20),
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              border: Border.all(color: AppTheme.earthBorder),
+            ),
+            child: Icon(icon, color: AppTheme.forest, size: 20),
+          ),
       ],
     );
   }

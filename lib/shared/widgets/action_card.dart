@@ -21,19 +21,19 @@ class VRMActionCard extends StatelessWidget {
       onTap: onTap,
       child: Container(
         width: double.infinity,
-        height: 72,
+        height: 84,
+        padding: const EdgeInsets.symmetric(horizontal: 24),
         decoration: BoxDecoration(
-          color: AppTheme.primaryGreen,
-          borderRadius: BorderRadius.circular(36),
+          color: AppTheme.forest,
+          borderRadius: BorderRadius.circular(99),
           boxShadow: [
             BoxShadow(
-              color: AppTheme.primaryGreen.withOpacity(0.2),
-              blurRadius: 15,
-              offset: const Offset(0, 8),
+              color: AppTheme.forest.withValues(alpha: 0.15),
+              blurRadius: 24,
+              offset: const Offset(0, 12),
             ),
           ],
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 20),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -44,22 +44,26 @@ class VRMActionCard extends StatelessWidget {
                 Text(
                   title,
                   style: const TextStyle(
-                    fontSize: 16,
+                    fontSize: 18,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
-                    inherit: true,
                   ),
                 ),
+                const SizedBox(height: 2),
                 Row(
                   children: [
-                    Icon(icon, size: 10, color: Colors.white.withOpacity(0.7)),
-                    const SizedBox(width: 4),
+                    Icon(
+                      Icons.keyboard_voice,
+                      size: 14,
+                      color: Colors.white.withValues(alpha: 0.8),
+                    ),
+                    const SizedBox(width: 6),
                     Text(
                       subtitle,
                       style: TextStyle(
-                        fontSize: 10,
-                        color: Colors.white.withOpacity(0.7),
-                        inherit: true,
+                        fontSize: 11,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white.withValues(alpha: 0.8),
                       ),
                     ),
                   ],
@@ -67,12 +71,13 @@ class VRMActionCard extends StatelessWidget {
               ],
             ),
             Container(
-              padding: const EdgeInsets.all(10),
+              width: 44,
+              height: 44,
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.12),
+                color: Colors.white.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.add, color: Colors.white, size: 20),
+              child: const Icon(Icons.add, color: Colors.white, size: 24),
             ),
           ],
         ),

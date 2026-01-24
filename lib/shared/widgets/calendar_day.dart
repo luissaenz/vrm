@@ -20,47 +20,55 @@ class VRMCalendarDay extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 64,
-        padding: const EdgeInsets.symmetric(vertical: 16),
+        width: 76,
+        padding: const EdgeInsets.symmetric(vertical: 14),
         decoration: BoxDecoration(
-          color: isSelected ? AppTheme.primaryGreen : Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: isSelected ? null : Border.all(color: AppTheme.border),
+          color: isSelected ? AppTheme.forest : Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          border: isSelected ? null : Border.all(color: AppTheme.earthBorder),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: AppTheme.forest.withValues(alpha: 0.2),
+                    blurRadius: 15,
+                    offset: const Offset(0, 8),
+                  ),
+                ]
+              : null,
         ),
         child: Column(
           children: [
             Text(
-              day,
+              day.toUpperCase(),
               style: TextStyle(
-                fontSize: 9,
+                fontSize: 10,
                 fontWeight: FontWeight.bold,
                 color: isSelected
-                    ? Colors.white.withOpacity(0.7)
-                    : AppTheme.textMuted,
-                inherit: true,
+                    ? Colors.white.withValues(alpha: 0.7)
+                    : AppTheme.textMuted.withValues(alpha: 0.8),
+                letterSpacing: 1.0,
               ),
             ),
-            const SizedBox(height: 6),
+            const SizedBox(height: 8),
             Text(
               date,
               style: TextStyle(
-                fontSize: 16,
+                fontSize: 20,
                 fontWeight: FontWeight.bold,
                 color: isSelected ? Colors.white : AppTheme.textMain,
-                inherit: true,
               ),
             ),
-            if (isSelected) ...[
-              const SizedBox(height: 6),
-              Container(
-                width: 3,
-                height: 3,
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                ),
+            const SizedBox(height: 8),
+            Container(
+              width: 4,
+              height: 4,
+              decoration: BoxDecoration(
+                color: isSelected
+                    ? Colors.white
+                    : (isSelected ? Colors.transparent : AppTheme.forest),
+                shape: BoxShape.circle,
               ),
-            ],
+            ),
           ],
         ),
       ),

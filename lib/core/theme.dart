@@ -2,18 +2,23 @@ import 'package:flutter/material.dart';
 
 class AppTheme {
   // Paleta Estandarizada y Mínima (Con colores exactos del diseño)
-  static const Color primaryGreen = Color(0xFF2A4844); // Forest Muted
-  static const Color accentOrange = Color(0xFFF97316); // Flame
-  static const Color accentTeal = Color(0xFF0D9488); // Mic / Ready
-  static const Color accentTealDark = Color(
-    0xFF324E4C,
-  ); // "Ver todos" (Exacto: RGB 50, 78, 76)
+  static const Color forest = Color(0xFF2C4341);
+  static const Color forestDark = Color(0xFF162210);
+  static const Color earth = Color(0xFF7D6B5D);
+  static const Color accent = Color(0xFF4A6663);
+  static const Color backgroundLight = Color(0xFFF8F9F8);
+  static const Color surfaceColor = Color(0xFFFFFFFF);
+  static const Color accentOrange = Color(0xFFF97316);
 
-  static const Color background = Color(0xFFF8F9FB);
-  static const Color surface = Colors.white;
-  static const Color textMain = Color(0xFF111827);
-  static const Color textMuted = Color(0xFF6B7280);
+  static const Color primaryGreen = forest;
+  static const Color background = backgroundLight;
+  static const Color surface = surfaceColor;
+  static const Color textMain = Color(0xFF0F172A); // Slate 900
+  static const Color textMuted = Color(0xFF64748B); // Slate 500
   static const Color border = Color(0xFFE5E7EB);
+  static const Color earthBorder = Color(0xFFE5E7EB);
+  static const Color offWhite = backgroundLight;
+  static const Color earthLight = Color(0xFFEAE7E2);
 
   static ThemeData get lightTheme {
     return ThemeData(

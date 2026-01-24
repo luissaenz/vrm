@@ -219,4 +219,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get record => 'RECORD';
+
+  @override
+  String get waiting => 'WAITING...';
+
+  @override
+  String get voiceControlDisabled => 'Voice control disabled';
 }

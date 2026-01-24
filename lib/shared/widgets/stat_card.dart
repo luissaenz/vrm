@@ -19,14 +19,14 @@ class VRMStatCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.all(16), // Reducido de 20
+        padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(28), // Más redondeado
-          border: Border.all(color: AppTheme.border), // Borde sólido de 1px
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: AppTheme.earthBorder),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.01),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -36,34 +36,32 @@ class VRMStatCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              padding: const EdgeInsets.all(5),
+              width: 36,
+              height: 36,
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
+                color: color.withValues(alpha: 0.05),
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, color: color, size: 14), // Reducido de 16
+              child: Icon(icon, color: color, size: 20),
             ),
-            const SizedBox(height: 12), // Reducido de 16
+            const SizedBox(height: 12),
             Text(
               value,
               style: const TextStyle(
-                fontSize: 18, // Reducido de 20
-                fontWeight: FontWeight.w900,
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
                 color: AppTheme.textMain,
-                height: 1.1,
-                inherit: true,
+                letterSpacing: -0.5,
               ),
             ),
-            const SizedBox(height: 1), // Mínimo espacio
+            const SizedBox(height: 2),
             Text(
-              label,
+              label.toUpperCase(),
               style: const TextStyle(
-                fontSize: 7.5, // Reducido de 8
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
                 color: AppTheme.textMuted,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 0.3,
-                height: 1.2,
-                inherit: true,
+                letterSpacing: 0.5,
               ),
             ),
           ],

@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:vrm_app/l10n/app_localizations.dart';
 import 'package:vrm_app/shared/widgets/section_header.dart';
@@ -15,41 +16,41 @@ class DashboardPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return Scaffold(
+      backgroundColor: AppTheme.offWhite,
+      extendBody: true,
       bottomNavigationBar: _buildBottomNav(l10n),
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 450),
             child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 28.0,
-                vertical: 20.0,
-              ),
+              padding: const EdgeInsets.only(bottom: 120),
+              physics: const BouncingScrollPhysics(),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildTopBar(l10n),
-                  const SizedBox(height: 28),
                   _buildMainGreeting(l10n),
-                  const SizedBox(height: 28),
                   _buildStatsSection(l10n),
                   const SizedBox(height: 20),
-                  VRMActionCard(
-                    title: l10n.newProject,
-                    subtitle: l10n.voiceControlActive,
-                    icon: Icons.mic,
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const NewProjectPage(),
-                        ),
-                      );
-                    },
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    child: VRMActionCard(
+                      title: l10n.newProject,
+                      subtitle: l10n.voiceControlActive,
+                      icon: Icons.mic,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const NewProjectPage(),
+                          ),
+                        );
+                      },
+                    ),
                   ),
-                  const SizedBox(height: 36),
                   const _RecentProjectsSection(),
-                  const SizedBox(height: 36),
+                  const SizedBox(height: 40),
                   _buildCalendarSection(l10n),
                 ],
               ),
@@ -61,101 +62,127 @@ class DashboardPage extends StatelessWidget {
   }
 
   Widget _buildTopBar(AppLocalizations l10n) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Row(
-          children: [
-            const CircleAvatar(
-              radius: 18,
-              backgroundImage: NetworkImage(
-                'https://i.pravatar.cc/150?u=vrm_user_alex',
-              ),
-            ),
-            const SizedBox(width: 8),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  l10n.goodMorning,
-                  style: const TextStyle(
-                    fontSize: 8.5,
-                    fontWeight: FontWeight.bold,
-                    color: AppTheme.textMuted,
-                    letterSpacing: 0.8,
-                    inherit: true,
+    return Container(
+      padding: const EdgeInsets.fromLTRB(24, 24, 24, 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.white, width: 2),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.05),
+                      blurRadius: 4,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                  image: const DecorationImage(
+                    image: NetworkImage(
+                      'https://i.pravatar.cc/150?u=vrm_user_alex',
+                    ),
+                    fit: BoxFit.cover,
                   ),
                 ),
-                Text(
-                  l10n.creator,
-                  style: const TextStyle(
-                    fontSize: 13,
-                    fontWeight: FontWeight.bold,
-                    color: AppTheme.textMain,
-                    inherit: true,
+              ),
+              const SizedBox(width: 12),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.goodMorning,
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xFF64748B), // Slate 500
+                      letterSpacing: 0.5,
+                    ),
                   ),
+                  Text(
+                    l10n.creator,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF0F172A),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.circle,
+              border: Border.all(color: AppTheme.earthBorder),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.02),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
                 ),
               ],
             ),
-          ],
-        ),
-        Container(
-          padding: const EdgeInsets.all(7),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            shape: BoxShape.circle,
-            border: Border.all(color: AppTheme.border),
+            child: const Icon(Icons.settings, size: 20, color: AppTheme.forest),
           ),
-          child: const Icon(Icons.settings, size: 16, color: AppTheme.textMain),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
   Widget _buildMainGreeting(AppLocalizations l10n) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          l10n.readyToCreate,
-          style: const TextStyle(
-            fontSize: 26,
-            fontWeight: FontWeight.w800,
-            color: AppTheme.textMain,
-            letterSpacing: -0.8,
-            inherit: true,
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.readyToCreate,
+            style: const TextStyle(
+              fontSize: 32,
+              fontWeight: FontWeight.w800,
+              color: Color(0xFF0F172A),
+              letterSpacing: -1,
+            ),
           ),
-        ),
-        const SizedBox(height: 1),
-        Text(
-          l10n.captureIdeas,
-          style: const TextStyle(
-            fontSize: 12.5,
-            color: AppTheme.textMuted,
-            inherit: true,
+          const SizedBox(height: 6),
+          Text(
+            l10n.captureIdeas,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: const Color(0xFF64748B), // Slate 500
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
   Widget _buildStatsSection(AppLocalizations l10n) {
-    return IntrinsicHeight(
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           VRMStatCard(
             value: l10n.days('5'),
             label: l10n.streakLabel,
             icon: Icons.local_fire_department,
-            color: AppTheme.accentOrange,
+            color: const Color(0xFFEA580C), // Orange 600
           ),
           const SizedBox(width: 16),
           VRMStatCard(
             value: '42',
             label: l10n.fragments,
             icon: Icons.mic,
-            color: AppTheme.accentTeal,
+            color: AppTheme.forest,
           ),
         ],
       ),
@@ -163,61 +190,75 @@ class DashboardPage extends StatelessWidget {
   }
 
   Widget _buildCalendarSection(AppLocalizations l10n) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        VRMSectionHeader(title: l10n.calendar, icon: Icons.calendar_month),
-        const SizedBox(height: 16),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            VRMCalendarDay(
-              day: l10n.wed,
-              date: '24',
-              isSelected: true,
-              onTap: () {},
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          VRMSectionHeader(title: l10n.calendar, icon: Icons.calendar_month),
+          const SizedBox(height: 20),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
+            child: Row(
+              children: [
+                VRMCalendarDay(
+                  day: l10n.wed,
+                  date: '24',
+                  isSelected: true,
+                  onTap: () {},
+                ),
+                const SizedBox(width: 16),
+                VRMCalendarDay(
+                  day: l10n.thu,
+                  date: '25',
+                  isSelected: false,
+                  onTap: () {},
+                ),
+                const SizedBox(width: 16),
+                VRMCalendarDay(
+                  day: l10n.fri,
+                  date: '26',
+                  isSelected: false,
+                  onTap: () {},
+                ),
+                const SizedBox(width: 16),
+                VRMCalendarDay(
+                  day: l10n.sat,
+                  date: '27',
+                  isSelected: false,
+                  onTap: () {},
+                ),
+              ],
             ),
-            VRMCalendarDay(
-              day: l10n.thu,
-              date: '25',
-              isSelected: false,
-              onTap: () {},
-            ),
-            VRMCalendarDay(
-              day: l10n.fri,
-              date: '26',
-              isSelected: false,
-              onTap: () {},
-            ),
-            VRMCalendarDay(
-              day: l10n.sat,
-              date: '27',
-              isSelected: false,
-              onTap: () {},
-            ),
-          ],
-        ),
-      ],
+          ),
+        ],
+      ),
     );
   }
 
   Widget _buildBottomNav(AppLocalizations l10n) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border(
-          top: BorderSide(color: AppTheme.border.withOpacity(0.5)),
+    return ClipRect(
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+        child: Container(
+          padding: const EdgeInsets.fromLTRB(32, 16, 32, 40),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.8),
+            border: Border(
+              top: BorderSide(color: AppTheme.earthBorder, width: 1),
+            ),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _buildNavItem(Icons.grid_view_rounded, l10n.panel, true),
+              _buildNavItem(Icons.video_library_rounded, l10n.videos, false),
+              _buildNavItem(Icons.mic_none_rounded, l10n.script, false),
+              _buildNavItem(Icons.person_rounded, l10n.profile, false),
+            ],
+          ),
         ),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _buildNavItem(Icons.grid_view_sharp, l10n.panel, true),
-          _buildNavItem(Icons.play_circle_outline, l10n.videos, false),
-          _buildNavItem(Icons.mic_none_outlined, l10n.script, false),
-          _buildNavItem(Icons.person_outline, l10n.profile, false),
-        ],
       ),
     );
   }
@@ -228,21 +269,21 @@ class DashboardPage extends StatelessWidget {
       children: [
         Icon(
           icon,
-          size: 20,
+          size: 24,
           color: isActive
-              ? AppTheme.primaryGreen
-              : AppTheme.textMuted.withOpacity(0.4),
+              ? AppTheme.forest
+              : const Color(0xFF94A3B8), // Slate 400
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 6),
         Text(
-          label,
+          label.toUpperCase(),
           style: TextStyle(
-            fontSize: 9,
+            fontSize: 10,
             fontWeight: FontWeight.bold,
+            letterSpacing: 1.0,
             color: isActive
-                ? AppTheme.primaryGreen
-                : AppTheme.textMuted.withOpacity(0.4),
-            inherit: true,
+                ? AppTheme.forest
+                : const Color(0xFF94A3B8), // Slate 400
           ),
         ),
       ],
@@ -256,40 +297,52 @@ class _RecentProjectsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        VRMSectionHeader(
-          title: l10n.recentProjects,
-          actionLabel: l10n.viewAll,
-          onActionPressed: () {
-            // TODO: Ver todos los proyectos
-          },
-        ),
-        const SizedBox(height: 16),
-        VRMProjectCard(
-          title: 'Reseña Tech: iPhone 15',
-          time: l10n.editedHoursAgo('2'),
-          progress: 0.3,
-          statusText: l10n.fragmentCount('3', '10'),
-          badgeText: l10n.draft,
-          progressLabel: l10n.progressLabel,
-          icon: Icons.smartphone,
-          badgeBg: const Color(0xFFFFF7ED),
-          badgeTextCol: AppTheme.accentOrange,
-        ),
-        VRMProjectCard(
-          title: 'Vlog Japón: Día 1',
-          time: l10n.editedYesterday,
-          progress: 1.0,
-          statusText: l10n.fragmentCount('12', '12'),
-          badgeText: l10n.ready,
-          progressLabel: l10n.progressLabel,
-          icon: Icons.airplanemode_active,
-          badgeBg: const Color(0xFFECFDF5),
-          badgeTextCol: AppTheme.primaryGreen,
-        ),
-      ],
+    return Padding(
+      padding: const EdgeInsets.only(top: 32),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: VRMSectionHeader(
+              title: l10n.recentProjects,
+              actionLabel: l10n.viewAll,
+              onActionPressed: () {},
+            ),
+          ),
+          const SizedBox(height: 16),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Column(
+              children: [
+                VRMProjectCard(
+                  title: 'Reseña Tech: iPhone 15',
+                  time: l10n.editedHoursAgo('2'),
+                  progress: 0.3,
+                  statusText: l10n.fragmentCount('3', '10'),
+                  badgeText: l10n.draft,
+                  progressLabel: l10n.progressLabel,
+                  icon: Icons.smartphone_rounded,
+                  badgeBg: const Color(0xFFFFF7ED),
+                  badgeTextCol: const Color(0xFFC2410C), // Orange 700
+                ),
+                const SizedBox(height: 4),
+                VRMProjectCard(
+                  title: 'Vlog Japón: Día 1',
+                  time: l10n.editedYesterday,
+                  progress: 1.0,
+                  statusText: l10n.fragmentCount('12', '12'),
+                  badgeText: l10n.ready,
+                  progressLabel: l10n.progressLabel,
+                  icon: Icons.flight_rounded,
+                  badgeBg: const Color(0xFFECFDF5),
+                  badgeTextCol: const Color(0xFF047857), // Emerald 700
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

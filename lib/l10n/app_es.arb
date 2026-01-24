@@ -116,5 +116,7 @@
   "systemReads": "EL SISTEMA LEE EL GUION:",
   "getReady": "PREPÁRATE",
   "repeat": "REPETIR",
-  "record": "GRABAR"
+  "record": "GRABAR",
+  "waiting": "ESPERANDO...",
+  "voiceControlDisabled": "Control por voz desactivado"
 }

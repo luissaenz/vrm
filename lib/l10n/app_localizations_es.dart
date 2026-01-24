@@ -221,4 +221,10 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get record => 'GRABAR';
+
+  @override
+  String get waiting => 'ESPERANDO...';
+
+  @override
+  String get voiceControlDisabled => 'Control por voz desactivado';
 }

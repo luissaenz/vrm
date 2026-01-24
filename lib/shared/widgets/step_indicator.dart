@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../core/theme.dart';
 
 class VRMStepIndicator extends StatelessWidget {
   final String stepNumber;
@@ -15,10 +16,10 @@ class VRMStepIndicator extends StatelessWidget {
     return Row(
       children: [
         Container(
-          width: 24, // Reducido de 32 a 24
-          height: 24, // Reducido de 32 a 24
+          width: 32,
+          height: 32,
           decoration: const BoxDecoration(
-            color: Color(0xFF2A4844),
+            color: AppTheme.forest,
             shape: BoxShape.circle,
           ),
           child: Center(
@@ -27,7 +28,7 @@ class VRMStepIndicator extends StatelessWidget {
               style: const TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
-                fontSize: 11, // Reducido acorde al círculo
+                fontSize: 14,
               ),
             ),
           ),
@@ -35,11 +36,11 @@ class VRMStepIndicator extends StatelessWidget {
         const SizedBox(width: 12),
         Text(
           title,
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            color: Colors.brown[300],
-            letterSpacing: 0.5,
+          style: const TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.bold,
+            color: AppTheme.earth,
+            letterSpacing: 1.1,
           ),
         ),
       ],

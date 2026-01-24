@@ -37,21 +37,29 @@ class VRMProjectCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: AppTheme.border),
+          border: Border.all(color: AppTheme.earthBorder),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.04),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: Column(
           children: [
             Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(8),
+                  width: 56,
+                  height: 56,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF3F4F6),
-                    borderRadius: BorderRadius.circular(14),
+                    color: AppTheme.earthLight.withValues(alpha: 0.5),
+                    borderRadius: BorderRadius.circular(16),
                   ),
-                  child: Icon(icon, color: AppTheme.primaryGreen, size: 18),
+                  child: Icon(icon, color: AppTheme.forest, size: 24),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 16),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -65,39 +73,42 @@ class VRMProjectCard extends StatelessWidget {
                               overflow: TextOverflow.ellipsis,
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
-                                fontSize: 12.5,
+                                fontSize: 15,
                                 color: AppTheme.textMain,
-                                inherit: true,
                               ),
                             ),
                           ),
                           Container(
                             padding: const EdgeInsets.symmetric(
-                              horizontal: 5,
-                              vertical: 1.5,
+                              horizontal: 8,
+                              vertical: 3,
                             ),
                             decoration: BoxDecoration(
                               color: badgeBg,
-                              borderRadius: BorderRadius.circular(6),
+                              borderRadius: BorderRadius.circular(99),
+                              border: Border.all(
+                                color: badgeTextCol.withValues(alpha: 0.1),
+                              ),
                             ),
                             child: Text(
-                              badgeText,
+                              badgeText.toUpperCase(),
                               style: TextStyle(
-                                fontSize: 7.5,
+                                fontSize: 10,
                                 fontWeight: FontWeight.bold,
                                 color: badgeTextCol,
-                                inherit: true,
+                                letterSpacing: 0.5,
                               ),
                             ),
                           ),
                         ],
                       ),
+                      const SizedBox(height: 2),
                       Text(
                         time,
                         style: const TextStyle(
-                          fontSize: 9.5,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
                           color: AppTheme.textMuted,
-                          inherit: true,
                         ),
                       ),
                     ],
@@ -105,39 +116,41 @@ class VRMProjectCard extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 16),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  progressLabel,
-                  style: TextStyle(
-                    fontSize: 8,
+                  progressLabel.toUpperCase(),
+                  style: const TextStyle(
+                    fontSize: 11,
                     fontWeight: FontWeight.bold,
-                    color: AppTheme.textMuted,
-                    inherit: true,
+                    color: Color(0xFF64748B),
                   ),
                 ),
                 Text(
                   statusText,
-                  style: const TextStyle(
-                    fontSize: 10,
+                  style: TextStyle(
+                    fontSize: 11,
                     fontWeight: FontWeight.bold,
-                    color: AppTheme.primaryGreen, // Siempre verde
-                    inherit: true,
+                    color: progress == 1.0
+                        ? const Color(0xFF059669)
+                        : AppTheme.forest,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 4),
-            LinearProgressIndicator(
-              value: progress,
-              minHeight: 5,
-              borderRadius: BorderRadius.circular(6),
-              backgroundColor: const Color(0xFFF3F4F6),
-              color: progress == 1.0
-                  ? const Color(0xFF10B981)
-                  : AppTheme.primaryGreen,
+            const SizedBox(height: 8),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(99),
+              child: LinearProgressIndicator(
+                value: progress,
+                minHeight: 6,
+                backgroundColor: const Color(0xFFF1F5F9),
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  progress == 1.0 ? const Color(0xFF10B981) : AppTheme.forest,
+                ),
+              ),
             ),
           ],
         ),

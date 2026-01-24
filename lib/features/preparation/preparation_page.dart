@@ -1,16 +1,56 @@
+import 'dart:async';
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import '../../shared/widgets/header.dart';
 import '../../l10n/app_localizations.dart';
 
-class PreparationPage extends StatelessWidget {
+class PreparationPage extends StatefulWidget {
   const PreparationPage({super.key});
 
+  @override
+  State<PreparationPage> createState() => _PreparationPageState();
+}
+
+class _PreparationPageState extends State<PreparationPage> {
   // Design Tokens from the provided HTML/Tailwind config
   static const Color forest = Color(0xFF2D4B44);
-  static const Color forestLight = Color(0xFF3D635B);
   static const Color backgroundLight = Color(0xFFF9F8F6);
   static const Color surfaceLight = Color(0xFFFFFFFF);
+
+  bool _isVoiceControlActive = true;
+  int _countdown = 3;
+  double _countdownProgress = 0.0;
+  Timer? _countdownTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _startCountdown();
+  }
+
+  @override
+  void dispose() {
+    _countdownTimer?.cancel();
+    super.dispose();
+  }
+
+  void _startCountdown() {
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+      setState(() {
+        if (_countdown > 1) {
+          _countdown--;
+          _countdownProgress += 0.33;
+        } else {
+          timer.cancel();
+          _countdownProgress = 1.0;
+          // Lógica tras completar cuenta regresiva
+        }
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -33,10 +73,12 @@ class PreparationPage extends StatelessWidget {
                     decoration: BoxDecoration(
                       color: surfaceLight,
                       shape: BoxShape.circle,
-                      border: Border.all(color: Colors.black.withOpacity(0.05)),
+                      border: Border.all(
+                        color: Colors.black.withValues(alpha: 0.05),
+                      ),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.02),
+                          color: Colors.black.withValues(alpha: 0.02),
                           blurRadius: 4,
                           offset: const Offset(0, 2),
                         ),
@@ -79,7 +121,7 @@ class PreparationPage extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 10,
                           fontWeight: FontWeight.bold,
-                          color: forest.withOpacity(0.6),
+                          color: forest.withValues(alpha: 0.6),
                           letterSpacing: 1.2,
                         ),
                       ),
@@ -88,18 +130,25 @@ class PreparationPage extends StatelessWidget {
                           Container(
                             width: 6,
                             height: 6,
-                            decoration: const BoxDecoration(
-                              color: forest,
+                            decoration: BoxDecoration(
+                              color: _isVoiceControlActive
+                                  ? forest
+                                  : Colors.grey[400],
                               shape: BoxShape.circle,
                             ),
                           ),
                           const SizedBox(width: 6),
                           Text(
-                            l10n.listening.toUpperCase(),
-                            style: const TextStyle(
+                            (_isVoiceControlActive
+                                    ? l10n.listening
+                                    : l10n.waiting)
+                                .toUpperCase(),
+                            style: TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.bold,
-                              color: forest,
+                              color: _isVoiceControlActive
+                                  ? forest
+                                  : Colors.grey[400],
                               letterSpacing: 1.2,
                             ),
                           ),
@@ -111,8 +160,9 @@ class PreparationPage extends StatelessWidget {
                   ClipRRect(
                     borderRadius: BorderRadius.circular(999),
                     child: LinearProgressIndicator(
-                      value: 0.2,
-                      backgroundColor: forest.withOpacity(0.1),
+                      value:
+                          0.2, // Este es el progreso de grabación, no la cuenta atrás
+                      backgroundColor: forest.withValues(alpha: 0.1),
                       valueColor: const AlwaysStoppedAnimation<Color>(forest),
                       minHeight: 4,
                     ),
@@ -137,7 +187,7 @@ class PreparationPage extends StatelessWidget {
                         Icon(
                           Icons.volume_up,
                           size: 18,
-                          color: forest.withOpacity(0.4),
+                          color: forest.withValues(alpha: 0.4),
                         ),
                         const SizedBox(width: 8),
                         Text(
@@ -145,7 +195,7 @@ class PreparationPage extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 10,
                             fontWeight: FontWeight.bold,
-                            color: forest.withOpacity(0.4),
+                            color: forest.withValues(alpha: 0.4),
                             letterSpacing: 1.2,
                           ),
                         ),
@@ -170,7 +220,7 @@ class PreparationPage extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 30,
                               fontWeight: FontWeight.w600,
-                              color: forest.withOpacity(0.3),
+                              color: forest.withValues(alpha: 0.3),
                               height: 1.3,
                               letterSpacing: -0.5,
                             ),
@@ -194,11 +244,11 @@ class PreparationPage extends StatelessWidget {
                               color: surfaceLight,
                               borderRadius: BorderRadius.circular(40), // 2.5rem
                               border: Border.all(
-                                color: Colors.black.withOpacity(0.1),
+                                color: Colors.black.withValues(alpha: 0.1),
                               ),
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.black.withOpacity(0.1),
+                                  color: Colors.black.withValues(alpha: 0.1),
                                   blurRadius: 40,
                                   offset: const Offset(0, 20),
                                   spreadRadius: -15,
@@ -214,7 +264,7 @@ class PreparationPage extends StatelessWidget {
                                     35,
                                   ), // 2.2rem
                                   border: Border.all(
-                                    color: Colors.black.withOpacity(0.05),
+                                    color: Colors.black.withValues(alpha: 0.05),
                                   ),
                                 ),
                                 child: Stack(
@@ -227,7 +277,9 @@ class PreparationPage extends StatelessWidget {
                                         width: 40,
                                         height: 4,
                                         decoration: BoxDecoration(
-                                          color: Colors.black.withOpacity(0.05),
+                                          color: Colors.black.withValues(
+                                            alpha: 0.05,
+                                          ),
                                           borderRadius: BorderRadius.circular(
                                             999,
                                           ),
@@ -243,13 +295,13 @@ class PreparationPage extends StatelessWidget {
                                           crossAxisAlignment:
                                               CrossAxisAlignment.end,
                                           children: [
-                                            _buildWaveBar(16, 0),
+                                            _buildWaveBar(16),
                                             const SizedBox(width: 4),
-                                            _buildWaveBar(32, 2),
+                                            _buildWaveBar(32),
                                             const SizedBox(width: 4),
-                                            _buildWaveBar(24, 4),
+                                            _buildWaveBar(24),
                                             const SizedBox(width: 4),
-                                            _buildWaveBar(12, 1),
+                                            _buildWaveBar(12),
                                           ],
                                         ),
                                       ),
@@ -271,9 +323,11 @@ class PreparationPage extends StatelessWidget {
                                     width: 128,
                                     height: 128,
                                     child: CircularProgressIndicator(
-                                      value: 0.75,
+                                      value: _countdownProgress,
                                       strokeWidth: 2,
-                                      backgroundColor: forest.withOpacity(0.1),
+                                      backgroundColor: forest.withValues(
+                                        alpha: 0.1,
+                                      ),
                                       valueColor:
                                           const AlwaysStoppedAnimation<Color>(
                                             forest,
@@ -281,9 +335,9 @@ class PreparationPage extends StatelessWidget {
                                       strokeCap: StrokeCap.round,
                                     ),
                                   ),
-                                  const Text(
-                                    "3",
-                                    style: TextStyle(
+                                  Text(
+                                    "$_countdown",
+                                    style: const TextStyle(
                                       fontSize: 60,
                                       fontWeight: FontWeight.bold,
                                       color: forest,
@@ -298,7 +352,7 @@ class PreparationPage extends StatelessWidget {
                                 style: TextStyle(
                                   fontSize: 10,
                                   fontWeight: FontWeight.bold,
-                                  color: forest.withOpacity(0.4),
+                                  color: forest.withValues(alpha: 0.4),
                                   letterSpacing: 2.5,
                                 ),
                               ),
@@ -315,9 +369,9 @@ class PreparationPage extends StatelessWidget {
             // Glass Footer
             Container(
               decoration: BoxDecoration(
-                color: surfaceLight.withOpacity(0.8),
+                color: surfaceLight.withValues(alpha: 0.8),
                 border: Border(
-                  top: BorderSide(color: Colors.black.withOpacity(0.05)),
+                  top: BorderSide(color: Colors.black.withValues(alpha: 0.05)),
                 ),
               ),
               child: ClipRect(
@@ -329,31 +383,58 @@ class PreparationPage extends StatelessWidget {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         // Voice control badge
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: forest.withOpacity(0.05),
-                            borderRadius: BorderRadius.circular(999),
-                            border: Border.all(color: forest.withOpacity(0.1)),
-                          ),
-                          child: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              const Icon(Icons.mic, size: 14, color: forest),
-                              const SizedBox(width: 8),
-                              Text(
-                                l10n.voiceControlActive.toUpperCase(),
-                                style: TextStyle(
-                                  fontSize: 9,
-                                  fontWeight: FontWeight.bold,
-                                  color: forest.withOpacity(0.6),
-                                  letterSpacing: 1.0,
-                                ),
+                        GestureDetector(
+                          onTap: () {
+                            setState(() {
+                              _isVoiceControlActive = !_isVoiceControlActive;
+                            });
+                          },
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 6,
+                            ),
+                            decoration: BoxDecoration(
+                              color: _isVoiceControlActive
+                                  ? forest.withValues(alpha: 0.05)
+                                  : Colors.grey[200],
+                              borderRadius: BorderRadius.circular(999),
+                              border: Border.all(
+                                color: _isVoiceControlActive
+                                    ? forest.withValues(alpha: 0.1)
+                                    : Colors.grey[300]!,
                               ),
-                            ],
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  _isVoiceControlActive
+                                      ? Icons.mic
+                                      : Icons.mic_off,
+                                  size: 14,
+                                  color: _isVoiceControlActive
+                                      ? forest
+                                      : Colors.grey[500],
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  (_isVoiceControlActive
+                                          ? l10n.voiceControlActive
+                                          : l10n.voiceControlDisabled)
+                                      .toUpperCase(),
+                                  style: TextStyle(
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.bold,
+                                    color: _isVoiceControlActive
+                                        ? forest.withValues(alpha: 0.6)
+                                        : Colors.grey[500],
+                                    letterSpacing: 1.0,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                         const SizedBox(height: 24),
@@ -378,7 +459,7 @@ class PreparationPage extends StatelessWidget {
     );
   }
 
-  Widget _buildWaveBar(double height, int delay) {
+  Widget _buildWaveBar(double height) {
     return Container(
       width: 4,
       height: height,
@@ -399,10 +480,10 @@ class PreparationPage extends StatelessWidget {
           decoration: BoxDecoration(
             color: surfaceLight,
             shape: BoxShape.circle,
-            border: Border.all(color: Colors.black.withOpacity(0.1)),
+            border: Border.all(color: Colors.black.withValues(alpha: 0.1)),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.02),
+                color: Colors.black.withValues(alpha: 0.02),
                 blurRadius: 4,
                 offset: const Offset(0, 2),
               ),
@@ -413,7 +494,7 @@ class PreparationPage extends StatelessWidget {
             child: InkWell(
               borderRadius: BorderRadius.circular(999),
               onTap: () {},
-              child: Icon(icon, color: forest.withOpacity(0.4), size: 24),
+              child: Icon(icon, color: forest.withValues(alpha: 0.4), size: 24),
             ),
           ),
         ),
@@ -423,7 +504,7 @@ class PreparationPage extends StatelessWidget {
           style: TextStyle(
             fontSize: 9,
             fontWeight: FontWeight.bold,
-            color: forest.withOpacity(0.3),
+            color: forest.withValues(alpha: 0.3),
             letterSpacing: 1.5,
           ),
         ),
@@ -443,7 +524,7 @@ class PreparationPage extends StatelessWidget {
             shape: BoxShape.circle,
             boxShadow: [
               BoxShadow(
-                color: forest.withOpacity(0.2),
+                color: forest.withValues(alpha: 0.2),
                 blurRadius: 24,
                 offset: const Offset(0, 12),
               ),

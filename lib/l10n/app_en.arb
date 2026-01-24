@@ -116,5 +116,7 @@
   "systemReads": "THE SYSTEM READS THE SCRIPT:",
   "getReady": "GET READY",
   "repeat": "REPEAT",
-  "record": "RECORD"
+  "record": "RECORD",
+  "waiting": "WAITING...",
+  "voiceControlDisabled": "Voice control disabled"
 }

@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import '../../shared/widgets/header.dart';
 import '../../shared/widgets/script_editor.dart';
 import '../../l10n/app_localizations.dart';
+import '../../core/theme.dart';
 
 class AssistantPage extends StatefulWidget {
   const AssistantPage({super.key});
@@ -14,6 +15,12 @@ class AssistantPage extends StatefulWidget {
 
 class _AssistantPageState extends State<AssistantPage> {
   final TextEditingController _ideaController = TextEditingController();
+
+  // Local style tokens from HTML
+  static const Color primaryNeon = Color(0xFF52D411);
+  static const Color forestDark = Color(0xFF162210);
+  static const Color earthGreen = Color(0xFF6F8961);
+  static const Color backgroundLite = Color(0xFFFBFCFB);
 
   @override
   void initState() {
@@ -32,7 +39,7 @@ class _AssistantPageState extends State<AssistantPage> {
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB),
+      backgroundColor: backgroundLite,
       body: SafeArea(
         child: Column(
           children: [
@@ -43,17 +50,20 @@ class _AssistantPageState extends State<AssistantPage> {
             ),
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 24,
+                ),
+                physics: const BouncingScrollPhysics(),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(height: 24),
                     Text(
                       l10n.defineIdea,
                       style: const TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.w900,
-                        color: Color(0xFF111827),
+                        fontSize: 32,
+                        fontWeight: FontWeight.bold,
+                        color: forestDark,
                         letterSpacing: -0.5,
                       ),
                     ),
@@ -62,18 +72,17 @@ class _AssistantPageState extends State<AssistantPage> {
                     const SizedBox(height: 12),
                     Text(
                       l10n.iaHelperText,
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontSize: 13,
-                        color: Colors.grey[400],
-                        fontWeight: FontWeight.w400,
+                        color: earthGreen,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
                     const SizedBox(height: 40),
                     _buildStructuresHeader(l10n),
                     const SizedBox(height: 16),
                     _buildStructureCard(
-                      icon: Icons.electric_bolt_rounded,
-                      iconColor: Colors.green,
+                      icon: Icons.flash_on_rounded,
                       title: l10n.hookTitle,
                       description: l10n.hookDesc,
                       imageUrl:
@@ -81,7 +90,6 @@ class _AssistantPageState extends State<AssistantPage> {
                     ),
                     _buildStructureCard(
                       icon: Icons.segment_rounded,
-                      iconColor: Colors.green[300]!,
                       title: l10n.valueTitle,
                       description: l10n.valueDesc,
                       imageUrl:
@@ -89,13 +97,12 @@ class _AssistantPageState extends State<AssistantPage> {
                     ),
                     _buildStructureCard(
                       icon: Icons.ads_click_rounded,
-                      iconColor: Colors.green[400]!,
                       title: l10n.ctaTitle,
                       description: l10n.ctaDesc,
                       imageUrl:
                           'C:/Users/ld_sa/.gemini/antigravity/brain/a2d98ace-2e64-4e4e-9c9b-fbff12c8d4cb/cta_image_1769278096023.png',
                     ),
-                    const SizedBox(height: 120), // Space for bottom button
+                    const SizedBox(height: 140), // Space for bottom button
                   ],
                 ),
               ),
@@ -104,28 +111,43 @@ class _AssistantPageState extends State<AssistantPage> {
         ),
       ),
       bottomSheet: Container(
-        padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-        color: const Color(0xFFF9FAFB),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ElevatedButton.icon(
-              onPressed: _ideaController.text.trim().isEmpty
-                  ? null
-                  : () => Navigator.pop(context), // Volver para llenar el guion
-              icon: const Icon(Icons.auto_awesome, size: 20),
-              label: Text(l10n.generateFullScript),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF1A2421),
-                foregroundColor: Colors.white,
-                minimumSize: const Size(double.infinity, 64),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                elevation: 0,
-              ),
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 40),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.bottomCenter,
+            end: Alignment.topCenter,
+            colors: [backgroundLite, backgroundLite.withValues(alpha: 0.0)],
+          ),
+        ),
+        child: ElevatedButton(
+          onPressed: _ideaController.text.trim().isEmpty
+              ? null
+              : () => Navigator.pop(context),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppTheme.forest,
+            foregroundColor: Colors.white,
+            minimumSize: const Size(double.infinity, 60),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
             ),
-          ],
+            elevation: 4,
+            shadowColor: AppTheme.forest.withValues(alpha: 0.2),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.auto_awesome, size: 20),
+              const SizedBox(width: 12),
+              Text(
+                l10n.generateFullScript.toUpperCase(),
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -135,20 +157,22 @@ class _AssistantPageState extends State<AssistantPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          l10n.videoIdeaLabel,
-          style: TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w500, // No negrita
-            color: Colors.grey[400],
-            letterSpacing: 0.5,
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: 8),
+          child: Text(
+            l10n.videoIdeaLabel.toUpperCase(),
+            style: const TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+              color: earthGreen,
+              letterSpacing: 1.5,
+            ),
           ),
         ),
-        const SizedBox(height: 12),
         VRMScriptEditor(
           controller: _ideaController,
           hintText: l10n.videoIdeaPlaceholder,
-          maxLines: 4,
+          maxLines: 5,
           actions: [
             VRMScriptEditor.actionButton(
               onPressed: () async {
@@ -158,7 +182,14 @@ class _AssistantPageState extends State<AssistantPage> {
                 }
               },
               icon: Icons.paste_outlined,
-              label: l10n.paste,
+              label: "Pegar",
+              backgroundColor: const Color(0xFFF1F5F9),
+              foregroundColor: const Color(0xFF64748B),
+            ),
+            const SizedBox(width: 4),
+            VRMScriptEditor.actionIcon(
+              onPressed: () {},
+              icon: Icons.file_upload_outlined,
             ),
             VRMScriptEditor.actionIcon(
               onPressed: () {},
@@ -177,23 +208,24 @@ class _AssistantPageState extends State<AssistantPage> {
         Text(
           l10n.suggestedStructures,
           style: const TextStyle(
-            fontSize: 15, // Más pequeño
+            fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: Color(0xFF111827),
+            color: forestDark,
           ),
         ),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
           decoration: BoxDecoration(
-            color: const Color(0xFFECFDF5),
-            borderRadius: BorderRadius.circular(8),
+            color: primaryNeon.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(99),
           ),
           child: Text(
             l10n.premiumAi,
             style: const TextStyle(
               fontSize: 10,
-              fontWeight: FontWeight.w800,
-              color: Color(0xFF10B981),
+              fontWeight: FontWeight.bold,
+              color: primaryNeon,
+              letterSpacing: -0.5,
             ),
           ),
         ),
@@ -203,18 +235,24 @@ class _AssistantPageState extends State<AssistantPage> {
 
   Widget _buildStructureCard({
     required IconData icon,
-    required Color iconColor,
     required String title,
     required String description,
     required String imageUrl,
   }) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(12), // Reducido de 16 a 12
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey[100]!),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: earthGreen.withValues(alpha: 0.1)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -225,7 +263,7 @@ class _AssistantPageState extends State<AssistantPage> {
               children: [
                 Row(
                   children: [
-                    Icon(icon, size: 16, color: iconColor),
+                    Icon(icon, size: 16, color: primaryNeon),
                     const SizedBox(width: 8),
                     Flexible(
                       child: Text(
@@ -233,19 +271,20 @@ class _AssistantPageState extends State<AssistantPage> {
                         style: const TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF111827),
+                          color: forestDark,
                         ),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 6),
                 Text(
                   description,
                   style: const TextStyle(
-                    fontSize: 12,
-                    color: Color(0xFF6B7280),
-                    height: 1.3,
+                    fontSize: 13,
+                    color: earthGreen,
+                    height: 1.4,
+                    fontWeight: FontWeight.w400,
                   ),
                 ),
               ],
@@ -253,11 +292,12 @@ class _AssistantPageState extends State<AssistantPage> {
           ),
           const SizedBox(width: 12),
           Container(
-            width: 70, // Ligeramente más pequeño
-            height: 52, // Ligeramente más pequeño
+            width: 96, // 24 * 4
+            height: 64, // 16 * 4
             decoration: BoxDecoration(
-              color: Colors.grey[100],
-              borderRadius: BorderRadius.circular(10),
+              color: backgroundLite,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: earthGreen.withValues(alpha: 0.05)),
               image: DecorationImage(
                 image: imageUrl.startsWith('http')
                     ? NetworkImage(imageUrl) as ImageProvider
