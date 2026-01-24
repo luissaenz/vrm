@@ -271,6 +271,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{current}/{total} Fragments'**
   String fragmentCount(String current, String total);
+
+  /// No description provided for @newProjectTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New Project'**
+  String get newProjectTitle;
+
+  /// No description provided for @step1Title.
+  ///
+  /// In en, this message translates to:
+  /// **'STEP 1: WRITE OR PASTE YOUR SCRIPT'**
+  String get step1Title;
+
+  /// No description provided for @charactersCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} characters'**
+  String charactersCount(String count);
+
+  /// No description provided for @secondsAbbreviation.
+  ///
+  /// In en, this message translates to:
+  /// **'{seconds}s'**
+  String secondsAbbreviation(String seconds);
+
+  /// No description provided for @totalTimeEstimate.
+  ///
+  /// In en, this message translates to:
+  /// **'approximate duration {seconds}'**
+  String totalTimeEstimate(String seconds);
+
+  /// No description provided for @assistant.
+  ///
+  /// In en, this message translates to:
+  /// **'ASSISTANT'**
+  String get assistant;
+
+  /// No description provided for @optimize.
+  ///
+  /// In en, this message translates to:
+  /// **'OPTIMIZE WITH AI'**
+  String get optimize;
+
+  /// No description provided for @fragmentPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'FRAGMENT PREVIEW'**
+  String get fragmentPreview;
+
+  /// No description provided for @blocksCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} BLOCKS'**
+  String blocksCount(int count);
+
+  /// No description provided for @splitIntoFragments.
+  ///
+  /// In en, this message translates to:
+  /// **'Split into Fragments'**
+  String get splitIntoFragments;
+
+  /// No description provided for @paste.
+  ///
+  /// In en, this message translates to:
+  /// **'Paste'**
+  String get paste;
+
+  /// No description provided for @segment.
+  ///
+  /// In en, this message translates to:
+  /// **'SEGMENT'**
+  String get segment;
 }
 
 class _AppLocalizationsDelegate

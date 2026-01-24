@@ -52,5 +52,45 @@
         "type": "String"
       }
     }
-  }
+  },
+  "newProjectTitle": "New Project",
+  "step1Title": "STEP 1: WRITE OR PASTE YOUR SCRIPT",
+  "charactersCount": "{count} characters",
+  "@charactersCount": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "secondsAbbreviation": "{seconds}s",
+  "@secondsAbbreviation": {
+    "placeholders": {
+      "seconds": {
+        "type": "String"
+      }
+    }
+  },
+  "totalTimeEstimate": "approximate duration {seconds}",
+  "@totalTimeEstimate": {
+    "placeholders": {
+      "seconds": {
+        "type": "String"
+      }
+    }
+  },
+  "assistant": "ASSISTANT",
+  "optimize": "OPTIMIZE WITH AI",
+  "fragmentPreview": "FRAGMENT PREVIEW",
+  "blocksCount": "{count} BLOCKS",
+  "@blocksCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "splitIntoFragments": "Split into Fragments",
+  "paste": "Paste",
+  "segment": "SEGMENT"
 }

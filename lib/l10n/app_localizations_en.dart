@@ -100,4 +100,48 @@ class AppLocalizationsEn extends AppLocalizations {
   String fragmentCount(String current, String total) {
     return '$current/$total Fragments';
   }
+
+  @override
+  String get newProjectTitle => 'New Project';
+
+  @override
+  String get step1Title => 'STEP 1: WRITE OR PASTE YOUR SCRIPT';
+
+  @override
+  String charactersCount(String count) {
+    return '$count characters';
+  }
+
+  @override
+  String secondsAbbreviation(String seconds) {
+    return '${seconds}s';
+  }
+
+  @override
+  String totalTimeEstimate(String seconds) {
+    return 'approximate duration $seconds';
+  }
+
+  @override
+  String get assistant => 'ASSISTANT';
+
+  @override
+  String get optimize => 'OPTIMIZE WITH AI';
+
+  @override
+  String get fragmentPreview => 'FRAGMENT PREVIEW';
+
+  @override
+  String blocksCount(int count) {
+    return '$count BLOCKS';
+  }
+
+  @override
+  String get splitIntoFragments => 'Split into Fragments';
+
+  @override
+  String get paste => 'Paste';
+
+  @override
+  String get segment => 'SEGMENT';
 }

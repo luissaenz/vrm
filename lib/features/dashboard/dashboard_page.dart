@@ -5,6 +5,7 @@ import 'package:vrm_app/shared/widgets/stat_card.dart';
 import 'package:vrm_app/shared/widgets/action_card.dart';
 import 'package:vrm_app/shared/widgets/project_card.dart';
 import 'package:vrm_app/shared/widgets/calendar_day.dart';
+import 'package:vrm_app/features/new_project/new_project_page.dart';
 import '../../core/theme.dart';
 
 class DashboardPage extends StatelessWidget {
@@ -38,7 +39,12 @@ class DashboardPage extends StatelessWidget {
                     subtitle: l10n.voiceControlActive,
                     icon: Icons.mic,
                     onTap: () {
-                      // TODO: Navegar a grabación
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const NewProjectPage(),
+                        ),
+                      );
                     },
                   ),
                   const SizedBox(height: 36),
