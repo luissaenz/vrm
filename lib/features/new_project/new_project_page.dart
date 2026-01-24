@@ -56,12 +56,10 @@ class _NewProjectPageState extends State<NewProjectPage> {
                     VRMStepIndicator(stepNumber: '1', title: l10n.step1Title),
                     const SizedBox(height: 20),
                     _buildScriptInput(l10n),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 16),
                     _buildStatsRow(l10n),
                     const SizedBox(height: 40),
-                    _buildPreviewHeader(l10n),
-                    const SizedBox(height: 16),
-                    _buildFragmentsPreview(l10n),
+                    // Vista previa eliminada según requerimiento
                   ],
                 ),
               ),
@@ -136,10 +134,8 @@ class _NewProjectPageState extends State<NewProjectPage> {
           },
           icon: Icons.paste_outlined,
           label: "Pegar",
-          backgroundColor: const Color(
-            0xFFF1F5F9,
-          ), // Gris azulado muy claro (Slate 100)
-          foregroundColor: const Color(0xFF64748B), // Gris medio (Slate 500)
+          backgroundColor: const Color(0xFFF1F5F9),
+          foregroundColor: const Color(0xFF64748B),
         ),
         const SizedBox(width: 4),
         VRMScriptEditor.actionIcon(
@@ -174,171 +170,52 @@ class _NewProjectPageState extends State<NewProjectPage> {
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4),
-      child: Text(
-        "${_scriptController.text.length} caracteres • ~$seconds s total"
-            .toUpperCase(),
-        style: const TextStyle(
-          fontSize: 11,
-          fontWeight: FontWeight.w600,
-          color: Color(0xFF94A3B8), // Slate 400
-          letterSpacing: 0.5,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPreviewHeader(AppLocalizations l10n) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Text(
-            "VISTA PREVIA DE FRAGMENTOS",
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              color: AppTheme.earth,
-              letterSpacing: 1.2,
-            ),
-          ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: AppTheme.forest.withValues(alpha: 0.05),
-              borderRadius: BorderRadius.circular(99),
-            ),
-            child: const Text(
-              "3 BLOQUES",
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
-                color: AppTheme.forest,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildFragmentsPreview(AppLocalizations l10n) {
-    return Column(
-      children: [
-        _buildFragmentItem(
-          "01",
-          "00:00 - 00:08",
-          "8s",
-          "En este video te voy a mostrar cómo configurar tu espacio de trabajo para ser más productivo.",
-        ),
-        const SizedBox(height: 12),
-        _buildFragmentItem(
-          "02",
-          "00:08 - 00:15",
-          "7s",
-          "Primero, hablemos de la iluminación natural. Luego, pasaremos a la organización del escritorio...",
-        ),
-        const SizedBox(height: 12),
-        _buildFragmentItem(
-          "03",
-          "00:15 - 00:22",
-          "7s",
-          "...y por último, la importancia de las pausas activas.",
-        ),
-      ],
-    );
-  }
-
-  Widget _buildFragmentItem(
-    String number,
-    String time,
-    String duration,
-    String content,
-  ) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey.withValues(alpha: 0.05)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: const Color(0xFFF8FAFC),
-              borderRadius: BorderRadius.circular(99),
-              border: Border.all(color: const Color(0xFFF1F5F9)),
-            ),
-            child: Center(
-              child: Text(
-                number,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: AppTheme.forest,
-                  fontSize: 16,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          Text.rich(
+            TextSpan(
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                TextSpan(
+                  text: "${_scriptController.text.length} ",
+                  style: const TextStyle(color: AppTheme.forest),
+                ),
+                const TextSpan(text: "CARACTERES"),
+              ],
+            ),
+            style: const TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w700,
+              color: Color(0xFF94A3B8),
+              letterSpacing: 0.5,
+            ),
+          ),
+          Row(
+            children: [
+              const Icon(
+                Icons.access_time_rounded,
+                size: 14,
+                color: Color(0xFF94A3B8),
+              ),
+              const SizedBox(width: 6),
+              Text.rich(
+                TextSpan(
                   children: [
-                    Row(
-                      children: [
-                        Text(
-                          time,
-                          style: const TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                            color: AppTheme.forest,
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          "($duration)",
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.w500,
-                            color: AppTheme.forest.withValues(alpha: 0.6),
-                          ),
-                        ),
-                      ],
-                    ),
-                    const Icon(
-                      Icons.drag_indicator,
-                      color: Color(0xFFCBD5E1),
-                      size: 20,
+                    const TextSpan(text: "APROXIMADAMENTE "),
+                    TextSpan(
+                      text: "$seconds S",
+                      style: const TextStyle(color: AppTheme.forest),
                     ),
                   ],
                 ),
-                const SizedBox(height: 6),
-                Text(
-                  "\"$content\"",
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: Color(0xFF475569), // Slate 600
-                    height: 1.4,
-                    fontStyle: FontStyle.italic,
-                  ),
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF94A3B8),
+                  letterSpacing: 0.5,
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ],
       ),
