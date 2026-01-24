@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html class="dark" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Biblioteca de Proyectos</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;family=Noto+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#9213ec",
+                        "primary-content": "#ffffff",
+                        "background-light": "#f7f6f8",
+                        "background-dark": "#0f0c11", // Deep OLED black feel
+                        "surface-dark": "#1a161f",     // Slightly lighter for cards
+                        "surface-highlight": "#2a2430", // For inputs/chips
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"],
+                        "body": ["Noto Sans", "sans-serif"],
+                    },
+                    borderRadius: {
+                        "DEFAULT": "1rem",
+                        "lg": "1.5rem",
+                        "xl": "2rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: "Noto Sans", sans-serif;
+        }
+        h1, h2, h3, h4, .font-display {
+            font-family: "Space Grotesk", sans-serif;
+        }.hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-gray-100 min-h-screen flex flex-col relative overflow-x-hidden antialiased selection:bg-primary selection:text-white">
+<header class="sticky top-0 z-30 bg-background-light/95 dark:bg-background-dark/95 backdrop-blur-md border-b border-gray-200 dark:border-white/5">
+<div class="flex items-center px-4 py-3 justify-between">
+<button class="flex items-center justify-center p-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
+<span class="material-symbols-outlined text-slate-800 dark:text-white" style="font-size: 24px;">arrow_back</span>
+</button>
+<h1 class="text-xl font-bold leading-tight tracking-tight flex-1 text-center pr-2 font-display">Biblioteca</h1>
+<button class="flex items-center justify-center px-3 py-1.5 rounded-full hover:bg-black/5 dark:hover:bg-white/10 transition-colors">
+<span class="text-primary text-sm font-bold tracking-wide uppercase font-display">Editar</span>
+</button>
+</div>
+<div class="px-4 pb-2">
+<div class="flex w-full items-center rounded-2xl bg-white dark:bg-surface-highlight shadow-sm border border-gray-100 dark:border-white/5 transition-all focus-within:ring-2 focus-within:ring-primary/50 focus-within:border-primary/50">
+<div class="pl-4 flex items-center justify-center text-slate-400 dark:text-[#ad9db9]">
+<span class="material-symbols-outlined" style="font-size: 20px;">search</span>
+</div>
+<input class="flex-1 w-full bg-transparent border-none focus:ring-0 text-slate-800 dark:text-white placeholder:text-slate-400 dark:placeholder:text-[#ad9db9]/50 h-11 text-base font-medium px-3" placeholder="Buscar proyecto..." type="text"/>
+<button class="pr-4 flex items-center justify-center text-primary hover:text-primary/80 transition-colors">
+<span class="material-symbols-outlined" style="font-size: 20px;">mic</span>
+</button>
+</div>
+</div>
+<div class="flex gap-2 px-4 py-3 overflow-x-auto hide-scrollbar">
+<button class="flex h-9 shrink-0 items-center justify-center px-5 rounded-full bg-primary text-white shadow-lg shadow-primary/20 transition-transform active:scale-95">
+<span class="text-sm font-medium whitespace-nowrap font-display">Todos</span>
+</button>
+<button class="flex h-9 shrink-0 items-center justify-center px-5 rounded-full bg-white dark:bg-surface-highlight border border-gray-200 dark:border-white/5 text-slate-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors active:scale-95">
+<span class="text-sm font-medium whitespace-nowrap font-display">Exportados</span>
+</button>
+<button class="flex h-9 shrink-0 items-center justify-center px-5 rounded-full bg-white dark:bg-surface-highlight border border-gray-200 dark:border-white/5 text-slate-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors active:scale-95">
+<span class="text-sm font-medium whitespace-nowrap font-display">En Borrador</span>
+</button>
+<button class="flex h-9 shrink-0 items-center justify-center px-5 rounded-full bg-white dark:bg-surface-highlight border border-gray-200 dark:border-white/5 text-slate-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-white/5 transition-colors active:scale-95">
+<span class="text-sm font-medium whitespace-nowrap font-display">Favoritos</span>
+</button>
+</div>
+</header>
+<main class="flex-1 px-4 py-2 space-y-5 pb-24">
+<div class="flex items-center justify-between pt-2">
+<h3 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest font-display">Recientes</h3>
+</div>
+<article class="group relative flex flex-col bg-white dark:bg-surface-dark rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-white/5 overflow-hidden transition-all hover:shadow-lg dark:hover:shadow-primary/5 dark:hover:border-primary/20">
+<div class="relative w-full aspect-video bg-gray-200 dark:bg-gray-800">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" data-alt="creadora hablando a camara tips productividad" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCdiVQ-mi6ZmamGTWwVWlkRAWpR4RCrort6Qvp8GVq0nK4bvy7TrJQeDDcyQmDDkJ7UkDfclgkcIKSSRKy-kJ5PHicxybAUAsRVb_WiQ4NHyyOpTHOrNHbCf5_7U44y24oSg8n83t20CwQMYLkPGbJIGRX-gFY8g-P-fJRRauZZGmouKLQj4Q8NLY1bgXen6qNPn4PDiN5WFbnEBPiSGsXvlZR2mX3m2_H3z5VqjGpsKIau3-d5smGlEKPfwPewq0B6n5tEap028YEV");'></div>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60"></div>
+<div class="absolute bottom-3 right-3 bg-black/60 backdrop-blur-md border border-white/10 px-2 py-1 rounded-lg">
+<span class="text-xs font-display font-medium text-white tracking-wide">03:24</span>
+</div>
+<div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+<div class="bg-primary/90 backdrop-blur-md p-3 rounded-full flex items-center justify-center shadow-lg shadow-primary/30 transform scale-90 group-hover:scale-100 transition-transform">
+<span class="material-symbols-outlined text-white" style="font-size: 32px;">play_arrow</span>
+</div>
+</div>
+</div>
+<div class="p-4 flex gap-4">
+<div class="flex-1 min-w-0">
+<div class="flex items-start justify-between mb-2">
+<h3 class="text-lg font-bold text-slate-900 dark:text-gray-50 truncate pr-2 font-display">Tips de Productividad</h3>
+<button class="text-slate-400 dark:text-slate-500 hover:text-primary transition-colors">
+<span class="material-symbols-outlined" style="font-size: 22px;">more_horiz</span>
+</button>
+</div>
+<div class="flex items-center gap-3">
+<span class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-500 border border-amber-500/20">
+<span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                            En Borrador
+                        </span>
+<span class="text-xs text-slate-500 dark:text-slate-400 font-medium">Hace 2h</span>
+</div>
+</div>
+</div>
+</article>
+<div class="flex items-center justify-between pt-2">
+<h3 class="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest font-display">Esta Semana</h3>
+</div>
+<article class="group relative flex flex-col bg-white dark:bg-surface-dark rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-white/5 overflow-hidden transition-all hover:shadow-lg dark:hover:shadow-primary/5 dark:hover:border-primary/20">
+<div class="relative w-full aspect-video bg-gray-200 dark:bg-gray-800">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" data-alt="review camara creador" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuANUKMFvUtSA4vilaTnusJTVJsNx9igPkXudoWD4CweC51FG6DyFxd6KDHgOfTeYJVcfVpBQXDXlvgysmcHSGCdEtEfz0Ml3X5L8UwFBbziIsfRoiF8GiVTXv9NhXFqkNLdJoVCg99_nsJlH6-Kj8GbeFsOCpSB3vxXs5TZ79euX29asjj3k8gjeivLW15It2lbmerOXCDVOO6UZD0JnzVBvD0DSCa_K_4ZtPDyTHP4WM86OFVdoeuxFW4aoQpn0niGdwoOVNYKAk7O");'></div>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60"></div>
+<div class="absolute bottom-3 right-3 bg-black/60 backdrop-blur-md border border-white/10 px-2 py-1 rounded-lg">
+<span class="text-xs font-display font-medium text-white tracking-wide">10:45</span>
+</div>
+</div>
+<div class="p-4 flex gap-4">
+<div class="flex-1 min-w-0">
+<div class="flex items-start justify-between mb-2">
+<h3 class="text-lg font-bold text-slate-900 dark:text-gray-50 truncate pr-2 font-display">Review de Cámara</h3>
+<button class="text-slate-400 dark:text-slate-500 hover:text-primary transition-colors">
+<span class="material-symbols-outlined" style="font-size: 22px;">more_horiz</span>
+</button>
+</div>
+<div class="flex items-center gap-3">
+<span class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+<span class="material-symbols-outlined text-sm" style="font-size: 14px;">check</span>
+                            Exportado
+                        </span>
+<span class="text-xs text-slate-500 dark:text-slate-400 font-medium">Ayer</span>
+</div>
+</div>
+</div>
+</article>
+<article class="group relative flex flex-col bg-white dark:bg-surface-dark rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-white/5 overflow-hidden transition-all hover:shadow-lg dark:hover:shadow-primary/5 dark:hover:border-primary/20">
+<div class="relative w-full aspect-video bg-gray-200 dark:bg-gray-800">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" data-alt="setup escritorio creador" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDvr5JwhojH3lsN3Df2s09_GjDwJWyOdSNE23drgh-YCxnX_sVoxhW5_97lMnTqquBZP6li9d6A7x9Pb8-swPU_58zVEFVyX45ezE19Cmki7Hruo3Lxjh-fDzMMyWKIWxOIA9eeEfsqlkjOQm_MqU8hOAVK2wwQ259zoF7wJf5gcQxM07ndrCrpQMppHIHLm3sTgVEO3o6bsUzjin6vGLnSCEHhVU8-8sul2sC61137awDsJnWgoUMwwUZtbya0FjoXCxXqebJLiMvJ");'></div>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60"></div>
+<div class="absolute bottom-3 right-3 bg-black/60 backdrop-blur-md border border-white/10 px-2 py-1 rounded-lg">
+<span class="text-xs font-display font-medium text-white tracking-wide">08:12</span>
+</div>
+</div>
+<div class="p-4 flex gap-4">
+<div class="flex-1 min-w-0">
+<div class="flex items-start justify-between mb-2">
+<h3 class="text-lg font-bold text-slate-900 dark:text-gray-50 truncate pr-2 font-display">Mi Setup 2024</h3>
+<button class="text-slate-400 dark:text-slate-500 hover:text-primary transition-colors">
+<span class="material-symbols-outlined" style="font-size: 22px;">more_horiz</span>
+</button>
+</div>
+<div class="flex items-center gap-3">
+<span class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+<span class="material-symbols-outlined text-sm" style="font-size: 14px;">check</span>
+                            Exportado
+                        </span>
+<span class="text-xs text-slate-500 dark:text-slate-400 font-medium">10 Oct</span>
+</div>
+</div>
+</div>
+</article>
+<article class="group relative flex flex-col bg-white dark:bg-surface-dark rounded-2xl shadow-sm dark:shadow-none border border-gray-100 dark:border-white/5 overflow-hidden transition-all hover:shadow-lg dark:hover:shadow-primary/5 dark:hover:border-primary/20">
+<div class="relative w-full aspect-video bg-gray-200 dark:bg-gray-800">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" data-alt="vlog creador exterior" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCMvrmPGclNlp28c502os-eZrt-rvhikM2vIVB8PC4Z2qkzv9SxBE361K4SuRbORnl7j0WXFXBxLtj4mJ6xQJZ0wcvNtnt2xUOrcRL_VVBTmXax2f80PcCfo33MQ03Ak59LNneaKdUqpGVtbgq_s7cGpz9fIpPQgcR4LJf5fUUxZCcBZRXw1EUwDwPDZvyASrEmUiOCQtJzFBJHVL5PKq_gqbt9f4yKkxTyQV_eE51jyvXSDelS1fI1KF6zRyC9IezA-urDevr6P1i8");'></div>
+<div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent opacity-60"></div>
+<div class="absolute bottom-3 right-3 bg-black/60 backdrop-blur-md border border-white/10 px-2 py-1 rounded-lg">
+<span class="text-xs font-display font-medium text-white tracking-wide">14:20</span>
+</div>
+</div>
+<div class="p-4 flex gap-4">
+<div class="flex-1 min-w-0">
+<div class="flex items-start justify-between mb-2">
+<h3 class="text-lg font-bold text-slate-900 dark:text-gray-50 truncate pr-2 font-display">Vlog Semanal #42</h3>
+<button class="text-slate-400 dark:text-slate-500 hover:text-primary transition-colors">
+<span class="material-symbols-outlined" style="font-size: 22px;">more_horiz</span>
+</button>
+</div>
+<div class="flex items-center gap-3">
+<span class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-500/10 text-amber-500 border border-amber-500/20">
+<span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                            En Borrador
+                        </span>
+<span class="text-xs text-slate-500 dark:text-slate-400 font-medium">08 Oct</span>
+</div>
+</div>
+</div>
+</article>
+</main>
+<div class="fixed bottom-24 right-4 z-40">
+<button class="group flex items-center justify-center w-14 h-14 rounded-full bg-primary text-white shadow-lg shadow-primary/40 hover:scale-105 active:scale-95 transition-all">
+<span class="material-symbols-outlined" style="font-size: 32px;">add</span>
+<div class="absolute right-full mr-3 bg-white dark:bg-surface-highlight px-3 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wide text-slate-800 dark:text-white shadow-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none border border-gray-100 dark:border-white/5">
+                Nuevo Proyecto
+            </div>
+</button>
+</div>
+<nav class="fixed bottom-0 w-full z-50 bg-white/95 dark:bg-[#0f0c11]/95 backdrop-blur-xl border-t border-gray-200 dark:border-white/5 pb-6 pt-3">
+<div class="flex justify-around items-center px-2">
+<a class="flex flex-col items-center gap-1 text-primary w-16" href="#">
+<span class="material-symbols-outlined fill-1" style="font-variation-settings: 'FILL' 1;">video_library</span>
+<span class="text-[10px] font-bold tracking-wide">Biblioteca</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 w-16 transition-colors" href="#">
+<span class="material-symbols-outlined">mic</span>
+<span class="text-[10px] font-medium tracking-wide">Grabar</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 w-16 transition-colors" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-[10px] font-medium tracking-wide">Ajustes</span>
+</a>
+</div>
+</nav>
+
+</body></html>

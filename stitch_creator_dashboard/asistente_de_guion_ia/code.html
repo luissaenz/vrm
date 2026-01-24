@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+
+<html class="light" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Asistente de Guion IA</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#52d411",
+                        "forest": "#162210",
+                        "earth": "#6f8961",
+                        "background-light": "#fbfcfb",
+                        "background-dark": "#162210",
+                    },
+                    fontFamily: {
+                        "display": ["Space Grotesk", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .ios-shadow {
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-forest dark:text-white min-h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="sticky top-0 z-50 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md px-4 py-4 flex items-center justify-between border-b border-earth/10">
+<button class="flex items-center justify-center size-10 rounded-full hover:bg-earth/10 transition-colors">
+<span class="material-symbols-outlined text-forest dark:text-white">arrow_back_ios_new</span>
+</button>
+<h2 class="text-forest dark:text-white text-lg font-bold leading-tight tracking-tight flex-1 text-center pr-10">Asistente de Guion</h2>
+</header>
+<main class="flex-1 overflow-y-auto pb-32">
+<!-- HeadlineText -->
+<div class="px-4 pt-6 pb-2">
+<h3 class="text-forest dark:text-white tracking-tight text-3xl font-bold leading-tight">Define tu Idea</h3>
+<p class="text-earth dark:text-earth/80 text-sm mt-1">La IA te ayudará a estructurar el contenido perfecto.</p>
+</div>
+<!-- TextField Area -->
+<div class="px-4 py-4">
+<div class="flex flex-col gap-2">
+<label class="text-xs font-bold uppercase tracking-widest text-earth ml-1">Idea del Video</label>
+<div class="relative group">
+<textarea class="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-xl text-forest dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-earth/20 bg-white dark:bg-forest/50 focus:border-primary min-h-[160px] placeholder:text-earth/50 p-4 text-base font-normal leading-relaxed ios-shadow transition-all" placeholder="Ej: Un video sobre cómo organizar tu escritorio para ser más productivo en 5 pasos..."></textarea>
+<div class="absolute bottom-3 right-3 text-earth/40 text-xs">0 / 500</div>
+</div>
+</div>
+</div>
+<!-- SectionHeader -->
+<div class="px-4 pt-6 pb-2 flex items-center justify-between">
+<h3 class="text-forest dark:text-white text-lg font-bold leading-tight tracking-tight">Estructuras sugeridas</h3>
+<span class="text-xs font-medium text-primary bg-primary/10 px-2 py-1 rounded-full uppercase tracking-tighter">Premium AI</span>
+</div>
+<!-- Suggested Cards -->
+<div class="px-4 space-y-3">
+<!-- Card: Introduction -->
+<div class="p-4 bg-white dark:bg-forest/40 border border-earth/10 rounded-xl ios-shadow transition-transform active:scale-[0.98]">
+<div class="flex items-center justify-between gap-4">
+<div class="flex flex-col gap-1 flex-1">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-sm">flash_on</span>
+<p class="text-forest dark:text-white text-base font-bold leading-tight">Introducción / Hook</p>
+</div>
+<p class="text-earth dark:text-earth/80 text-sm font-normal leading-normal">Engancha a tu audiencia en los primeros 3 segundos con un problema común.</p>
+</div>
+<div class="w-24 h-16 bg-center bg-no-repeat bg-cover rounded-lg shrink-0 border border-earth/5" data-alt="Person looking excited in front of a camera" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBZvvhh3nxufvx70VZ2ptINn96Fpb0N4YdNS2Rv4cQCoR0jezc2jzTPGbSFNQSuupw-ty6jHFyIh0BGJ4mhESLv56SfNIqYeSkVFF59mv5opKdsLP9Ej3FsDXDdcrrN3YC4DUetm7pz3RdyI-k_4q1GFUjtvPVC2IEGKnxbMBxuyQq8Fx39WqtbkYIWY0UlpeGjm-bdsNyBw3U9JtFO9pGZYu8ZX1UglVwOLSXWK9zZcCmIYB-lA0fmFz78fJmUiHTsuFycldxzyzTD");'>
+</div>
+</div>
+</div>
+<!-- Card: Development -->
+<div class="p-4 bg-white dark:bg-forest/40 border border-earth/10 rounded-xl ios-shadow transition-transform active:scale-[0.98]">
+<div class="flex items-center justify-between gap-4">
+<div class="flex flex-col gap-1 flex-1">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-sm">segment</span>
+<p class="text-forest dark:text-white text-base font-bold leading-tight">Desarrollo de Valor</p>
+</div>
+<p class="text-earth dark:text-earth/80 text-sm font-normal leading-normal">Divide tu explicación en 3 puntos clave accionables y fáciles de seguir.</p>
+</div>
+<div class="w-24 h-16 bg-center bg-no-repeat bg-cover rounded-lg shrink-0 border border-earth/5" data-alt="Abstract workflow showing organized boxes" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAPbWDS6oobmsrmuRdtxfbtLbTRi4rbtEWhFdv-PQ4E-3Tqfkl4AAHQWBPiAbbVLtJB51MxQx0FBI9ApbDHviPl4Gb_XiP0-W53lTrUqh8ADyiuVd2lIeBp9vPw2BL2909H2VtDjKyB3le_jPKjb_Hj0UhphPP-QuNbbTvIq1-A6fAxSqSzVLwkEYqaMxynzODOBEMo0Gw-QTl_B_7V51CZLAnBX0YMxt6wJq5OoKFbJdfItze3pfycIITOLyHQcBRxN_6OLYxsjS-3");'>
+</div>
+</div>
+</div>
+<!-- Card: CTA -->
+<div class="p-4 bg-white dark:bg-forest/40 border border-earth/10 rounded-xl ios-shadow transition-transform active:scale-[0.98]">
+<div class="flex items-center justify-between gap-4">
+<div class="flex flex-col gap-1 flex-1">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-sm">ads_click</span>
+<p class="text-forest dark:text-white text-base font-bold leading-tight">Cierre (CTA)</p>
+</div>
+<p class="text-earth dark:text-earth/80 text-sm font-normal leading-normal">Pide a tus seguidores que comenten su mayor reto de organización.</p>
+</div>
+<div class="w-24 h-16 bg-center bg-no-repeat bg-cover rounded-lg shrink-0 border border-earth/5" data-alt="Arrow pointing to a click button illustration" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAYPaquzs-QohlcAuJmhodv7-TZOi6fP0_nPfVa1M0AzkVCFC2Rh5bBV_sDY0RXZYjVQdXJApKFA7FhSLv_9_FbrMdOPuucK17R525RRzdPW-khkw9MP2NhpLBNQiHvOm0yplHuG_JZ_oPT42tZ0RE_Ng300IODnJcExWUFvhcUWLUtHWuojdITp4k4O6CcFVmXJwC9uOgyUh_VB3pJkdx3cto-fiNngxegX3jemxhYsw8s6pgXr91KDw8m5rlR2SBW4awVHUI3_psD");'>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Sticky Bottom Button -->
+<div class="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-background-light dark:from-background-dark via-background-light dark:via-background-dark to-transparent">
+<button class="w-full bg-forest dark:bg-primary text-white dark:text-forest font-bold py-4 rounded-xl flex items-center justify-center gap-3 ios-shadow active:scale-[0.97] transition-all hover:opacity-90">
+<span class="material-symbols-outlined">auto_awesome</span>
+<span class="text-lg">Generar Guion Completo</span>
+</button>
+<p class="text-center text-[10px] text-earth mt-3 uppercase tracking-[0.2em] font-medium">Potenciado por IA de última generación</p>
+</div>
+</body></html>
