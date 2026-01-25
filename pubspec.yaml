@@ -50,6 +50,8 @@ dependencies:
   http: ^1.2.1
   flutter_localizations:
     sdk: flutter
+  flutter_tts: ^4.2.5
+  speech_to_text: ^7.3.0
 
 dev_dependencies:
   flutter_test:
