@@ -7,12 +7,15 @@ class VRMActionCard extends StatelessWidget {
   final IconData icon;
   final VoidCallback onTap;
 
+  final IconData? actionIcon;
+
   const VRMActionCard({
     super.key,
     required this.title,
     required this.subtitle,
     required this.icon,
     required this.onTap,
+    this.actionIcon,
   });
 
   @override
@@ -53,7 +56,7 @@ class VRMActionCard extends StatelessWidget {
                 Row(
                   children: [
                     Icon(
-                      Icons.keyboard_voice,
+                      icon, // Usar el icono pasado por parámetro en lugar de hardcoded Icons.keyboard_voice
                       size: 14,
                       color: Colors.white.withValues(alpha: 0.8),
                     ),
@@ -77,7 +80,11 @@ class VRMActionCard extends StatelessWidget {
                 color: Colors.white.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
-              child: const Icon(Icons.add, color: Colors.white, size: 24),
+              child: Icon(
+                actionIcon ?? Icons.add,
+                color: Colors.white,
+                size: 24,
+              ),
             ),
           ],
         ),

@@ -7,6 +7,7 @@ import 'package:vrm_app/shared/widgets/action_card.dart';
 import 'package:vrm_app/shared/widgets/project_card.dart';
 import 'package:vrm_app/shared/widgets/calendar_day.dart';
 import 'package:vrm_app/features/new_project/new_project_page.dart';
+import 'package:vrm_app/features/influencer_profile/influencer_profile_page.dart';
 import '../../core/theme.dart';
 
 class DashboardPage extends StatelessWidget {
@@ -18,7 +19,7 @@ class DashboardPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppTheme.offWhite,
       extendBody: true,
-      bottomNavigationBar: _buildBottomNav(l10n),
+      bottomNavigationBar: _buildBottomNav(context, l10n),
       body: SafeArea(
         child: Center(
           child: ConstrainedBox(
@@ -35,18 +36,38 @@ class DashboardPage extends StatelessWidget {
                   const SizedBox(height: 20),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: VRMActionCard(
-                      title: l10n.newProject,
-                      subtitle: l10n.voiceControlActive,
-                      icon: Icons.mic,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const NewProjectPage(),
-                          ),
-                        );
-                      },
+                    child: Column(
+                      children: [
+                        VRMActionCard(
+                          title: l10n.newProject,
+                          subtitle: l10n.voiceControlActive,
+                          icon: Icons.keyboard_voice,
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const NewProjectPage(),
+                              ),
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 12),
+                        VRMActionCard(
+                          title: 'Perfil Influencer',
+                          subtitle: 'Configura tu identidad real',
+                          icon: Icons.person_search_rounded,
+                          actionIcon: Icons.arrow_forward_rounded,
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    const InfluencerProfilePage(),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
                     ),
                   ),
                   const _RecentProjectsSection(),
@@ -237,7 +258,7 @@ class DashboardPage extends StatelessWidget {
     );
   }
 
-  Widget _buildBottomNav(AppLocalizations l10n) {
+  Widget _buildBottomNav(BuildContext context, AppLocalizations l10n) {
     return ClipRect(
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
@@ -252,10 +273,41 @@ class DashboardPage extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildNavItem(Icons.grid_view_rounded, l10n.panel, true),
-              _buildNavItem(Icons.video_library_rounded, l10n.videos, false),
-              _buildNavItem(Icons.mic_none_rounded, l10n.script, false),
-              _buildNavItem(Icons.person_rounded, l10n.profile, false),
+              _buildNavItem(
+                context,
+                Icons.grid_view_rounded,
+                l10n.panel,
+                true,
+                () {},
+              ),
+              _buildNavItem(
+                context,
+                Icons.video_library_rounded,
+                l10n.videos,
+                false,
+                () {},
+              ),
+              _buildNavItem(
+                context,
+                Icons.mic_none_rounded,
+                l10n.script,
+                false,
+                () {},
+              ),
+              _buildNavItem(
+                context,
+                Icons.person_rounded,
+                l10n.profile,
+                false,
+                () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const InfluencerProfilePage(),
+                    ),
+                  );
+                },
+              ),
             ],
           ),
         ),
@@ -263,30 +315,39 @@ class DashboardPage extends StatelessWidget {
     );
   }
 
-  Widget _buildNavItem(IconData icon, String label, bool isActive) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(
-          icon,
-          size: 24,
-          color: isActive
-              ? AppTheme.forest
-              : const Color(0xFF94A3B8), // Slate 400
-        ),
-        const SizedBox(height: 6),
-        Text(
-          label.toUpperCase(),
-          style: TextStyle(
-            fontSize: 10,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1.0,
+  Widget _buildNavItem(
+    BuildContext context,
+    IconData icon,
+    String label,
+    bool isActive,
+    VoidCallback onTap,
+  ) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            icon,
+            size: 24,
             color: isActive
                 ? AppTheme.forest
                 : const Color(0xFF94A3B8), // Slate 400
           ),
-        ),
-      ],
+          const SizedBox(height: 6),
+          Text(
+            label.toUpperCase(),
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.0,
+              color: isActive
+                  ? AppTheme.forest
+                  : const Color(0xFF94A3B8), // Slate 400
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
@@ -54,6 +55,10 @@ class _PreparationPageState extends State<PreparationPage> {
   }
 
   void _initSpeech() async {
+    if (kIsWeb) {
+      debugPrint("Reconocimiento de voz desactivado en Web por ahora.");
+      return;
+    }
     try {
       _speechEnabled = await _speechToText.initialize(
         onStatus: (status) => debugPrint('Speech Status: $status'),
@@ -67,6 +72,12 @@ class _PreparationPageState extends State<PreparationPage> {
 
   void _initTts() {
     _flutterTts = FlutterTts();
+
+    if (kIsWeb) {
+      debugPrint("TTS en modo simulado para Web.");
+      return;
+    }
+
     _flutterTts.setLanguage("es-ES");
     _flutterTts.setPitch(1.0);
     _flutterTts.setSpeechRate(0.5);
@@ -103,7 +114,9 @@ class _PreparationPageState extends State<PreparationPage> {
     });
 
     // Speak the text
-    _flutterTts.speak(_scriptText);
+    if (!kIsWeb) {
+      _flutterTts.speak(_scriptText);
+    }
 
     // Coordinate visual progress with expected duration (~2.5s for this string at 0.5 rate)
     // In a real app, we'd use setProgressHandler, but here we keep the smooth simulation
@@ -123,6 +136,9 @@ class _PreparationPageState extends State<PreparationPage> {
         _readingProgress = (currentStep / steps).clamp(0.0, 1.0);
         if (currentStep >= steps) {
           timer.cancel();
+          if (kIsWeb) {
+            _onReadingFinished();
+          }
         }
       });
     });

@@ -15,25 +15,27 @@ class VRMStepIndicator extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Container(
-          width: 32,
-          height: 32,
-          decoration: const BoxDecoration(
-            color: AppTheme.forest,
-            shape: BoxShape.circle,
-          ),
-          child: Center(
-            child: Text(
-              stepNumber,
-              style: const TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
+        if (stepNumber.isNotEmpty) ...[
+          Container(
+            width: 32,
+            height: 32,
+            decoration: const BoxDecoration(
+              color: AppTheme.forest,
+              shape: BoxShape.circle,
+            ),
+            child: Center(
+              child: Text(
+                stepNumber,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
               ),
             ),
           ),
-        ),
-        const SizedBox(width: 12),
+          const SizedBox(width: 12),
+        ],
         Text(
           title,
           style: const TextStyle(

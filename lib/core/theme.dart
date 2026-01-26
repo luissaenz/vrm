@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 
 class AppTheme {
   // Paleta Estandarizada y Mínima (Con colores exactos del diseño)
-  static const Color forest = Color(0xFF2C4341);
+  static const Color forest = Color(0xFF2D423F);
+  static const Color forestVibrant = Color(0xFF219653);
   static const Color forestDark = Color(0xFF162210);
-  static const Color earth = Color(0xFF7D6B5D);
+  static const Color earth = Color(0xFF8D7B6D);
   static const Color accent = Color(0xFF4A6663);
   static const Color backgroundLight = Color(0xFFF8F9F8);
   static const Color surfaceColor = Color(0xFFFFFFFF);
