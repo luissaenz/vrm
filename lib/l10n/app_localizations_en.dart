@@ -384,7 +384,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get profileLeaderImage =>
-      'https://lh3.googleusercontent.com/aida-public/AB6AXuDltdys4WmVAYJMx1yHytZ1C5eyo0IFjnSwVJZQAopilqYRRA7J0sq6VPKc5ajlEw14Dl9u0CgV3E1T945vv1QUDH-yN4FlZYGCrYW4WTMZkaiIUMp0P6ODrZlvqSgzI9imOXkmX6mSitw2NYI3FNcxu4ca0GBjpvyf9Tj-p5le0HI16babzlUL4c7c4dSjzfYLw3jd3kaiuTEj3ICZCQkCg7_7oylDhuvGEMGP5PunMcKL3ivc8sVogphwH9Rktj1BhjqKQxaPOCvz';
+      'https://images.unsplash.com/photo-1519085185750-7697655d7e74?q=80&w=1000&auto=format&fit=crop';
 
   @override
   String get profileInfluencerImage =>
