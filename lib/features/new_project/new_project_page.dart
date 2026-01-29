@@ -186,7 +186,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
             style: const TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w700,
-              color: Color(0xFF94A3B8),
+              color: AppTheme.textMuted,
               letterSpacing: 0.5,
             ),
           ),
@@ -195,7 +195,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
               const Icon(
                 Icons.access_time_rounded,
                 size: 14,
-                color: Color(0xFF94A3B8),
+                color: AppTheme.textMuted,
               ),
               const SizedBox(width: 6),
               Text.rich(
@@ -211,7 +211,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
                 style: const TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
-                  color: Color(0xFF94A3B8),
+                  color: AppTheme.textMuted,
                   letterSpacing: 0.5,
                 ),
               ),

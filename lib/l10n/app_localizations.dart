@@ -98,431 +98,713 @@ abstract class AppLocalizations {
     Locale('es'),
   ];
 
-  /// No description provided for @appTitle.
+  /// The title of the application
   ///
   /// In en, this message translates to:
   /// **'VRM App'**
   String get appTitle;
 
-  /// No description provided for @goodMorning.
+  /// Standard morning greeting
   ///
   /// In en, this message translates to:
   /// **'GOOD MORNING,'**
   String get goodMorning;
 
-  /// No description provided for @creator.
+  /// The name of the app creator
   ///
   /// In en, this message translates to:
   /// **'Alex Rivera'**
   String get creator;
 
-  /// No description provided for @streak.
+  /// Label for the user's daily activity streak
   ///
   /// In en, this message translates to:
   /// **'Streak'**
   String get streak;
 
-  /// No description provided for @days.
+  /// A count of days for the streak
   ///
   /// In en, this message translates to:
   /// **'{count} Days'**
   String days(String count);
 
-  /// No description provided for @clips.
+  /// Label for video clips section
   ///
   /// In en, this message translates to:
   /// **'Clips'**
   String get clips;
 
-  /// No description provided for @newProject.
+  /// Button text to start a new project
   ///
   /// In en, this message translates to:
   /// **'New Project'**
   String get newProject;
 
-  /// No description provided for @voiceControlActive.
+  /// Status message when voice control is active
   ///
   /// In en, this message translates to:
   /// **'Voice control active'**
   String get voiceControlActive;
 
-  /// No description provided for @recentProjects.
+  /// Title for the recent projects list
   ///
   /// In en, this message translates to:
   /// **'Recent Projects'**
   String get recentProjects;
 
-  /// No description provided for @viewAll.
+  /// Link to view all projects
   ///
   /// In en, this message translates to:
   /// **'View all'**
   String get viewAll;
 
-  /// No description provided for @readyToCreate.
+  /// Call to action headline
   ///
   /// In en, this message translates to:
   /// **'Ready to create?'**
   String get readyToCreate;
 
-  /// No description provided for @captureIdeas.
+  /// Subheadline for project creation
   ///
   /// In en, this message translates to:
   /// **'Capture your ideas, one fragment at a time.'**
   String get captureIdeas;
 
-  /// No description provided for @streakLabel.
+  /// Label for the recording streak widget
   ///
   /// In en, this message translates to:
   /// **'RECORDING\nSTREAK'**
   String get streakLabel;
 
-  /// No description provided for @fragments.
+  /// Label for the fragments count
   ///
   /// In en, this message translates to:
   /// **'FRAGMENTS'**
   String get fragments;
 
-  /// No description provided for @calendar.
+  /// Label for the calendar section
   ///
   /// In en, this message translates to:
   /// **'Calendar'**
   String get calendar;
 
-  /// No description provided for @panel.
+  /// Label for the control panel
   ///
   /// In en, this message translates to:
   /// **'PANEL'**
   String get panel;
 
-  /// No description provided for @videos.
+  /// Label for the videos section
   ///
   /// In en, this message translates to:
   /// **'VIDEOS'**
   String get videos;
 
-  /// No description provided for @script.
+  /// Label for the script section
   ///
   /// In en, this message translates to:
   /// **'SCRIPT'**
   String get script;
 
-  /// No description provided for @profile.
+  /// Label for the user profile section
   ///
   /// In en, this message translates to:
   /// **'PROFILE'**
   String get profile;
 
-  /// No description provided for @draft.
+  /// Status label for draft projects
   ///
   /// In en, this message translates to:
   /// **'DRAFT'**
   String get draft;
 
-  /// No description provided for @ready.
+  /// Status label for ready projects
   ///
   /// In en, this message translates to:
   /// **'READY'**
   String get ready;
 
-  /// No description provided for @wed.
+  /// Abbreviation for Wednesday
   ///
   /// In en, this message translates to:
   /// **'WED'**
   String get wed;
 
-  /// No description provided for @thu.
+  /// Abbreviation for Thursday
   ///
   /// In en, this message translates to:
   /// **'THU'**
   String get thu;
 
-  /// No description provided for @fri.
+  /// Abbreviation for Friday
   ///
   /// In en, this message translates to:
   /// **'FRI'**
   String get fri;
 
-  /// No description provided for @sat.
+  /// Abbreviation for Saturday
   ///
   /// In en, this message translates to:
   /// **'SAT'**
   String get sat;
 
-  /// No description provided for @progressLabel.
+  /// Label for the project progress bar
   ///
   /// In en, this message translates to:
   /// **'PROGRESS'**
   String get progressLabel;
 
-  /// No description provided for @editedYesterday.
+  /// Time reference for a project edited on the previous day
   ///
   /// In en, this message translates to:
   /// **'Edited yesterday'**
   String get editedYesterday;
 
-  /// No description provided for @editedHoursAgo.
+  /// Time reference for a project edited a few hours ago
   ///
   /// In en, this message translates to:
   /// **'Edited {count} hours ago'**
   String editedHoursAgo(String count);
 
-  /// No description provided for @fragmentCount.
+  /// A count of fragments in a project
   ///
   /// In en, this message translates to:
   /// **'{current}/{total} Fragments'**
   String fragmentCount(String current, String total);
 
-  /// No description provided for @newProjectTitle.
+  /// Title for the new project creation screen
   ///
   /// In en, this message translates to:
   /// **'New Project'**
   String get newProjectTitle;
 
-  /// No description provided for @step1Title.
+  /// Title for the first step of onboarding
   ///
   /// In en, this message translates to:
   /// **'STEP 1: WRITE OR PASTE YOUR SCRIPT'**
   String get step1Title;
 
-  /// No description provided for @charactersCount.
+  /// A count of characters in a text field
   ///
   /// In en, this message translates to:
   /// **'{count} characters'**
   String charactersCount(String count);
 
-  /// No description provided for @secondsAbbreviation.
+  /// Abbreviation for seconds
   ///
   /// In en, this message translates to:
   /// **'{seconds}s'**
   String secondsAbbreviation(String seconds);
 
-  /// No description provided for @totalTimeEstimate.
+  /// Estimated time duration
   ///
   /// In en, this message translates to:
   /// **'approximate duration {seconds}'**
   String totalTimeEstimate(String seconds);
 
-  /// No description provided for @assistant.
+  /// Label for the assistant section
   ///
   /// In en, this message translates to:
   /// **'ASSISTANT'**
   String get assistant;
 
-  /// No description provided for @optimize.
+  /// Button label to optimize script using AI
   ///
   /// In en, this message translates to:
   /// **'OPTIMIZE WITH AI'**
   String get optimize;
 
-  /// No description provided for @fragmentPreview.
+  /// Header for the fragment preview section
   ///
   /// In en, this message translates to:
   /// **'FRAGMENT PREVIEW'**
   String get fragmentPreview;
 
-  /// No description provided for @blocksCount.
+  /// A count of text blocks
   ///
   /// In en, this message translates to:
   /// **'{count} BLOCKS'**
   String blocksCount(int count);
 
-  /// No description provided for @splitIntoFragments.
+  /// Action to split a script into multiple fragments
   ///
   /// In en, this message translates to:
   /// **'Split into Fragments'**
   String get splitIntoFragments;
 
-  /// No description provided for @paste.
+  /// Action to paste text from clipboard
   ///
   /// In en, this message translates to:
   /// **'Paste'**
   String get paste;
 
-  /// No description provided for @segment.
+  /// Action to segment a fragment
   ///
   /// In en, this message translates to:
   /// **'SEGMENT'**
   String get segment;
 
-  /// No description provided for @scriptAssistantTitle.
+  /// Title for the script writing assistant
   ///
   /// In en, this message translates to:
   /// **'Script Assistant'**
   String get scriptAssistantTitle;
 
-  /// No description provided for @defineIdea.
+  /// Headline for defining the video core idea
   ///
   /// In en, this message translates to:
   /// **'Define your Idea'**
   String get defineIdea;
 
-  /// No description provided for @iaHelperText.
+  /// Instructional text about AI assistance
   ///
   /// In en, this message translates to:
   /// **'AI will help you structure the perfect content.'**
   String get iaHelperText;
 
-  /// No description provided for @videoIdeaLabel.
+  /// Label for the video idea input field
   ///
   /// In en, this message translates to:
   /// **'VIDEO IDEA'**
   String get videoIdeaLabel;
 
-  /// No description provided for @videoIdeaPlaceholder.
+  /// Placeholder example for the video idea field
   ///
   /// In en, this message translates to:
   /// **'Ej: A video about how to organize your desk to be more productive in 5 steps...'**
   String get videoIdeaPlaceholder;
 
-  /// No description provided for @suggestedStructures.
+  /// Header for suggested script structures
   ///
   /// In en, this message translates to:
   /// **'Suggested Structures'**
   String get suggestedStructures;
 
-  /// No description provided for @premiumAi.
+  /// Label for premium AI features
   ///
   /// In en, this message translates to:
   /// **'PREMIUM AI'**
   String get premiumAi;
 
-  /// No description provided for @hookTitle.
+  /// Title for the script hook section
   ///
   /// In en, this message translates to:
   /// **'Introduction / Hook'**
   String get hookTitle;
 
-  /// No description provided for @hookDesc.
+  /// Description of the hook purpose
   ///
   /// In en, this message translates to:
   /// **'Hook your audience in the first 3 seconds with a common problem.'**
   String get hookDesc;
 
-  /// No description provided for @valueTitle.
+  /// Title for the value development section
   ///
   /// In en, this message translates to:
   /// **'Value Development'**
   String get valueTitle;
 
-  /// No description provided for @valueDesc.
+  /// Description of the value development purpose
   ///
   /// In en, this message translates to:
   /// **'Divide your explanation into 3 actionable and easy-to-follow key points.'**
   String get valueDesc;
 
-  /// No description provided for @ctaTitle.
+  /// Title for the call to action section
   ///
   /// In en, this message translates to:
   /// **'Close (CTA)'**
   String get ctaTitle;
 
-  /// No description provided for @ctaDesc.
+  /// Description of the CTA purpose
   ///
   /// In en, this message translates to:
   /// **'Ask your followers to like and share the content.'**
   String get ctaDesc;
 
-  /// No description provided for @generateFullScript.
+  /// Action button to generate the complete script
   ///
   /// In en, this message translates to:
   /// **'Generate Full Script'**
   String get generateFullScript;
 
-  /// No description provided for @poweredByAi.
+  /// Subtext indicating AI-powered generation
   ///
   /// In en, this message translates to:
   /// **'POWERED BY LATEST GENERATION AI'**
   String get poweredByAi;
 
-  /// No description provided for @step2Title.
+  /// Title for the second step of onboarding
   ///
   /// In en, this message translates to:
   /// **'STEP 2: VALIDATE THE FRAGMENTS'**
   String get step2Title;
 
-  /// No description provided for @next.
+  /// Standard label for moving to the next step
   ///
   /// In en, this message translates to:
   /// **'NEXT'**
   String get next;
 
-  /// No description provided for @reRecord.
+  /// Action button to restart recording
   ///
   /// In en, this message translates to:
   /// **'RE-RECORD'**
   String get reRecord;
 
-  /// No description provided for @preparation.
+  /// Header for the preparation screen
   ///
   /// In en, this message translates to:
   /// **'PREPARATION'**
   String get preparation;
 
-  /// No description provided for @listening.
+  /// Status message while waiting for voice input
   ///
   /// In en, this message translates to:
   /// **'LISTENING...'**
   String get listening;
 
-  /// No description provided for @systemReads.
+  /// Status text while the AI is reading
   ///
   /// In en, this message translates to:
   /// **'THE SYSTEM READS THE SCRIPT:'**
   String get systemReads;
 
-  /// No description provided for @getReady.
+  /// Status text before recording starts
   ///
   /// In en, this message translates to:
   /// **'GET READY'**
   String get getReady;
 
-  /// No description provided for @repeat.
+  /// Action button to play audio again
   ///
   /// In en, this message translates to:
   /// **'REPEAT'**
   String get repeat;
 
-  /// No description provided for @record.
+  /// Action button to start recording
   ///
   /// In en, this message translates to:
   /// **'RECORD'**
   String get record;
 
-  /// No description provided for @waiting.
+  /// General status for waiting state
   ///
   /// In en, this message translates to:
   /// **'WAITING...'**
   String get waiting;
 
-  /// No description provided for @voiceControlDisabled.
+  /// Status when the voice system is off
   ///
   /// In en, this message translates to:
   /// **'Voice control disabled'**
   String get voiceControlDisabled;
 
-  /// No description provided for @recordingStatus.
+  /// Status text during active recording
   ///
   /// In en, this message translates to:
   /// **'RECORDING'**
   String get recordingStatus;
 
-  /// No description provided for @listeningToAdvance.
+  /// Status while waiting for voice command to advance
   ///
   /// In en, this message translates to:
   /// **'Listening for voice to advance...'**
   String get listeningToAdvance;
 
-  /// No description provided for @gridLabel.
+  /// Label for the layout grid
   ///
   /// In en, this message translates to:
   /// **'GRID'**
   String get gridLabel;
 
-  /// No description provided for @ghostLabel.
+  /// Label for the ghost frame overlay
   ///
   /// In en, this message translates to:
   /// **'GHOST'**
   String get ghostLabel;
+
+  /// Header for the welcome Step
+  ///
+  /// In en, this message translates to:
+  /// **'WELCOME'**
+  String get welcomeTitle;
+
+  /// Main question in the welcome step
+  ///
+  /// In en, this message translates to:
+  /// **'What is your biggest obstacle today?'**
+  String get welcomeHeadline;
+
+  /// Button to start the onboarding flow
+  ///
+  /// In en, this message translates to:
+  /// **'START'**
+  String get welcomeCta;
+
+  /// Title for the identity selection step
+  ///
+  /// In en, this message translates to:
+  /// **'Choose your Identity'**
+  String get identityHeadline;
+
+  /// Instruction for identity selection
+  ///
+  /// In en, this message translates to:
+  /// **'Touch the mirror that best reflects your purpose today'**
+  String get identitySubheadline;
+
+  /// Confirmation button for identity selection
+  ///
+  /// In en, this message translates to:
+  /// **'CONFIRM IDENTITY'**
+  String get identityConfirm;
+
+  /// Header for the personalized config step
+  ///
+  /// In en, this message translates to:
+  /// **'Custom Configuration'**
+  String get configTitle;
+
+  /// Personalized coaching message for Leader profile
+  ///
+  /// In en, this message translates to:
+  /// **'\"Welcome. I have configured the app in Efficiency Mode. Your scripts will be concise and the AI will automatically remove your silences.\"'**
+  String get configGreetingLeader;
+
+  /// Personalized coaching message for Influencer profile
+  ///
+  /// In en, this message translates to:
+  /// **'\"Hi! I have activated Flow Mode. The app will notify you if your smile or eye contact drops. Let\'s make them fall in love with your content.\"'**
+  String get configGreetingInfluencer;
+
+  /// Personalized coaching message for Seller profile
+  ///
+  /// In en, this message translates to:
+  /// **'\"Ready. I have loaded Elevator Pitch templates and proven sales scripts. Your goal is clarity.\"'**
+  String get configGreetingSeller;
+
+  /// Default personalized coaching message
+  ///
+  /// In en, this message translates to:
+  /// **'\"We are ready to start.\"'**
+  String get configGreetingDefault;
+
+  /// Label for the configuration summary section
+  ///
+  /// In en, this message translates to:
+  /// **'CONFIGURATION SUMMARY'**
+  String get configSummaryLabel;
+
+  /// Label for the teleprompter speed indicator
+  ///
+  /// In en, this message translates to:
+  /// **'Suggested speed for your profile'**
+  String get configTeleprompterLabel;
+
+  /// Button to finish onboarding and move to dashboard
+  ///
+  /// In en, this message translates to:
+  /// **'CREATE MY FIRST VIDEO'**
+  String get configCta;
+
+  /// Final instructional hint at onboarding end
+  ///
+  /// In en, this message translates to:
+  /// **'PRESS TO START YOUR EXPERIENCE'**
+  String get configFooterLabel;
+
+  /// Title label for Leader profile
+  ///
+  /// In en, this message translates to:
+  /// **'Leader'**
+  String get profileLeaderTitle;
+
+  /// Taglabel for Leader profile
+  ///
+  /// In en, this message translates to:
+  /// **'EFFICIENCY'**
+  String get profileLeaderTag;
+
+  /// Representative quote for Leader profile
+  ///
+  /// In en, this message translates to:
+  /// **'\"I have little time\"'**
+  String get profileLeaderQuote;
+
+  /// Title label for Influencer profile
+  ///
+  /// In en, this message translates to:
+  /// **'Influencer'**
+  String get profileInfluencerTitle;
+
+  /// Taglabel for Influencer profile
+  ///
+  /// In en, this message translates to:
+  /// **'ENERGY'**
+  String get profileInfluencerTag;
+
+  /// Representative quote for Influencer profile
+  ///
+  /// In en, this message translates to:
+  /// **'\"I want to connect\"'**
+  String get profileInfluencerQuote;
+
+  /// Title label for Seller profile
+  ///
+  /// In en, this message translates to:
+  /// **'Seller'**
+  String get profileSellerTitle;
+
+  /// Taglabel for Seller profile
+  ///
+  /// In en, this message translates to:
+  /// **'CONFIDENCE'**
+  String get profileSellerTag;
+
+  /// Representative quote for Seller profile
+  ///
+  /// In en, this message translates to:
+  /// **'\"I need to sell\"'**
+  String get profileSellerQuote;
+
+  /// Solution title for Leader profile
+  ///
+  /// In en, this message translates to:
+  /// **'Take 1 Minute'**
+  String get configSolutionLeaderTitle;
+
+  /// Solution description for Leader profile
+  ///
+  /// In en, this message translates to:
+  /// **'Fast and perfect recordings'**
+  String get configSolutionLeaderSubtitle;
+
+  /// Solution title for Influencer profile
+  ///
+  /// In en, this message translates to:
+  /// **'Find your Voice'**
+  String get configSolutionInfluencerTitle;
+
+  /// Solution description for Influencer profile
+  ///
+  /// In en, this message translates to:
+  /// **'Create a community that loves you'**
+  String get configSolutionInfluencerSubtitle;
+
+  /// Solution title for Seller profile
+  ///
+  /// In en, this message translates to:
+  /// **'Absolute Clarity'**
+  String get configSolutionSellerTitle;
+
+  /// Solution description for Seller profile
+  ///
+  /// In en, this message translates to:
+  /// **'Convert viewers into customers'**
+  String get configSolutionSellerSubtitle;
+
+  /// Default solution title
+  ///
+  /// In en, this message translates to:
+  /// **'Optimized Solution'**
+  String get configSolutionDefaultTitle;
+
+  /// Default solution description
+  ///
+  /// In en, this message translates to:
+  /// **'Custom configuration'**
+  String get configSolutionDefaultSubtitle;
+
+  /// Premium feature title for Leader profile
+  ///
+  /// In en, this message translates to:
+  /// **'\"Magic Edit\" Mode'**
+  String get configPremiumLeaderTitle;
+
+  /// Premium feature description for Leader profile
+  ///
+  /// In en, this message translates to:
+  /// **'Video ready in 30 seconds'**
+  String get configPremiumLeaderSubtitle;
+
+  /// Premium feature title for Influencer profile
+  ///
+  /// In en, this message translates to:
+  /// **'\"Charisma\" Filters'**
+  String get configPremiumInfluencerTitle;
+
+  /// Premium feature description for Influencer profile
+  ///
+  /// In en, this message translates to:
+  /// **'Emotional tone analysis'**
+  String get configPremiumInfluencerSubtitle;
+
+  /// Premium feature title for Seller profile
+  ///
+  /// In en, this message translates to:
+  /// **'Sales Teleprompter'**
+  String get configPremiumSellerTitle;
+
+  /// Premium feature description for Seller profile
+  ///
+  /// In en, this message translates to:
+  /// **'Premium scripts included'**
+  String get configPremiumSellerSubtitle;
+
+  /// Default premium feature title
+  ///
+  /// In en, this message translates to:
+  /// **'Premium Features'**
+  String get configPremiumDefaultTitle;
+
+  /// Default premium feature description
+  ///
+  /// In en, this message translates to:
+  /// **'Unlock all potential'**
+  String get configPremiumDefaultSubtitle;
+
+  /// Personalized teleprompter speed message for Leader profile
+  ///
+  /// In en, this message translates to:
+  /// **'Fast Teleprompter ({ppm} ppm)'**
+  String profileTeleprompterLeader(String ppm);
+
+  /// Personalized teleprompter speed message for Influencer profile
+  ///
+  /// In en, this message translates to:
+  /// **'Dynamic Teleprompter ({ppm} ppm)'**
+  String profileTeleprompterInfluencer(String ppm);
+
+  /// Personalized teleprompter speed message for Seller profile
+  ///
+  /// In en, this message translates to:
+  /// **'Persuasive Teleprompter ({ppm} ppm)'**
+  String profileTeleprompterSeller(String ppm);
+
+  /// URL for the coach welcome image
+  ///
+  /// In en, this message translates to:
+  /// **'https://lh3.googleusercontent.com/aida-public/AB6AXuDtnj9X_8A4fpoltWeeCfJjOfdRir4lvqGiqtmMoT9Hvmws0Aq5DKAZCFTa9kXP_wgcDvg8PTDqEzCFC3zFii1Veuisu0XyAs9IOo0zP1n_QGqG1XnhUWb56CkgWZFSuxlcpsJtwkYwOP5ge53hCLRFqDiuBvmfFjY0vE1fNtLvZx3ZRMPsDPqcISCDlgnLfuVNNvfOC-Xo2Avc5bsJ4x6WTihF_dDNwh_ZMzgcGLr31IjmjExdO2MegRAE0LM3QxLehYpyI7bLo8dl'**
+  String get welcomeCoachImage;
+
+  /// URL for the Leader profile image
+  ///
+  /// In en, this message translates to:
+  /// **'https://lh3.googleusercontent.com/aida-public/AB6AXuDltdys4WmVAYJMx1yHytZ1C5eyo0IFjnSwVJZQAopilqYRRA7J0sq6VPKc5ajlEw14Dl9u0CgV3E1T945vv1QUDH-yN4FlZYGCrYW4WTMZkaiIUMp0P6ODrZlvqSgzI9imOXkmX6mSitw2NYI3FNcxu4ca0GBjpvyf9Tj-p5le0HI16babzlUL4c7c4dSjzfYLw3jd3kaiuTEj3ICZCQkCg7_7oylDhuvGEMGP5PunMcKL3ivc8sVogphwH9Rktj1BhjqKQxaPOCvz'**
+  String get profileLeaderImage;
+
+  /// URL for the Influencer profile image
+  ///
+  /// In en, this message translates to:
+  /// **'https://lh3.googleusercontent.com/aida-public/AB6AXuDvfHM-MBerpZJQCw1G3xkyUzZFtWHm1-mXt_BzAN78Zz5-iUC5HLbaQ6Hsf0u8oYKDUVO__A18MIz3ySJH3ssZ1G17Z5raOAK1hVKQNdfj8_ei7kjmmWZ_lDM2t3nzH5wHp8JrcbyyoH_1IGK7erPct4eaNzbgBsqenPoZe2CZi63PE8ftlb6WRkOIA8OKzqKwVeUwL-S_7Rl7pV0666CS5a1g1zTZAWo6DpQ6i06jyEngNHa-BVG39DOOc1Eq6XNMsziDBwVAn3qZ'**
+  String get profileInfluencerImage;
+
+  /// URL for the Seller profile image
+  ///
+  /// In en, this message translates to:
+  /// **'https://lh3.googleusercontent.com/aida-public/AB6AXuAbHlQa2OUJlKn6gBpuhTPrs-Q0_qAIgIDsINsGm2LfDF76YoL3utRhVCQZBt6pFvVeMUMvQuAg_7-LwLeCMFJnJQ4l18fMu-jUX1w15MZt7mxklAwpcg1L6vUWXRZn2xc81UNL7g2IqMrNhBTCXDe9Y18yO1iYbt8tc8jU4KDoFeLKt5_qsgWKoGerm2puw0hCjNqb0TfvxixhDpay7OjTLm-u4IRnf_IbJ-Ezo-hvh5e4YPu2lHJS9o03e05lK4IxuPyCXfoCCU4d'**
+  String get profileSellerImage;
 }
 
 class _AppLocalizationsDelegate

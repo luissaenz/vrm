@@ -8,10 +8,38 @@ import 'package:vrm_app/shared/widgets/project_card.dart';
 import 'package:vrm_app/shared/widgets/calendar_day.dart';
 import 'package:vrm_app/features/new_project/new_project_page.dart';
 import 'package:vrm_app/features/influencer_profile/influencer_profile_page.dart';
+import 'package:vrm_app/features/onboarding/data/onboarding_repository.dart';
+import 'package:vrm_app/features/onboarding/data/user_profile.dart';
 import '../../core/theme.dart';
 
-class DashboardPage extends StatelessWidget {
+class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
+
+  @override
+  State<DashboardPage> createState() => _DashboardPageState();
+}
+
+class _DashboardPageState extends State<DashboardPage> {
+  UserProfile _profile = UserProfile.empty();
+  final _repository = OnboardingRepository();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfile();
+  }
+
+  void _loadProfile() async {
+    final profile = await _repository.getUserProfile();
+    if (mounted) {
+      if (!profile.onboardingCompleted ||
+          profile.identity == UserIdentity.none) {
+        Navigator.of(context).pushReplacementNamed('/onboarding');
+      } else {
+        setState(() => _profile = profile);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +63,7 @@ class DashboardPage extends StatelessWidget {
                   _buildStatsSection(l10n),
                   const SizedBox(height: 20),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: Column(
                       children: [
                         VRMActionCard(
@@ -84,7 +112,7 @@ class DashboardPage extends StatelessWidget {
 
   Widget _buildTopBar(AppLocalizations l10n) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(24, 24, 24, 8),
+      padding: const EdgeInsets.fromLTRB(20, 24, 20, 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -120,16 +148,16 @@ class DashboardPage extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
-                      color: const Color(0xFF64748B), // Slate 500
+                      color: AppTheme.textMuted,
                       letterSpacing: 0.5,
                     ),
                   ),
                   Text(
-                    l10n.creator,
+                    _getProfileLabel(),
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF0F172A),
+                      color: AppTheme.textMain,
                     ),
                   ),
                 ],
@@ -160,26 +188,26 @@ class DashboardPage extends StatelessWidget {
 
   Widget _buildMainGreeting(AppLocalizations l10n) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+      padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            l10n.readyToCreate,
+            _getMainTitle(),
             style: const TextStyle(
               fontSize: 32,
               fontWeight: FontWeight.w800,
-              color: Color(0xFF0F172A),
+              color: AppTheme.textMain,
               letterSpacing: -1,
             ),
           ),
           const SizedBox(height: 6),
           Text(
-            l10n.captureIdeas,
-            style: TextStyle(
+            _getMainSubtitle(),
+            style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w500,
-              color: const Color(0xFF64748B), // Slate 500
+              color: AppTheme.textMuted,
             ),
           ),
         ],
@@ -187,9 +215,48 @@ class DashboardPage extends StatelessWidget {
     );
   }
 
+  String _getProfileLabel() {
+    switch (_profile.identity) {
+      case UserIdentity.leader:
+        return 'Líder Ejecutivo';
+      case UserIdentity.influencer:
+        return 'Creador Flow';
+      case UserIdentity.seller:
+        return 'Vendedor Pro';
+      default:
+        return 'Creador';
+    }
+  }
+
+  String _getMainTitle() {
+    switch (_profile.identity) {
+      case UserIdentity.leader:
+        return 'Modo Eficiencia';
+      case UserIdentity.influencer:
+        return 'Modo Flow';
+      case UserIdentity.seller:
+        return 'Modo Persuasión';
+      default:
+        return '¿Listo para crear?';
+    }
+  }
+
+  String _getMainSubtitle() {
+    switch (_profile.identity) {
+      case UserIdentity.leader:
+        return 'Tu tiempo es dinero. Máxima precisión.';
+      case UserIdentity.influencer:
+        return 'Encuentra tu voz. Conecta con tu audiencia.';
+      case UserIdentity.seller:
+        return 'Convierte espectadores en clientes.';
+      default:
+        return 'Captura tus ideas y dales vida hoy.';
+    }
+  }
+
   Widget _buildStatsSection(AppLocalizations l10n) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: Row(
         children: [
           VRMStatCard(
@@ -212,7 +279,7 @@ class DashboardPage extends StatelessWidget {
 
   Widget _buildCalendarSection(AppLocalizations l10n) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -263,7 +330,7 @@ class DashboardPage extends StatelessWidget {
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
         child: Container(
-          padding: const EdgeInsets.fromLTRB(32, 16, 32, 40),
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 40),
           decoration: BoxDecoration(
             color: Colors.white.withValues(alpha: 0.8),
             border: Border(
@@ -330,9 +397,7 @@ class DashboardPage extends StatelessWidget {
           Icon(
             icon,
             size: 24,
-            color: isActive
-                ? AppTheme.forest
-                : const Color(0xFF94A3B8), // Slate 400
+            color: isActive ? AppTheme.forest : AppTheme.textMuted,
           ),
           const SizedBox(height: 6),
           Text(
@@ -341,9 +406,7 @@ class DashboardPage extends StatelessWidget {
               fontSize: 10,
               fontWeight: FontWeight.bold,
               letterSpacing: 1.0,
-              color: isActive
-                  ? AppTheme.forest
-                  : const Color(0xFF94A3B8), // Slate 400
+              color: isActive ? AppTheme.forest : AppTheme.textMuted,
             ),
           ),
         ],
@@ -364,7 +427,7 @@ class _RecentProjectsSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
             child: VRMSectionHeader(
               title: l10n.recentProjects,
               actionLabel: l10n.viewAll,
@@ -373,7 +436,7 @@ class _RecentProjectsSection extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Column(
               children: [
                 VRMProjectCard(

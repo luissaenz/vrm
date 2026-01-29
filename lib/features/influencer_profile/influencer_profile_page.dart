@@ -46,7 +46,7 @@ class _InfluencerProfilePageState extends State<InfluencerProfilePage> {
               child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 20,
-                  vertical: 12,
+                  vertical: 24,
                 ),
                 physics: const BouncingScrollPhysics(),
                 child: Column(
@@ -169,7 +169,7 @@ class _InfluencerProfilePageState extends State<InfluencerProfilePage> {
           isLarge: true,
         ),
         _buildStep2Field(
-          '6. ¿Qué hace la gente mal?',
+          '6. ¿Qué hace mal la gente?',
           'Un error común que detectas...',
           _wrongController,
         ),
@@ -240,12 +240,12 @@ class _InfluencerProfilePageState extends State<InfluencerProfilePage> {
         const SizedBox(height: 12),
         Row(
           children: [
-            const Icon(Icons.info_outline, size: 14, color: Color(0xFF94A3B8)),
+            const Icon(Icons.info_outline, size: 14, color: AppTheme.textMuted),
             const SizedBox(width: 8),
             const Expanded(
               child: Text(
                 'Esto nos ayuda a entrenar la IA con tu voz real.',
-                style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8)),
+                style: TextStyle(fontSize: 12, color: AppTheme.textMuted),
               ),
             ),
           ],
@@ -488,8 +488,8 @@ class _InfluencerProfilePageState extends State<InfluencerProfilePage> {
                           fontSize: 14,
                           fontWeight: isSel ? FontWeight.bold : FontWeight.w500,
                           color: isSel
-                              ? const Color(0xFF047857)
-                              : const Color(0xFF64748B),
+                              ? AppTheme.forestVibrant
+                              : AppTheme.textMuted,
                         ),
                       ),
                     ),
@@ -511,7 +511,7 @@ class _InfluencerProfilePageState extends State<InfluencerProfilePage> {
                     style: const TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.w900,
-                      color: Color(0xFF94A3B8),
+                      color: AppTheme.textMuted,
                       letterSpacing: 0.5,
                     ),
                   ),
@@ -527,14 +527,14 @@ class _InfluencerProfilePageState extends State<InfluencerProfilePage> {
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 16, 20, 40),
       decoration: BoxDecoration(
-        color: AppTheme.backgroundLight,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 20,
-            offset: const Offset(0, -5),
-          ),
-        ],
+        gradient: LinearGradient(
+          begin: Alignment.bottomCenter,
+          end: Alignment.topCenter,
+          colors: [
+            AppTheme.backgroundLight,
+            AppTheme.backgroundLight.withValues(alpha: 0.0),
+          ],
+        ),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -549,12 +549,13 @@ class _InfluencerProfilePageState extends State<InfluencerProfilePage> {
               }
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.forest,
+              backgroundColor: AppTheme.forestDark,
+              foregroundColor: Colors.white,
+              minimumSize: const Size(double.infinity, 56),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(30),
+                borderRadius: BorderRadius.circular(16),
               ),
-              minimumSize: const Size(double.infinity, 64),
-              elevation: 4,
+              elevation: 8,
               shadowColor: AppTheme.forest.withValues(alpha: 0.3),
             ),
             child: Row(
@@ -584,7 +585,7 @@ class _InfluencerProfilePageState extends State<InfluencerProfilePage> {
             TextButton(
               onPressed: () => setState(() => _currentStep--),
               style: TextButton.styleFrom(
-                minimumSize: const Size(double.infinity, 64),
+                minimumSize: const Size(double.infinity, 56),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(30),
                   side: BorderSide(color: Colors.grey.withValues(alpha: 0.2)),

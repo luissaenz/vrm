@@ -1,11 +1,11 @@
 import 'dart:async';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import '../../l10n/app_localizations.dart';
+import '../../core/theme.dart';
 import '../recording/recording_page.dart';
 
 enum PreparationPhase { fixation, decision }
@@ -18,14 +18,14 @@ class PreparationPage extends StatefulWidget {
 }
 
 class _PreparationPageState extends State<PreparationPage> {
-  // Design Tokens
-  static const Color forest = Color(0xFF2D4B44);
-  static const Color backgroundLight = Color(0xFFF9F8F6);
-  static const Color surfaceLight = Color(0xFFFFFFFF);
+  // Using AppTheme colors for consistency
 
   // State
   PreparationPhase _currentPhase = PreparationPhase.fixation;
   bool _isVoiceControlActive = false;
+  bool _isPaused = false;
+  int _currentFixationStep = 0;
+  int _fixationTotalSteps = 0;
 
   // Phase 1: Fixation (Simulated reading)
   double _readingProgress = 0.0;
@@ -83,8 +83,10 @@ class _PreparationPageState extends State<PreparationPage> {
     _flutterTts.setSpeechRate(0.5);
 
     _flutterTts.setCompletionHandler(() {
-      if (mounted && _currentPhase == PreparationPhase.fixation) {
-        _onReadingFinished();
+      if (mounted) {
+        if (_currentPhase == PreparationPhase.fixation) {
+          _onReadingFinished();
+        }
       }
     });
 
@@ -92,6 +94,10 @@ class _PreparationPageState extends State<PreparationPage> {
       if (mounted) {
         debugPrint("TTS Started");
       }
+    });
+
+    _flutterTts.setErrorHandler((msg) {
+      // Handle error if needed
     });
   }
 
@@ -122,19 +128,21 @@ class _PreparationPageState extends State<PreparationPage> {
     // In a real app, we'd use setProgressHandler, but here we keep the smooth simulation
     const duration = Duration(milliseconds: 2800);
     const interval = Duration(milliseconds: 50);
-    int steps = duration.inMilliseconds ~/ interval.inMilliseconds;
-    int currentStep = 0;
+    _fixationTotalSteps = duration.inMilliseconds ~/ interval.inMilliseconds;
 
     _readingTimer?.cancel();
     _readingTimer = Timer.periodic(interval, (timer) {
-      if (!mounted || _currentPhase != PreparationPhase.fixation) {
+      if (!mounted || _currentPhase != PreparationPhase.fixation || _isPaused) {
         timer.cancel();
         return;
       }
       setState(() {
-        currentStep++;
-        _readingProgress = (currentStep / steps).clamp(0.0, 1.0);
-        if (currentStep >= steps) {
+        _currentFixationStep++;
+        _readingProgress = (_currentFixationStep / _fixationTotalSteps).clamp(
+          0.0,
+          1.0,
+        );
+        if (_currentFixationStep >= _fixationTotalSteps) {
           timer.cancel();
           if (kIsWeb) {
             _onReadingFinished();
@@ -145,9 +153,11 @@ class _PreparationPageState extends State<PreparationPage> {
   }
 
   void _onReadingFinished() {
-    // Wait 1 second before moving to Decision phase
-    Future.delayed(const Duration(seconds: 1), () {
-      if (mounted) {
+    if (_isPaused) return;
+
+    // 1. La cuenta regresiva comenzará 500ms luego que termine el audio.
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (mounted && !_isPaused) {
         _startDecisionPhase();
         _startListening();
       }
@@ -186,7 +196,7 @@ class _PreparationPageState extends State<PreparationPage> {
     });
 
     _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (!mounted) {
+      if (!mounted || _isPaused) {
         timer.cancel();
         return;
       }
@@ -201,14 +211,6 @@ class _PreparationPageState extends State<PreparationPage> {
           _onDecisionPhaseTimeout();
         }
       });
-    });
-  }
-
-  void _onDecisionPhaseTimeout() {
-    _stopListening();
-    // Wait 1 second before restarting Phase 1
-    Future.delayed(const Duration(seconds: 1), () {
-      if (mounted) _startFixationPhase();
     });
   }
 
@@ -240,12 +242,91 @@ class _PreparationPageState extends State<PreparationPage> {
     );
   }
 
+  void _onDecisionPhaseTimeout() {
+    _stopListening();
+    if (!mounted) return;
+
+    // Si está pausado, no avanzamos. El flujo se detiene aquí.
+    if (_isPaused) return;
+
+    Future.delayed(const Duration(seconds: 1), () {
+      // Re-verificamos la pausa después del retraso de 1 segundo
+      if (mounted && _currentPhase == PreparationPhase.decision && !_isPaused) {
+        _startFixationPhase();
+      }
+    });
+  }
+
+  void _togglePause() {
+    setState(() {
+      _isPaused = !_isPaused;
+      if (_isPaused) {
+        _flutterTts.stop();
+        _readingTimer?.cancel();
+        _countdownTimer?.cancel();
+        // 3, al presionar pausa no se debe deshabilitar el control por voz
+      } else {
+        if (_currentPhase == PreparationPhase.fixation) {
+          _flutterTts.speak(_scriptText);
+          _startFixationTimer();
+        } else {
+          _startDecisionTimer();
+        }
+      }
+    });
+  }
+
+  void _startFixationTimer() {
+    const interval = Duration(milliseconds: 50);
+    _readingTimer?.cancel();
+    _readingTimer = Timer.periodic(interval, (timer) {
+      if (!mounted || _currentPhase != PreparationPhase.fixation || _isPaused) {
+        timer.cancel();
+        return;
+      }
+      setState(() {
+        _currentFixationStep++;
+        _readingProgress = (_currentFixationStep / _fixationTotalSteps).clamp(
+          0.0,
+          1.0,
+        );
+        if (_currentFixationStep >= _fixationTotalSteps) {
+          timer.cancel();
+          if (kIsWeb) {
+            _onReadingFinished();
+          }
+        }
+      });
+    });
+  }
+
+  void _startDecisionTimer() {
+    _countdownTimer?.cancel();
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted || _isPaused) {
+        timer.cancel();
+        return;
+      }
+      setState(() {
+        if (_countdown > 1) {
+          _countdown--;
+          _countdownProgress += 0.33;
+        } else {
+          timer.cancel();
+          _countdown = 0;
+          _countdownProgress = 1.0;
+          _onDecisionPhaseTimeout();
+        }
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      backgroundColor: backgroundLight,
+      backgroundColor: AppTheme.backgroundLight,
       body: SafeArea(
         child: Column(
           children: [
@@ -254,7 +335,7 @@ class _PreparationPageState extends State<PreparationPage> {
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
+                  horizontal: 20,
                   vertical: 32,
                 ),
                 physics: const BouncingScrollPhysics(),
@@ -279,7 +360,7 @@ class _PreparationPageState extends State<PreparationPage> {
 
   Widget _buildHeader(AppLocalizations l10n) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+      padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -287,7 +368,7 @@ class _PreparationPageState extends State<PreparationPage> {
           Text(
             l10n.preparation.toUpperCase(),
             style: const TextStyle(
-              color: forest,
+              color: AppTheme.forest,
               fontSize: 12,
               fontWeight: FontWeight.bold,
               letterSpacing: 2.0,
@@ -304,7 +385,7 @@ class _PreparationPageState extends State<PreparationPage> {
       width: 40,
       height: 40,
       decoration: BoxDecoration(
-        color: surfaceLight,
+        color: AppTheme.surfaceColor,
         shape: BoxShape.circle,
         border: Border.all(color: Colors.black.withValues(alpha: 0.05)),
         boxShadow: [
@@ -316,7 +397,7 @@ class _PreparationPageState extends State<PreparationPage> {
         ],
       ),
       child: IconButton(
-        icon: Icon(icon, size: 20, color: forest),
+        icon: Icon(icon, size: 20, color: AppTheme.forest),
         onPressed: onTap,
         padding: EdgeInsets.zero,
       ),
@@ -325,7 +406,7 @@ class _PreparationPageState extends State<PreparationPage> {
 
   Widget _buildProgressSection(AppLocalizations l10n) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       child: Column(
         children: [
           Row(
@@ -336,7 +417,7 @@ class _PreparationPageState extends State<PreparationPage> {
                 style: TextStyle(
                   fontSize: 10,
                   fontWeight: FontWeight.bold,
-                  color: forest.withValues(alpha: 0.6),
+                  color: AppTheme.forest.withValues(alpha: 0.6),
                   letterSpacing: 1.2,
                 ),
               ),
@@ -348,8 +429,8 @@ class _PreparationPageState extends State<PreparationPage> {
             borderRadius: BorderRadius.circular(999),
             child: LinearProgressIndicator(
               value: 0.2,
-              backgroundColor: forest.withValues(alpha: 0.1),
-              valueColor: const AlwaysStoppedAnimation<Color>(forest),
+              backgroundColor: AppTheme.forest.withValues(alpha: 0.1),
+              valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.forest),
               minHeight: 4,
             ),
           ),
@@ -366,7 +447,7 @@ class _PreparationPageState extends State<PreparationPage> {
           width: 6,
           height: 6,
           decoration: BoxDecoration(
-            color: active ? forest : Colors.grey[400],
+            color: active ? AppTheme.forest : Colors.grey[400],
             shape: BoxShape.circle,
           ),
         ),
@@ -376,7 +457,7 @@ class _PreparationPageState extends State<PreparationPage> {
           style: TextStyle(
             fontSize: 10,
             fontWeight: FontWeight.bold,
-            color: active ? forest : Colors.grey[400],
+            color: active ? AppTheme.forest : Colors.grey[400],
             letterSpacing: 1.2,
           ),
         ),
@@ -387,14 +468,18 @@ class _PreparationPageState extends State<PreparationPage> {
   Widget _buildScriptHeader(AppLocalizations l10n) {
     return Row(
       children: [
-        Icon(Icons.volume_up, size: 18, color: forest.withValues(alpha: 0.4)),
+        Icon(
+          Icons.volume_up,
+          size: 18,
+          color: AppTheme.forest.withValues(alpha: 0.4),
+        ),
         const SizedBox(width: 8),
         Text(
           l10n.systemReads.toUpperCase(),
           style: TextStyle(
             fontSize: 10,
             fontWeight: FontWeight.bold,
-            color: forest.withValues(alpha: 0.4),
+            color: AppTheme.forest.withValues(alpha: 0.4),
             letterSpacing: 1.2,
           ),
         ),
@@ -408,30 +493,39 @@ class _PreparationPageState extends State<PreparationPage> {
     String finishedText = _scriptText.substring(0, charsToShow);
     String remainingText = _scriptText.substring(charsToShow);
 
-    return Text.rich(
-      TextSpan(
-        children: [
-          TextSpan(
-            text: finishedText,
-            style: const TextStyle(
-              fontSize: 30,
-              fontWeight: FontWeight.w600,
-              color: forest,
-              height: 1.3,
-              letterSpacing: -0.5,
+    // 2. mientras esté activa la cuenta regresiva el texto debe aparecer como deshabilitado
+    final bool isDisabled = _currentPhase == PreparationPhase.decision;
+
+    return AnimatedOpacity(
+      duration: const Duration(milliseconds: 300),
+      opacity: isDisabled ? 0.3 : 1.0,
+      child: Text.rich(
+        TextSpan(
+          children: [
+            TextSpan(
+              text: finishedText,
+              style: TextStyle(
+                fontSize: 30,
+                fontWeight: FontWeight.w600,
+                color: isDisabled ? AppTheme.textMuted : AppTheme.forest,
+                height: 1.3,
+                letterSpacing: -0.5,
+              ),
             ),
-          ),
-          TextSpan(
-            text: remainingText,
-            style: TextStyle(
-              fontSize: 30,
-              fontWeight: FontWeight.w600,
-              color: forest.withValues(alpha: 0.3),
-              height: 1.3,
-              letterSpacing: -0.5,
+            TextSpan(
+              text: remainingText,
+              style: TextStyle(
+                fontSize: 30,
+                fontWeight: FontWeight.w600,
+                color: isDisabled
+                    ? AppTheme.textMuted.withValues(alpha: 0.3)
+                    : AppTheme.forest.withValues(alpha: 0.3),
+                height: 1.3,
+                letterSpacing: -0.5,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -446,7 +540,7 @@ class _PreparationPageState extends State<PreparationPage> {
             width: 176,
             height: 288,
             decoration: BoxDecoration(
-              color: surfaceLight,
+              color: AppTheme.surfaceColor,
               borderRadius: BorderRadius.circular(40),
               border: Border.all(color: Colors.black.withValues(alpha: 0.1)),
               boxShadow: [
@@ -462,7 +556,7 @@ class _PreparationPageState extends State<PreparationPage> {
               padding: const EdgeInsets.all(6),
               child: Container(
                 decoration: BoxDecoration(
-                  color: backgroundLight,
+                  color: AppTheme.backgroundLight,
                   borderRadius: BorderRadius.circular(35),
                   border: Border.all(
                     color: Colors.black.withValues(alpha: 0.05),
@@ -492,11 +586,7 @@ class _PreparationPageState extends State<PreparationPage> {
           if (_currentPhase == PreparationPhase.decision) _buildCountdown(l10n),
 
           if (_currentPhase == PreparationPhase.fixation)
-            Icon(
-              Icons.graphic_eq_rounded,
-              size: 48,
-              color: forest.withValues(alpha: 0.1),
-            ),
+            _SoundWaveAnimation(color: AppTheme.forest, isPaused: _isPaused),
         ],
       ),
     );
@@ -515,8 +605,10 @@ class _PreparationPageState extends State<PreparationPage> {
               child: CircularProgressIndicator(
                 value: _countdownProgress,
                 strokeWidth: 2,
-                backgroundColor: forest.withValues(alpha: 0.1),
-                valueColor: const AlwaysStoppedAnimation<Color>(forest),
+                backgroundColor: AppTheme.forest.withValues(alpha: 0.1),
+                valueColor: const AlwaysStoppedAnimation<Color>(
+                  AppTheme.forest,
+                ),
                 strokeCap: StrokeCap.round,
               ),
             ),
@@ -525,7 +617,7 @@ class _PreparationPageState extends State<PreparationPage> {
               style: const TextStyle(
                 fontSize: 60,
                 fontWeight: FontWeight.bold,
-                color: forest,
+                color: AppTheme.forest,
                 letterSpacing: -2,
               ),
             ),
@@ -537,7 +629,7 @@ class _PreparationPageState extends State<PreparationPage> {
           style: TextStyle(
             fontSize: 10,
             fontWeight: FontWeight.bold,
-            color: forest.withValues(alpha: 0.4),
+            color: AppTheme.forest.withValues(alpha: 0.4),
             letterSpacing: 2.5,
           ),
         ),
@@ -546,40 +638,63 @@ class _PreparationPageState extends State<PreparationPage> {
   }
 
   Widget _buildFooter(AppLocalizations l10n) {
+    // El footer se habilita y cambia a verde oscuro durante toda la fase de decisión, pausada o no.
+
     return Container(
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 40),
       decoration: BoxDecoration(
-        color: surfaceLight.withValues(alpha: 0.8),
-        border: Border(
-          top: BorderSide(color: Colors.black.withValues(alpha: 0.05)),
+        gradient: LinearGradient(
+          begin: Alignment.bottomCenter,
+          end: Alignment.topCenter,
+          colors: [
+            AppTheme.backgroundLight,
+            AppTheme.backgroundLight.withValues(alpha: 0.0),
+          ],
         ),
       ),
-      child: ClipRect(
-        child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(32, 24, 32, 40),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _buildVoiceControlBadge(l10n),
-                const SizedBox(height: 24),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _buildControlBtn(
-                      Icons.replay,
-                      l10n.repeat,
-                      56,
-                      () => _startFixationPhase(),
-                    ),
-                    _buildRecordBtn(l10n.record),
-                    _buildControlBtn(Icons.skip_next, l10n.next, 56, () {}),
-                  ],
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _buildVoiceControlBadge(l10n),
+          const SizedBox(height: 24),
+          Row(
+            children: [
+              // 1. Regresar (Izquierda)
+              Expanded(
+                child: _buildControlBtn(
+                  Icons.arrow_back_ios_new_rounded,
+                  "Regresar",
+                  56,
+                  (_currentPhase == PreparationPhase.decision)
+                      ? () => Navigator.pop(context)
+                      : null,
+                  isSpecial: true,
+                  activeState: (_currentPhase == PreparationPhase.decision),
                 ),
-              ],
-            ),
+              ),
+              // 2. Grabar (Centro)
+              Expanded(
+                child: _buildRecordBtn(
+                  "Grabar",
+                  enabled: (_currentPhase == PreparationPhase.decision),
+                  activeState: (_currentPhase == PreparationPhase.decision),
+                ),
+              ),
+              // 3. Pausar (Derecha)
+              Expanded(
+                child: _buildControlBtn(
+                  _isPaused ? Icons.play_arrow_rounded : Icons.pause_rounded,
+                  _isPaused ? "Continuar" : "Pausar",
+                  56,
+                  (_currentPhase == PreparationPhase.decision)
+                      ? _togglePause
+                      : null,
+                  activeState: (_currentPhase == PreparationPhase.decision),
+                ),
+              ),
+            ],
           ),
-        ),
+        ],
       ),
     );
   }
@@ -590,10 +705,14 @@ class _PreparationPageState extends State<PreparationPage> {
       duration: const Duration(milliseconds: 200),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: active ? forest.withValues(alpha: 0.05) : Colors.grey[200],
+        color: active
+            ? AppTheme.forest.withValues(alpha: 0.05)
+            : Colors.grey[200],
         borderRadius: BorderRadius.circular(999),
         border: Border.all(
-          color: active ? forest.withValues(alpha: 0.1) : Colors.grey[300]!,
+          color: active
+              ? AppTheme.forest.withValues(alpha: 0.1)
+              : Colors.grey[300]!,
         ),
       ),
       child: Row(
@@ -602,7 +721,7 @@ class _PreparationPageState extends State<PreparationPage> {
           Icon(
             active ? Icons.mic : Icons.mic_off,
             size: 14,
-            color: active ? forest : Colors.grey[500],
+            color: active ? AppTheme.forest : Colors.grey[500],
           ),
           const SizedBox(width: 8),
           Text(
@@ -611,7 +730,9 @@ class _PreparationPageState extends State<PreparationPage> {
             style: TextStyle(
               fontSize: 9,
               fontWeight: FontWeight.bold,
-              color: active ? forest.withValues(alpha: 0.6) : Colors.grey[500],
+              color: active
+                  ? AppTheme.forest.withValues(alpha: 0.6)
+                  : Colors.grey[500],
               letterSpacing: 1.0,
             ),
           ),
@@ -624,8 +745,17 @@ class _PreparationPageState extends State<PreparationPage> {
     IconData icon,
     String label,
     double size,
-    VoidCallback onTap,
-  ) {
+    VoidCallback? onTap, {
+    bool isSpecial = false,
+    bool activeState = false,
+  }) {
+    final bool isActuallyEnabled = onTap != null;
+    // tanto los iconos como los textos deben estar en color verde oscuro (cuando activo)
+    // tanto los iconos como los textos deben estar en color verde gris (cuando desactivo)
+    final Color currentColor = activeState
+        ? AppTheme.forest
+        : AppTheme.textMuted;
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -633,30 +763,35 @@ class _PreparationPageState extends State<PreparationPage> {
           width: size,
           height: size,
           decoration: BoxDecoration(
-            color: surfaceLight,
+            color: AppTheme.surfaceColor,
             shape: BoxShape.circle,
-            border: Border.all(color: Colors.black.withValues(alpha: 0.1)),
+            border: Border.all(
+              color: isActuallyEnabled
+                  ? Colors.black.withValues(alpha: 0.1)
+                  : Colors.black.withValues(alpha: 0.05),
+            ),
             boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.02),
-                blurRadius: 4,
-                offset: const Offset(0, 2),
-              ),
+              if (isActuallyEnabled)
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.02),
+                  blurRadius: 4,
+                  offset: const Offset(0, 2),
+                ),
             ],
           ),
           child: InkWell(
             borderRadius: BorderRadius.circular(999),
             onTap: onTap,
-            child: Icon(icon, color: forest.withValues(alpha: 0.4), size: 24),
+            child: Icon(icon, color: currentColor, size: 24),
           ),
         ),
         const SizedBox(height: 8),
         Text(
-          '"$label"'.toUpperCase(),
+          label.toUpperCase(),
           style: TextStyle(
             fontSize: 9,
             fontWeight: FontWeight.bold,
-            color: forest.withValues(alpha: 0.3),
+            color: currentColor,
             letterSpacing: 1.5,
           ),
         ),
@@ -664,7 +799,17 @@ class _PreparationPageState extends State<PreparationPage> {
     );
   }
 
-  Widget _buildRecordBtn(String label) {
+  Widget _buildRecordBtn(
+    String label, {
+    bool enabled = true,
+    bool activeState = false,
+  }) {
+    // tanto los iconos como los textos deben estar en color verde oscuro (cuando activo)
+    // tanto los iconos como los textos deben estar en color verde gris (cuando desactivo)
+    final Color currentColor = activeState
+        ? AppTheme.forest
+        : AppTheme.textMuted;
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -672,37 +817,164 @@ class _PreparationPageState extends State<PreparationPage> {
           width: 80,
           height: 80,
           decoration: BoxDecoration(
-            color: forest,
+            color: AppTheme.surfaceColor,
             shape: BoxShape.circle,
+            border: Border.all(
+              color: enabled
+                  ? Colors.black.withValues(alpha: 0.1)
+                  : Colors.black.withValues(alpha: 0.05),
+            ),
             boxShadow: [
-              BoxShadow(
-                color: forest.withValues(alpha: 0.2),
-                blurRadius: 24,
-                offset: const Offset(0, 12),
-              ),
+              if (enabled)
+                BoxShadow(
+                  color: AppTheme.forest.withValues(alpha: 0.1),
+                  blurRadius: 24,
+                  offset: const Offset(0, 8),
+                ),
             ],
           ),
           child: InkWell(
             borderRadius: BorderRadius.circular(999),
-            onTap: _navigateToRecording,
-            child: const Icon(
+            onTap: enabled ? _navigateToRecording : null,
+            child: Icon(
               Icons.fiber_manual_record,
-              color: surfaceLight,
-              size: 32,
+              color: currentColor,
+              size: 40,
             ),
           ),
         ),
         const SizedBox(height: 8),
         Text(
-          '"$label"'.toUpperCase(),
-          style: const TextStyle(
+          label.toUpperCase(),
+          style: TextStyle(
             fontSize: 9,
             fontWeight: FontWeight.bold,
-            color: forest,
+            color: currentColor,
             letterSpacing: 1.5,
           ),
         ),
       ],
+    );
+  }
+}
+
+class _SoundWaveAnimation extends StatefulWidget {
+  final Color color;
+  final bool isPaused;
+  const _SoundWaveAnimation({required this.color, this.isPaused = false});
+
+  @override
+  State<_SoundWaveAnimation> createState() => _SoundWaveAnimationState();
+}
+
+class _SoundWaveAnimationState extends State<_SoundWaveAnimation>
+    with TickerProviderStateMixin {
+  late List<AnimationController> _controllers;
+  late List<Animation<double>> _animations;
+  final int _barCount = 15;
+
+  @override
+  void initState() {
+    super.initState();
+    _controllers = List.generate(_barCount, (index) {
+      // Calculamos una duración más corta para dar más velocidad
+      final int offset = (index - _barCount ~/ 2).abs();
+      return AnimationController(
+        duration: Duration(milliseconds: 300 + (offset * 50)),
+        vsync: this,
+      );
+    });
+
+    _animations = _controllers.asMap().entries.map((entry) {
+      final index = entry.key;
+      final controller = entry.value;
+
+      // Las barras del centro tienen más rango de movimiento
+      final centerFactor =
+          1.0 - ((index - _barCount ~/ 2).abs() / (_barCount / 1.5));
+      final double beginValue = 0.1;
+      final double endValue = (0.3 + (0.7 * centerFactor)).clamp(0.2, 1.0);
+
+      return Tween<double>(begin: beginValue, end: endValue).animate(
+        CurvedAnimation(parent: controller, curve: Curves.easeInOutSine),
+      );
+    }).toList();
+
+    _startAnimations();
+  }
+
+  void _startAnimations() {
+    for (int i = 0; i < _controllers.length; i++) {
+      Future.delayed(Duration(milliseconds: i * 20), () {
+        if (mounted && !widget.isPaused) {
+          _controllers[i].repeat(reverse: true);
+        }
+      });
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant _SoundWaveAnimation oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isPaused != oldWidget.isPaused) {
+      if (widget.isPaused) {
+        for (var c in _controllers) {
+          c.stop();
+        }
+      } else {
+        for (var c in _controllers) {
+          c.repeat(reverse: true);
+        }
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    for (var c in _controllers) {
+      c.dispose();
+    }
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      height: 80,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: List.generate(_barCount, (index) {
+          return AnimatedBuilder(
+            animation: _animations[index],
+            builder: (context, child) {
+              final double value = _animations[index].value;
+              final double height = 8 + (60 * value);
+              final double opacity = (0.1 + (0.4 * value)).clamp(0.1, 0.5);
+
+              return Container(
+                margin: const EdgeInsets.symmetric(horizontal: 1.5),
+                width: 3.5,
+                height: height,
+                decoration: BoxDecoration(
+                  color: widget.color.withValues(alpha: opacity),
+                  borderRadius: BorderRadius.circular(99),
+                  boxShadow: [
+                    if (!widget.isPaused)
+                      BoxShadow(
+                        color: widget.color.withValues(alpha: 0.05),
+                        blurRadius: 10,
+                        spreadRadius: -2,
+                      ),
+                  ],
+                ),
+              );
+            },
+          );
+        }),
+      ),
     );
   }
 }

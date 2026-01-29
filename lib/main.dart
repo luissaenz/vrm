@@ -4,12 +4,20 @@ import 'package:vrm_app/l10n/app_localizations.dart';
 import 'package:vrm_app/core/theme.dart';
 import 'package:vrm_app/features/dashboard/dashboard_page.dart';
 
-void main() {
-  runApp(const VRMApp());
+import 'package:vrm_app/features/onboarding/pages/onboarding_flow.dart';
+import 'package:vrm_app/features/onboarding/data/onboarding_repository.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final repository = OnboardingRepository();
+  final profile = await repository.getUserProfile();
+
+  runApp(VRMApp(startWithOnboarding: !profile.onboardingCompleted));
 }
 
 class VRMApp extends StatelessWidget {
-  const VRMApp({super.key});
+  final bool startWithOnboarding;
+  const VRMApp({super.key, required this.startWithOnboarding});
 
   @override
   Widget build(BuildContext context) {
@@ -23,9 +31,14 @@ class VRMApp extends StatelessWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      locale: const Locale('en'),
       supportedLocales: const [Locale('en'), Locale('es')],
-      home: const DashboardPage(),
+      routes: {
+        '/onboarding': (context) => const OnboardingFlow(),
+        '/dashboard': (context) => const DashboardPage(),
+      },
+      home: startWithOnboarding
+          ? const OnboardingFlow()
+          : const DashboardPage(),
     );
   }
 }

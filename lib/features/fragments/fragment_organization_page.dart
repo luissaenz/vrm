@@ -3,6 +3,7 @@ import '../../shared/widgets/header.dart';
 import '../../shared/widgets/step_indicator.dart';
 import '../preparation/preparation_page.dart';
 import '../../l10n/app_localizations.dart';
+import '../../core/theme.dart';
 
 class Fragment {
   final String id;
@@ -76,7 +77,7 @@ class _FragmentOrganizationPageState extends State<FragmentOrganizationPage> {
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB),
+      backgroundColor: AppTheme.backgroundLight,
       body: SafeArea(
         child: Column(
           children: [
@@ -87,7 +88,7 @@ class _FragmentOrganizationPageState extends State<FragmentOrganizationPage> {
             ),
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
+                padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -123,8 +124,17 @@ class _FragmentOrganizationPageState extends State<FragmentOrganizationPage> {
         ),
       ),
       bottomSheet: Container(
-        padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-        color: const Color(0xFFF9FAFB),
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 40),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.bottomCenter,
+            end: Alignment.topCenter,
+            colors: [
+              AppTheme.backgroundLight,
+              AppTheme.backgroundLight.withValues(alpha: 0.0),
+            ],
+          ),
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -138,13 +148,14 @@ class _FragmentOrganizationPageState extends State<FragmentOrganizationPage> {
                 );
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF2A4844),
+                backgroundColor: AppTheme.forestDark,
                 foregroundColor: Colors.white,
-                minimumSize: const Size(double.infinity, 64),
+                minimumSize: const Size(double.infinity, 56),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(16),
                 ),
-                elevation: 0,
+                elevation: 8,
+                shadowColor: AppTheme.forest.withValues(alpha: 0.3),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -209,14 +220,14 @@ class _FragmentOrganizationPageState extends State<FragmentOrganizationPage> {
       padding: const EdgeInsets.only(bottom: 16),
       child: Row(
         children: [
-          Icon(icon, size: 18, color: const Color(0xFF111827)),
+          Icon(icon, size: 18, color: AppTheme.textMain),
           const SizedBox(width: 12),
           Text(
             title,
             style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF111827),
+              color: AppTheme.textMain,
               letterSpacing: -0.2,
             ),
           ),
@@ -232,7 +243,7 @@ class _FragmentOrganizationPageState extends State<FragmentOrganizationPage> {
               style: const TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF111827),
+                color: AppTheme.textMain,
               ),
             ),
           ),
@@ -279,7 +290,7 @@ class _FragmentOrganizationPageState extends State<FragmentOrganizationPage> {
                 style: const TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF374151),
+                  color: AppTheme.textMuted,
                 ),
               ),
             ),
@@ -294,7 +305,7 @@ class _FragmentOrganizationPageState extends State<FragmentOrganizationPage> {
                   style: const TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF111827),
+                    color: AppTheme.textMain,
                   ),
                 ),
                 const SizedBox(height: 6),
@@ -302,7 +313,7 @@ class _FragmentOrganizationPageState extends State<FragmentOrganizationPage> {
                   '"$content"',
                   style: const TextStyle(
                     fontSize: 14,
-                    color: Color(0xFF4B5563),
+                    color: AppTheme.textMuted,
                     height: 1.5,
                     fontStyle: FontStyle.italic,
                   ),
@@ -315,7 +326,7 @@ class _FragmentOrganizationPageState extends State<FragmentOrganizationPage> {
             index: index,
             child: const Icon(
               Icons.grid_view_rounded,
-              color: Color(0xFFD1D5DB),
+              color: AppTheme.border,
               size: 20,
             ),
           ),

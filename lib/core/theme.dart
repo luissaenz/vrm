@@ -32,6 +32,7 @@ class AppTheme {
         surface: surface,
       ),
       textTheme: const TextTheme(
+        // Display styles
         displayLarge: TextStyle(
           fontSize: 24,
           fontWeight: FontWeight.w800,
@@ -39,22 +40,66 @@ class AppTheme {
           letterSpacing: -0.5,
           inherit: true,
         ),
+        displayMedium: TextStyle(
+          fontSize: 32,
+          fontWeight: FontWeight.w800,
+          color: textMain,
+          letterSpacing: -1.0,
+          inherit: true,
+        ),
+        // Headline styles
+        headlineLarge: TextStyle(
+          fontSize: 24,
+          fontWeight: FontWeight.w800,
+          color: textMain,
+          letterSpacing: -0.5,
+          inherit: true,
+        ),
         headlineMedium: TextStyle(
-          fontSize: 14,
+          fontSize: 18,
           fontWeight: FontWeight.bold,
           color: textMain,
           inherit: true,
         ),
+        // Body styles
+        bodyLarge: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+          color: textMain,
+          inherit: true,
+        ),
         bodyMedium: TextStyle(
-          fontSize: 12, // Refinado
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
           color: textMuted,
           inherit: true,
         ),
-        labelSmall: TextStyle(
-          fontSize: 8.5,
+        bodySmall: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+          color: textMuted,
+          inherit: true,
+        ),
+        // Label styles
+        labelLarge: TextStyle(
+          fontSize: 11,
           fontWeight: FontWeight.bold,
           color: textMuted,
           letterSpacing: 0.5,
+          inherit: true,
+        ),
+        labelMedium: TextStyle(
+          fontSize: 10,
+          fontWeight: FontWeight.bold,
+          color: textMuted,
+          letterSpacing: 1.2,
+          inherit: true,
+        ),
+        labelSmall: TextStyle(
+          fontSize: 9,
+          fontWeight: FontWeight.bold,
+          color: textMuted,
+          letterSpacing: 1.0,
           inherit: true,
         ),
       ),

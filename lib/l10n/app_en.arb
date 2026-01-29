@@ -1,11 +1,24 @@
 {
   "@@locale": "en",
   "appTitle": "VRM App",
+  "@appTitle": {
+    "description": "The title of the application"
+  },
   "goodMorning": "GOOD MORNING,",
+  "@goodMorning": {
+    "description": "Standard morning greeting"
+  },
   "creator": "Alex Rivera",
+  "@creator": {
+    "description": "The name of the app creator"
+  },
   "streak": "Streak",
+  "@streak": {
+    "description": "Label for the user's daily activity streak"
+  },
   "days": "{count} Days",
   "@days": {
+    "description": "A count of days for the streak",
     "placeholders": {
       "count": {
         "type": "String"
@@ -13,29 +26,96 @@
     }
   },
   "clips": "Clips",
+  "@clips": {
+    "description": "Label for video clips section"
+  },
   "newProject": "New Project",
+  "@newProject": {
+    "description": "Button text to start a new project"
+  },
   "voiceControlActive": "Voice control active",
+  "@voiceControlActive": {
+    "description": "Status message when voice control is active"
+  },
   "recentProjects": "Recent Projects",
+  "@recentProjects": {
+    "description": "Title for the recent projects list"
+  },
   "viewAll": "View all",
+  "@viewAll": {
+    "description": "Link to view all projects"
+  },
   "readyToCreate": "Ready to create?",
+  "@readyToCreate": {
+    "description": "Call to action headline"
+  },
   "captureIdeas": "Capture your ideas, one fragment at a time.",
+  "@captureIdeas": {
+    "description": "Subheadline for project creation"
+  },
   "streakLabel": "RECORDING\nSTREAK",
+  "@streakLabel": {
+    "description": "Label for the recording streak widget"
+  },
   "fragments": "FRAGMENTS",
+  "@fragments": {
+    "description": "Label for the fragments count"
+  },
   "calendar": "Calendar",
+  "@calendar": {
+    "description": "Label for the calendar section"
+  },
   "panel": "PANEL",
+  "@panel": {
+    "description": "Label for the control panel"
+  },
   "videos": "VIDEOS",
+  "@videos": {
+    "description": "Label for the videos section"
+  },
   "script": "SCRIPT",
+  "@script": {
+    "description": "Label for the script section"
+  },
   "profile": "PROFILE",
+  "@profile": {
+    "description": "Label for the user profile section"
+  },
   "draft": "DRAFT",
+  "@draft": {
+    "description": "Status label for draft projects"
+  },
   "ready": "READY",
+  "@ready": {
+    "description": "Status label for ready projects"
+  },
   "wed": "WED",
+  "@wed": {
+    "description": "Abbreviation for Wednesday"
+  },
   "thu": "THU",
+  "@thu": {
+    "description": "Abbreviation for Thursday"
+  },
   "fri": "FRI",
+  "@fri": {
+    "description": "Abbreviation for Friday"
+  },
   "sat": "SAT",
+  "@sat": {
+    "description": "Abbreviation for Saturday"
+  },
   "progressLabel": "PROGRESS",
+  "@progressLabel": {
+    "description": "Label for the project progress bar"
+  },
   "editedYesterday": "Edited yesterday",
+  "@editedYesterday": {
+    "description": "Time reference for a project edited on the previous day"
+  },
   "editedHoursAgo": "Edited {count} hours ago",
   "@editedHoursAgo": {
+    "description": "Time reference for a project edited a few hours ago",
     "placeholders": {
       "count": {
         "type": "String"
@@ -44,6 +124,7 @@
   },
   "fragmentCount": "{current}/{total} Fragments",
   "@fragmentCount": {
+    "description": "A count of fragments in a project",
     "placeholders": {
       "current": {
         "type": "String"
@@ -54,9 +135,16 @@
     }
   },
   "newProjectTitle": "New Project",
+  "@newProjectTitle": {
+    "description": "Title for the new project creation screen"
+  },
   "step1Title": "STEP 1: WRITE OR PASTE YOUR SCRIPT",
+  "@step1Title": {
+    "description": "Title for the first step of onboarding"
+  },
   "charactersCount": "{count} characters",
   "@charactersCount": {
+    "description": "A count of characters in a text field",
     "placeholders": {
       "count": {
         "type": "String"
@@ -65,6 +153,7 @@
   },
   "secondsAbbreviation": "{seconds}s",
   "@secondsAbbreviation": {
+    "description": "Abbreviation for seconds",
     "placeholders": {
       "seconds": {
         "type": "String"
@@ -73,6 +162,7 @@
   },
   "totalTimeEstimate": "approximate duration {seconds}",
   "@totalTimeEstimate": {
+    "description": "Estimated time duration",
     "placeholders": {
       "seconds": {
         "type": "String"
@@ -80,10 +170,20 @@
     }
   },
   "assistant": "ASSISTANT",
+  "@assistant": {
+    "description": "Label for the assistant section"
+  },
   "optimize": "OPTIMIZE WITH AI",
+  "@optimize": {
+    "description": "Button label to optimize script using AI"
+  },
   "fragmentPreview": "FRAGMENT PREVIEW",
+  "@fragmentPreview": {
+    "description": "Header for the fragment preview section"
+  },
   "blocksCount": "{count} BLOCKS",
   "@blocksCount": {
+    "description": "A count of text blocks",
     "placeholders": {
       "count": {
         "type": "int"
@@ -91,36 +191,338 @@
     }
   },
   "splitIntoFragments": "Split into Fragments",
+  "@splitIntoFragments": {
+    "description": "Action to split a script into multiple fragments"
+  },
   "paste": "Paste",
+  "@paste": {
+    "description": "Action to paste text from clipboard"
+  },
   "segment": "SEGMENT",
+  "@segment": {
+    "description": "Action to segment a fragment"
+  },
   "scriptAssistantTitle": "Script Assistant",
+  "@scriptAssistantTitle": {
+    "description": "Title for the script writing assistant"
+  },
   "defineIdea": "Define your Idea",
+  "@defineIdea": {
+    "description": "Headline for defining the video core idea"
+  },
   "iaHelperText": "AI will help you structure the perfect content.",
+  "@iaHelperText": {
+    "description": "Instructional text about AI assistance"
+  },
   "videoIdeaLabel": "VIDEO IDEA",
+  "@videoIdeaLabel": {
+    "description": "Label for the video idea input field"
+  },
   "videoIdeaPlaceholder": "Ej: A video about how to organize your desk to be more productive in 5 steps...",
+  "@videoIdeaPlaceholder": {
+    "description": "Placeholder example for the video idea field"
+  },
   "suggestedStructures": "Suggested Structures",
+  "@suggestedStructures": {
+    "description": "Header for suggested script structures"
+  },
   "premiumAi": "PREMIUM AI",
+  "@premiumAi": {
+    "description": "Label for premium AI features"
+  },
   "hookTitle": "Introduction / Hook",
+  "@hookTitle": {
+    "description": "Title for the script hook section"
+  },
   "hookDesc": "Hook your audience in the first 3 seconds with a common problem.",
+  "@hookDesc": {
+    "description": "Description of the hook purpose"
+  },
   "valueTitle": "Value Development",
+  "@valueTitle": {
+    "description": "Title for the value development section"
+  },
   "valueDesc": "Divide your explanation into 3 actionable and easy-to-follow key points.",
+  "@valueDesc": {
+    "description": "Description of the value development purpose"
+  },
   "ctaTitle": "Close (CTA)",
+  "@ctaTitle": {
+    "description": "Title for the call to action section"
+  },
   "ctaDesc": "Ask your followers to like and share the content.",
+  "@ctaDesc": {
+    "description": "Description of the CTA purpose"
+  },
   "generateFullScript": "Generate Full Script",
+  "@generateFullScript": {
+    "description": "Action button to generate the complete script"
+  },
   "poweredByAi": "POWERED BY LATEST GENERATION AI",
+  "@poweredByAi": {
+    "description": "Subtext indicating AI-powered generation"
+  },
   "step2Title": "STEP 2: VALIDATE THE FRAGMENTS",
+  "@step2Title": {
+    "description": "Title for the second step of onboarding"
+  },
   "next": "NEXT",
+  "@next": {
+    "description": "Standard label for moving to the next step"
+  },
   "reRecord": "RE-RECORD",
+  "@reRecord": {
+    "description": "Action button to restart recording"
+  },
   "preparation": "PREPARATION",
+  "@preparation": {
+    "description": "Header for the preparation screen"
+  },
   "listening": "LISTENING...",
+  "@listening": {
+    "description": "Status message while waiting for voice input"
+  },
   "systemReads": "THE SYSTEM READS THE SCRIPT:",
+  "@systemReads": {
+    "description": "Status text while the AI is reading"
+  },
   "getReady": "GET READY",
+  "@getReady": {
+    "description": "Status text before recording starts"
+  },
   "repeat": "REPEAT",
+  "@repeat": {
+    "description": "Action button to play audio again"
+  },
   "record": "RECORD",
+  "@record": {
+    "description": "Action button to start recording"
+  },
   "waiting": "WAITING...",
+  "@waiting": {
+    "description": "General status for waiting state"
+  },
   "voiceControlDisabled": "Voice control disabled",
+  "@voiceControlDisabled": {
+    "description": "Status when the voice system is off"
+  },
   "recordingStatus": "RECORDING",
+  "@recordingStatus": {
+    "description": "Status text during active recording"
+  },
   "listeningToAdvance": "Listening for voice to advance...",
+  "@listeningToAdvance": {
+    "description": "Status while waiting for voice command to advance"
+  },
   "gridLabel": "GRID",
-  "ghostLabel": "GHOST"
+  "@gridLabel": {
+    "description": "Label for the layout grid"
+  },
+  "ghostLabel": "GHOST",
+  "@ghostLabel": {
+    "description": "Label for the ghost frame overlay"
+  },
+  "welcomeTitle": "WELCOME",
+  "@welcomeTitle": {
+    "description": "Header for the welcome Step"
+  },
+  "welcomeHeadline": "What is your biggest obstacle today?",
+  "@welcomeHeadline": {
+    "description": "Main question in the welcome step"
+  },
+  "welcomeCta": "START",
+  "@welcomeCta": {
+    "description": "Button to start the onboarding flow"
+  },
+  "identityHeadline": "Choose your Identity",
+  "@identityHeadline": {
+    "description": "Title for the identity selection step"
+  },
+  "identitySubheadline": "Touch the mirror that best reflects your purpose today",
+  "@identitySubheadline": {
+    "description": "Instruction for identity selection"
+  },
+  "identityConfirm": "CONFIRM IDENTITY",
+  "@identityConfirm": {
+    "description": "Confirmation button for identity selection"
+  },
+  "configTitle": "Custom Configuration",
+  "@configTitle": {
+    "description": "Header for the personalized config step"
+  },
+  "configGreetingLeader": "\"Welcome. I have configured the app in Efficiency Mode. Your scripts will be concise and the AI will automatically remove your silences.\"",
+  "@configGreetingLeader": {
+    "description": "Personalized coaching message for Leader profile"
+  },
+  "configGreetingInfluencer": "\"Hi! I have activated Flow Mode. The app will notify you if your smile or eye contact drops. Let's make them fall in love with your content.\"",
+  "@configGreetingInfluencer": {
+    "description": "Personalized coaching message for Influencer profile"
+  },
+  "configGreetingSeller": "\"Ready. I have loaded Elevator Pitch templates and proven sales scripts. Your goal is clarity.\"",
+  "@configGreetingSeller": {
+    "description": "Personalized coaching message for Seller profile"
+  },
+  "configGreetingDefault": "\"We are ready to start.\"",
+  "@configGreetingDefault": {
+    "description": "Default personalized coaching message"
+  },
+  "configSummaryLabel": "CONFIGURATION SUMMARY",
+  "@configSummaryLabel": {
+    "description": "Label for the configuration summary section"
+  },
+  "configTeleprompterLabel": "Suggested speed for your profile",
+  "@configTeleprompterLabel": {
+    "description": "Label for the teleprompter speed indicator"
+  },
+  "configCta": "CREATE MY FIRST VIDEO",
+  "@configCta": {
+    "description": "Button to finish onboarding and move to dashboard"
+  },
+  "configFooterLabel": "PRESS TO START YOUR EXPERIENCE",
+  "@configFooterLabel": {
+    "description": "Final instructional hint at onboarding end"
+  },
+  "profileLeaderTitle": "Leader",
+  "@profileLeaderTitle": {
+    "description": "Title label for Leader profile"
+  },
+  "profileLeaderTag": "EFFICIENCY",
+  "@profileLeaderTag": {
+    "description": "Taglabel for Leader profile"
+  },
+  "profileLeaderQuote": "\"I have little time\"",
+  "@profileLeaderQuote": {
+    "description": "Representative quote for Leader profile"
+  },
+  "profileInfluencerTitle": "Influencer",
+  "@profileInfluencerTitle": {
+    "description": "Title label for Influencer profile"
+  },
+  "profileInfluencerTag": "ENERGY",
+  "@profileInfluencerTag": {
+    "description": "Taglabel for Influencer profile"
+  },
+  "profileInfluencerQuote": "\"I want to connect\"",
+  "@profileInfluencerQuote": {
+    "description": "Representative quote for Influencer profile"
+  },
+  "profileSellerTitle": "Seller",
+  "@profileSellerTitle": {
+    "description": "Title label for Seller profile"
+  },
+  "profileSellerTag": "CONFIDENCE",
+  "@profileSellerTag": {
+    "description": "Taglabel for Seller profile"
+  },
+  "profileSellerQuote": "\"I need to sell\"",
+  "@profileSellerQuote": {
+    "description": "Representative quote for Seller profile"
+  },
+  "configSolutionLeaderTitle": "Take 1 Minute",
+  "@configSolutionLeaderTitle": {
+    "description": "Solution title for Leader profile"
+  },
+  "configSolutionLeaderSubtitle": "Fast and perfect recordings",
+  "@configSolutionLeaderSubtitle": {
+    "description": "Solution description for Leader profile"
+  },
+  "configSolutionInfluencerTitle": "Find your Voice",
+  "@configSolutionInfluencerTitle": {
+    "description": "Solution title for Influencer profile"
+  },
+  "configSolutionInfluencerSubtitle": "Create a community that loves you",
+  "@configSolutionInfluencerSubtitle": {
+    "description": "Solution description for Influencer profile"
+  },
+  "configSolutionSellerTitle": "Absolute Clarity",
+  "@configSolutionSellerTitle": {
+    "description": "Solution title for Seller profile"
+  },
+  "configSolutionSellerSubtitle": "Convert viewers into customers",
+  "@configSolutionSellerSubtitle": {
+    "description": "Solution description for Seller profile"
+  },
+  "configSolutionDefaultTitle": "Optimized Solution",
+  "@configSolutionDefaultTitle": {
+    "description": "Default solution title"
+  },
+  "configSolutionDefaultSubtitle": "Custom configuration",
+  "@configSolutionDefaultSubtitle": {
+    "description": "Default solution description"
+  },
+  "configPremiumLeaderTitle": "\"Magic Edit\" Mode",
+  "@configPremiumLeaderTitle": {
+    "description": "Premium feature title for Leader profile"
+  },
+  "configPremiumLeaderSubtitle": "Video ready in 30 seconds",
+  "@configPremiumLeaderSubtitle": {
+    "description": "Premium feature description for Leader profile"
+  },
+  "configPremiumInfluencerTitle": "\"Charisma\" Filters",
+  "@configPremiumInfluencerTitle": {
+    "description": "Premium feature title for Influencer profile"
+  },
+  "configPremiumInfluencerSubtitle": "Emotional tone analysis",
+  "@configPremiumInfluencerSubtitle": {
+    "description": "Premium feature description for Influencer profile"
+  },
+  "configPremiumSellerTitle": "Sales Teleprompter",
+  "@configPremiumSellerTitle": {
+    "description": "Premium feature title for Seller profile"
+  },
+  "configPremiumSellerSubtitle": "Premium scripts included",
+  "@configPremiumSellerSubtitle": {
+    "description": "Premium feature description for Seller profile"
+  },
+  "configPremiumDefaultTitle": "Premium Features",
+  "@configPremiumDefaultTitle": {
+    "description": "Default premium feature title"
+  },
+  "configPremiumDefaultSubtitle": "Unlock all potential",
+  "@configPremiumDefaultSubtitle": {
+    "description": "Default premium feature description"
+  },
+  "profileTeleprompterLeader": "Fast Teleprompter ({ppm} ppm)",
+  "@profileTeleprompterLeader": {
+    "description": "Personalized teleprompter speed message for Leader profile",
+    "placeholders": {
+      "ppm": {
+        "type": "String"
+      }
+    }
+  },
+  "profileTeleprompterInfluencer": "Dynamic Teleprompter ({ppm} ppm)",
+  "@profileTeleprompterInfluencer": {
+    "description": "Personalized teleprompter speed message for Influencer profile",
+    "placeholders": {
+      "ppm": {
+        "type": "String"
+      }
+    }
+  },
+  "profileTeleprompterSeller": "Persuasive Teleprompter ({ppm} ppm)",
+  "@profileTeleprompterSeller": {
+    "description": "Personalized teleprompter speed message for Seller profile",
+    "placeholders": {
+      "ppm": {
+        "type": "String"
+      }
+    }
+  },
+  "welcomeCoachImage": "https://lh3.googleusercontent.com/aida-public/AB6AXuDtnj9X_8A4fpoltWeeCfJjOfdRir4lvqGiqtmMoT9Hvmws0Aq5DKAZCFTa9kXP_wgcDvg8PTDqEzCFC3zFii1Veuisu0XyAs9IOo0zP1n_QGqG1XnhUWb56CkgWZFSuxlcpsJtwkYwOP5ge53hCLRFqDiuBvmfFjY0vE1fNtLvZx3ZRMPsDPqcISCDlgnLfuVNNvfOC-Xo2Avc5bsJ4x6WTihF_dDNwh_ZMzgcGLr31IjmjExdO2MegRAE0LM3QxLehYpyI7bLo8dl",
+  "@welcomeCoachImage": {
+    "description": "URL for the coach welcome image"
+  },
+  "profileLeaderImage": "https://lh3.googleusercontent.com/aida-public/AB6AXuDltdys4WmVAYJMx1yHytZ1C5eyo0IFjnSwVJZQAopilqYRRA7J0sq6VPKc5ajlEw14Dl9u0CgV3E1T945vv1QUDH-yN4FlZYGCrYW4WTMZkaiIUMp0P6ODrZlvqSgzI9imOXkmX6mSitw2NYI3FNcxu4ca0GBjpvyf9Tj-p5le0HI16babzlUL4c7c4dSjzfYLw3jd3kaiuTEj3ICZCQkCg7_7oylDhuvGEMGP5PunMcKL3ivc8sVogphwH9Rktj1BhjqKQxaPOCvz",
+  "@profileLeaderImage": {
+    "description": "URL for the Leader profile image"
+  },
+  "profileInfluencerImage": "https://lh3.googleusercontent.com/aida-public/AB6AXuDvfHM-MBerpZJQCw1G3xkyUzZFtWHm1-mXt_BzAN78Zz5-iUC5HLbaQ6Hsf0u8oYKDUVO__A18MIz3ySJH3ssZ1G17Z5raOAK1hVKQNdfj8_ei7kjmmWZ_lDM2t3nzH5wHp8JrcbyyoH_1IGK7erPct4eaNzbgBsqenPoZe2CZi63PE8ftlb6WRkOIA8OKzqKwVeUwL-S_7Rl7pV0666CS5a1g1zTZAWo6DpQ6i06jyEngNHa-BVG39DOOc1Eq6XNMsziDBwVAn3qZ",
+  "@profileInfluencerImage": {
+    "description": "URL for the Influencer profile image"
+  },
+  "profileSellerImage": "https://lh3.googleusercontent.com/aida-public/AB6AXuAbHlQa2OUJlKn6gBpuhTPrs-Q0_qAIgIDsINsGm2LfDF76YoL3utRhVCQZBt6pFvVeMUMvQuAg_7-LwLeCMFJnJQ4l18fMu-jUX1w15MZt7mxklAwpcg1L6vUWXRZn2xc81UNL7g2IqMrNhBTCXDe9Y18yO1iYbt8tc8jU4KDoFeLKt5_qsgWKoGerm2puw0hCjNqb0TfvxixhDpay7OjTLm-u4IRnf_IbJ-Ezo-hvh5e4YPu2lHJS9o03e05lK4IxuPyCXfoCCU4d",
+  "@profileSellerImage": {
+    "description": "URL for the Seller profile image"
+  }
 }

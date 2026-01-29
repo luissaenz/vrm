@@ -16,11 +16,7 @@ class AssistantPage extends StatefulWidget {
 class _AssistantPageState extends State<AssistantPage> {
   final TextEditingController _ideaController = TextEditingController();
 
-  // Local style tokens from HTML
-  static const Color primaryNeon = Color(0xFF52D411);
-  static const Color forestDark = Color(0xFF162210);
-  static const Color earthGreen = Color(0xFF6F8961);
-  static const Color backgroundLite = Color(0xFFFBFCFB);
+  // Using AppTheme colors for consistency
 
   @override
   void initState() {
@@ -39,7 +35,7 @@ class _AssistantPageState extends State<AssistantPage> {
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      backgroundColor: backgroundLite,
+      backgroundColor: AppTheme.backgroundLight,
       body: SafeArea(
         child: Column(
           children: [
@@ -63,7 +59,7 @@ class _AssistantPageState extends State<AssistantPage> {
                       style: const TextStyle(
                         fontSize: 32,
                         fontWeight: FontWeight.bold,
-                        color: forestDark,
+                        color: AppTheme.forestDark,
                         letterSpacing: -0.5,
                       ),
                     ),
@@ -74,7 +70,7 @@ class _AssistantPageState extends State<AssistantPage> {
                       l10n.iaHelperText,
                       style: const TextStyle(
                         fontSize: 13,
-                        color: earthGreen,
+                        color: AppTheme.earth,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -116,7 +112,10 @@ class _AssistantPageState extends State<AssistantPage> {
           gradient: LinearGradient(
             begin: Alignment.bottomCenter,
             end: Alignment.topCenter,
-            colors: [backgroundLite, backgroundLite.withValues(alpha: 0.0)],
+            colors: [
+              AppTheme.backgroundLight,
+              AppTheme.backgroundLight.withValues(alpha: 0.0),
+            ],
           ),
         ),
         child: ElevatedButton(
@@ -124,14 +123,14 @@ class _AssistantPageState extends State<AssistantPage> {
               ? null
               : () => Navigator.pop(context),
           style: ElevatedButton.styleFrom(
-            backgroundColor: AppTheme.forest,
+            backgroundColor: AppTheme.forestDark,
             foregroundColor: Colors.white,
-            minimumSize: const Size(double.infinity, 60),
+            minimumSize: const Size(double.infinity, 56),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),
-            elevation: 4,
-            shadowColor: AppTheme.forest.withValues(alpha: 0.2),
+            elevation: 8,
+            shadowColor: AppTheme.forest.withValues(alpha: 0.3),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -164,8 +163,8 @@ class _AssistantPageState extends State<AssistantPage> {
             style: const TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.bold,
-              color: earthGreen,
-              letterSpacing: 1.5,
+              color: AppTheme.earth,
+              letterSpacing: 0.5,
             ),
           ),
         ),
@@ -210,13 +209,13 @@ class _AssistantPageState extends State<AssistantPage> {
           style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: forestDark,
+            color: AppTheme.forestDark,
           ),
         ),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
           decoration: BoxDecoration(
-            color: primaryNeon.withValues(alpha: 0.1),
+            color: AppTheme.forestVibrant.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(99),
           ),
           child: Text(
@@ -224,7 +223,7 @@ class _AssistantPageState extends State<AssistantPage> {
             style: const TextStyle(
               fontSize: 10,
               fontWeight: FontWeight.bold,
-              color: primaryNeon,
+              color: AppTheme.forestVibrant,
               letterSpacing: -0.5,
             ),
           ),
@@ -245,7 +244,7 @@ class _AssistantPageState extends State<AssistantPage> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: earthGreen.withValues(alpha: 0.1)),
+        border: Border.all(color: AppTheme.earth.withValues(alpha: 0.1)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.04),
@@ -263,7 +262,7 @@ class _AssistantPageState extends State<AssistantPage> {
               children: [
                 Row(
                   children: [
-                    Icon(icon, size: 16, color: primaryNeon),
+                    Icon(icon, size: 16, color: AppTheme.forestVibrant),
                     const SizedBox(width: 8),
                     Flexible(
                       child: Text(
@@ -271,7 +270,7 @@ class _AssistantPageState extends State<AssistantPage> {
                         style: const TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.bold,
-                          color: forestDark,
+                          color: AppTheme.forestDark,
                         ),
                       ),
                     ),
@@ -282,7 +281,7 @@ class _AssistantPageState extends State<AssistantPage> {
                   description,
                   style: const TextStyle(
                     fontSize: 13,
-                    color: earthGreen,
+                    color: AppTheme.earth,
                     height: 1.4,
                     fontWeight: FontWeight.w400,
                   ),
@@ -295,9 +294,9 @@ class _AssistantPageState extends State<AssistantPage> {
             width: 96, // 24 * 4
             height: 64, // 16 * 4
             decoration: BoxDecoration(
-              color: backgroundLite,
+              color: AppTheme.backgroundLight,
               borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: earthGreen.withValues(alpha: 0.05)),
+              border: Border.all(color: AppTheme.earth.withValues(alpha: 0.05)),
               image: DecorationImage(
                 image: imageUrl.startsWith('http')
                     ? NetworkImage(imageUrl) as ImageProvider

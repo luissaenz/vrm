@@ -237,4 +237,160 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get ghostLabel => 'GHOST';
+
+  @override
+  String get welcomeTitle => 'WELCOME';
+
+  @override
+  String get welcomeHeadline => 'What is your biggest obstacle today?';
+
+  @override
+  String get welcomeCta => 'START';
+
+  @override
+  String get identityHeadline => 'Choose your Identity';
+
+  @override
+  String get identitySubheadline =>
+      'Touch the mirror that best reflects your purpose today';
+
+  @override
+  String get identityConfirm => 'CONFIRM IDENTITY';
+
+  @override
+  String get configTitle => 'Custom Configuration';
+
+  @override
+  String get configGreetingLeader =>
+      '\"Welcome. I have configured the app in Efficiency Mode. Your scripts will be concise and the AI will automatically remove your silences.\"';
+
+  @override
+  String get configGreetingInfluencer =>
+      '\"Hi! I have activated Flow Mode. The app will notify you if your smile or eye contact drops. Let\'s make them fall in love with your content.\"';
+
+  @override
+  String get configGreetingSeller =>
+      '\"Ready. I have loaded Elevator Pitch templates and proven sales scripts. Your goal is clarity.\"';
+
+  @override
+  String get configGreetingDefault => '\"We are ready to start.\"';
+
+  @override
+  String get configSummaryLabel => 'CONFIGURATION SUMMARY';
+
+  @override
+  String get configTeleprompterLabel => 'Suggested speed for your profile';
+
+  @override
+  String get configCta => 'CREATE MY FIRST VIDEO';
+
+  @override
+  String get configFooterLabel => 'PRESS TO START YOUR EXPERIENCE';
+
+  @override
+  String get profileLeaderTitle => 'Leader';
+
+  @override
+  String get profileLeaderTag => 'EFFICIENCY';
+
+  @override
+  String get profileLeaderQuote => '\"I have little time\"';
+
+  @override
+  String get profileInfluencerTitle => 'Influencer';
+
+  @override
+  String get profileInfluencerTag => 'ENERGY';
+
+  @override
+  String get profileInfluencerQuote => '\"I want to connect\"';
+
+  @override
+  String get profileSellerTitle => 'Seller';
+
+  @override
+  String get profileSellerTag => 'CONFIDENCE';
+
+  @override
+  String get profileSellerQuote => '\"I need to sell\"';
+
+  @override
+  String get configSolutionLeaderTitle => 'Take 1 Minute';
+
+  @override
+  String get configSolutionLeaderSubtitle => 'Fast and perfect recordings';
+
+  @override
+  String get configSolutionInfluencerTitle => 'Find your Voice';
+
+  @override
+  String get configSolutionInfluencerSubtitle =>
+      'Create a community that loves you';
+
+  @override
+  String get configSolutionSellerTitle => 'Absolute Clarity';
+
+  @override
+  String get configSolutionSellerSubtitle => 'Convert viewers into customers';
+
+  @override
+  String get configSolutionDefaultTitle => 'Optimized Solution';
+
+  @override
+  String get configSolutionDefaultSubtitle => 'Custom configuration';
+
+  @override
+  String get configPremiumLeaderTitle => '\"Magic Edit\" Mode';
+
+  @override
+  String get configPremiumLeaderSubtitle => 'Video ready in 30 seconds';
+
+  @override
+  String get configPremiumInfluencerTitle => '\"Charisma\" Filters';
+
+  @override
+  String get configPremiumInfluencerSubtitle => 'Emotional tone analysis';
+
+  @override
+  String get configPremiumSellerTitle => 'Sales Teleprompter';
+
+  @override
+  String get configPremiumSellerSubtitle => 'Premium scripts included';
+
+  @override
+  String get configPremiumDefaultTitle => 'Premium Features';
+
+  @override
+  String get configPremiumDefaultSubtitle => 'Unlock all potential';
+
+  @override
+  String profileTeleprompterLeader(String ppm) {
+    return 'Fast Teleprompter ($ppm ppm)';
+  }
+
+  @override
+  String profileTeleprompterInfluencer(String ppm) {
+    return 'Dynamic Teleprompter ($ppm ppm)';
+  }
+
+  @override
+  String profileTeleprompterSeller(String ppm) {
+    return 'Persuasive Teleprompter ($ppm ppm)';
+  }
+
+  @override
+  String get welcomeCoachImage =>
+      'https://lh3.googleusercontent.com/aida-public/AB6AXuDtnj9X_8A4fpoltWeeCfJjOfdRir4lvqGiqtmMoT9Hvmws0Aq5DKAZCFTa9kXP_wgcDvg8PTDqEzCFC3zFii1Veuisu0XyAs9IOo0zP1n_QGqG1XnhUWb56CkgWZFSuxlcpsJtwkYwOP5ge53hCLRFqDiuBvmfFjY0vE1fNtLvZx3ZRMPsDPqcISCDlgnLfuVNNvfOC-Xo2Avc5bsJ4x6WTihF_dDNwh_ZMzgcGLr31IjmjExdO2MegRAE0LM3QxLehYpyI7bLo8dl';
+
+  @override
+  String get profileLeaderImage =>
+      'https://lh3.googleusercontent.com/aida-public/AB6AXuDltdys4WmVAYJMx1yHytZ1C5eyo0IFjnSwVJZQAopilqYRRA7J0sq6VPKc5ajlEw14Dl9u0CgV3E1T945vv1QUDH-yN4FlZYGCrYW4WTMZkaiIUMp0P6ODrZlvqSgzI9imOXkmX6mSitw2NYI3FNcxu4ca0GBjpvyf9Tj-p5le0HI16babzlUL4c7c4dSjzfYLw3jd3kaiuTEj3ICZCQkCg7_7oylDhuvGEMGP5PunMcKL3ivc8sVogphwH9Rktj1BhjqKQxaPOCvz';
+
+  @override
+  String get profileInfluencerImage =>
+      'https://lh3.googleusercontent.com/aida-public/AB6AXuDvfHM-MBerpZJQCw1G3xkyUzZFtWHm1-mXt_BzAN78Zz5-iUC5HLbaQ6Hsf0u8oYKDUVO__A18MIz3ySJH3ssZ1G17Z5raOAK1hVKQNdfj8_ei7kjmmWZ_lDM2t3nzH5wHp8JrcbyyoH_1IGK7erPct4eaNzbgBsqenPoZe2CZi63PE8ftlb6WRkOIA8OKzqKwVeUwL-S_7Rl7pV0666CS5a1g1zTZAWo6DpQ6i06jyEngNHa-BVG39DOOc1Eq6XNMsziDBwVAn3qZ';
+
+  @override
+  String get profileSellerImage =>
+      'https://lh3.googleusercontent.com/aida-public/AB6AXuAbHlQa2OUJlKn6gBpuhTPrs-Q0_qAIgIDsINsGm2LfDF76YoL3utRhVCQZBt6pFvVeMUMvQuAg_7-LwLeCMFJnJQ4l18fMu-jUX1w15MZt7mxklAwpcg1L6vUWXRZn2xc81UNL7g2IqMrNhBTCXDe9Y18yO1iYbt8tc8jU4KDoFeLKt5_qsgWKoGerm2puw0hCjNqb0TfvxixhDpay7OjTLm-u4IRnf_IbJ-Ezo-hvh5e4YPu2lHJS9o03e05lK4IxuPyCXfoCCU4d';
 }
