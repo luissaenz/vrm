@@ -791,7 +791,7 @@ abstract class AppLocalizations {
   /// URL for the Leader profile image
   ///
   /// In en, this message translates to:
-  /// **'https://images.unsplash.com/photo-1519085185750-7697655d7e74?q=80&w=1000&auto=format&fit=crop'**
+  /// **'https://lh3.googleusercontent.com/aida-public/AB6AXuBaw-4btBBo8h8Eo_zdQlH4NB0-mfmLOvZBgRkZbeWySLCOZmlQPhwwpiZj9FnkAt0fPwEVLldrfe14cfiUOqLNRqtslNctV2P71HNv4Ywto6BKxgvVR_F6dhJK6SgO_Vl-JUeXPiuNXyMReFBwQ5jraxir0GslbZAvIWf2L18N28Uv4H1cE5531ATnModh2xsBVwzHxwuTv8gKh-tDhmDylWTS7TvIc7kdaw-2Y1Khuu0BVAzSRY56VbfrDY-EU8Eiif5qGpVnEHTG'**
   String get profileLeaderImage;
 
   /// URL for the Influencer profile image
