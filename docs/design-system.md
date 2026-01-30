@@ -209,9 +209,9 @@ ElevatedButton(
 
 **Características**:
 - Color: `AppTheme.forestDark`
-- Altura mínima: `56px`
-- Border radius: `16px`
-- Texto en mayúsculas, bold, letter-spacing `0.5`
+- Altura mínima: `56px` (full-width), `64px` (píldora/centrado)
+- Border radius: `16px` (full-width), `999px` (píldora/centrado)
+- Texto: `16px`, en mayúsculas, bold, letter-spacing `0.5`
 - Elevation: `8`
 - Shadow: `shadowColor: AppTheme.forest.withValues(alpha: 0.3)`.
 
@@ -484,7 +484,8 @@ ClipRect(
 
 | Componente | Valor |
 |------------|-------|
-| Botones principales | `16px` |
+| Botones principales full-width | `16px` |
+| Botones principales centrados | `999px` (píldora) |
 | Tarjetas | `20px` - `24px` |
 | Action Cards | `99px` (completamente redondeado) |
 | Badges y pills | `999px` (completamente redondeado) |

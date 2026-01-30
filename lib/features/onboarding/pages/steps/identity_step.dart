@@ -41,23 +41,18 @@ class _IdentityStepState extends State<IdentityStep> {
   @override
   Widget build(BuildContext context) {
     return SizedBox.expand(
-      child: Stack(
-        children: [
-          SafeArea(
-            child: Column(
-              children: [
-                const SizedBox(height: 64), // More space since header is gone
-                _buildHeadline(),
-                const Spacer(),
-                _buildCardsSection(),
-                const Spacer(),
-                _buildActionButtons(),
-                const SizedBox(height: 48),
-              ],
-            ),
-          ),
-          _buildNavigationIndicator(),
-        ],
+      child: SafeArea(
+        child: Column(
+          children: [
+            const SizedBox(height: 64), // More space since header is gone
+            _buildHeadline(),
+            const Spacer(),
+            _buildCardsSection(),
+            const Spacer(),
+            _buildActionButtons(),
+            const SizedBox(height: 48),
+          ],
+        ),
       ),
     );
   }
@@ -288,15 +283,6 @@ class _IdentityStepState extends State<IdentityStep> {
                           color: Colors.white,
                         ),
                       ),
-                      Text(
-                        tag,
-                        style: const TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 2.0,
-                          color: Colors.white70,
-                        ),
-                      ),
                     ],
                   ),
                 ),
@@ -311,6 +297,16 @@ class _IdentityStepState extends State<IdentityStep> {
   Widget _buildActionButtons() {
     return Column(
       children: [
+        Text(
+          _getTag(_identities[_currentPage]),
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 2.0,
+            color: AppTheme.earth,
+          ),
+        ),
+        const SizedBox(height: 20),
         ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 320),
           child: ElevatedButton(
@@ -318,9 +314,9 @@ class _IdentityStepState extends State<IdentityStep> {
             style: ElevatedButton.styleFrom(
               backgroundColor: AppTheme.forest,
               foregroundColor: Colors.white,
-              minimumSize: const Size(double.infinity, 56),
+              minimumSize: const Size(double.infinity, 64),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(100),
+                borderRadius: BorderRadius.circular(999),
               ),
               elevation: 4,
             ),
@@ -330,7 +326,7 @@ class _IdentityStepState extends State<IdentityStep> {
                 Text(
                   AppLocalizations.of(context)!.identityConfirm,
                   style: const TextStyle(
-                    fontSize: 15,
+                    fontSize: 16,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 1.0,
                   ),
@@ -341,35 +337,7 @@ class _IdentityStepState extends State<IdentityStep> {
             ),
           ),
         ),
-        const SizedBox(height: 20),
-        const Text(
-          'EXPERIENCIA INMERSIVA',
-          style: TextStyle(
-            fontSize: 9,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 2.5,
-            color: Color(0x664A5568),
-          ),
-        ),
       ],
-    );
-  }
-
-  Widget _buildNavigationIndicator() {
-    return Positioned(
-      bottom: 8,
-      left: 0,
-      right: 0,
-      child: Center(
-        child: Container(
-          width: 128,
-          height: 4,
-          decoration: BoxDecoration(
-            color: AppTheme.forest.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(2),
-          ),
-        ),
-      ),
     );
   }
 }

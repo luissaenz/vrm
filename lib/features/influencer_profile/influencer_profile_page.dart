@@ -587,7 +587,7 @@ class _InfluencerProfilePageState extends State<InfluencerProfilePage> {
               style: TextButton.styleFrom(
                 minimumSize: const Size(double.infinity, 56),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30),
+                  borderRadius: BorderRadius.circular(16),
                   side: BorderSide(color: Colors.grey.withValues(alpha: 0.2)),
                 ),
               ),

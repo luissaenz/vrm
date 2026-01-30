@@ -47,7 +47,7 @@ class _AssistantPageState extends State<AssistantPage> {
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
+                  horizontal: 24,
                   vertical: 24,
                 ),
                 physics: const BouncingScrollPhysics(),
@@ -107,7 +107,7 @@ class _AssistantPageState extends State<AssistantPage> {
         ),
       ),
       bottomSheet: Container(
-        padding: const EdgeInsets.fromLTRB(20, 16, 20, 40),
+        padding: const EdgeInsets.fromLTRB(24, 16, 24, 40),
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.bottomCenter,

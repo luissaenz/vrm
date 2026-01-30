@@ -18,56 +18,51 @@ class ConfigStep extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox.expand(
-      child: Stack(
-        children: [
-          SafeArea(
-            child: Column(
-              children: [
-                _buildHeader(context),
-                Expanded(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                    child: Column(
-                      children: [
-                        const SizedBox(height: 24),
-                        _buildCoachAvatar(),
-                        const SizedBox(height: 32),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          child: Text(
-                            _getGreeting(context),
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: AppTheme.forest,
-                              height: 1.2,
-                            ),
-                          ),
+      child: SafeArea(
+        child: Column(
+          children: [
+            _buildHeader(context),
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 24),
+                    _buildCoachAvatar(),
+                    const SizedBox(height: 32),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Text(
+                        _getGreeting(context),
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                          color: AppTheme.forest,
+                          height: 1.2,
                         ),
-                        const SizedBox(height: 12),
-                        const Text(
-                          'COACH DE VIDEO AI',
-                          style: TextStyle(
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 2.0,
-                            color: AppTheme.earth,
-                          ),
-                        ),
-                        const SizedBox(height: 40),
-                        _buildSummarySection(context),
-                        const SizedBox(height: 32),
-                      ],
+                      ),
                     ),
-                  ),
+                    const SizedBox(height: 12),
+                    const Text(
+                      'COACH DE VIDEO AI',
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 2.0,
+                        color: AppTheme.earth,
+                      ),
+                    ),
+                    const SizedBox(height: 40),
+                    _buildSummarySection(context),
+                    const SizedBox(height: 32),
+                  ],
                 ),
-                _buildFooter(context),
-              ],
+              ),
             ),
-          ),
-          _buildNavigationIndicator(),
-        ],
+            _buildFooter(context),
+          ],
+        ),
       ),
     );
   }
@@ -385,7 +380,7 @@ class ConfigStep extends StatelessWidget {
               foregroundColor: Colors.white,
               minimumSize: const Size(double.infinity, 64),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(16),
               ),
               elevation: 8,
               shadowColor: AppTheme.forest.withValues(alpha: 0.3),
@@ -406,35 +401,7 @@ class ConfigStep extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 20),
-          Text(
-            AppLocalizations.of(context)!.configFooterLabel,
-            style: const TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.bold,
-              letterSpacing: 2.0,
-              color: AppTheme.earth,
-            ),
-          ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildNavigationIndicator() {
-    return Positioned(
-      bottom: 8,
-      left: 0,
-      right: 0,
-      child: Center(
-        child: Container(
-          width: 128,
-          height: 4,
-          decoration: BoxDecoration(
-            color: AppTheme.forest.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(2),
-          ),
-        ),
       ),
     );
   }

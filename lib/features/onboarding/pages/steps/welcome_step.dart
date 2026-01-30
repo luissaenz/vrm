@@ -149,7 +149,7 @@ class _WelcomeStepState extends State<WelcomeStep> {
               foregroundColor: Colors.white,
               minimumSize: const Size(double.infinity, 64),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(999),
               ),
               elevation: 4,
             ),
@@ -159,7 +159,7 @@ class _WelcomeStepState extends State<WelcomeStep> {
                 Text(
                   AppLocalizations.of(context)!.welcomeCta,
                   style: const TextStyle(
-                    fontSize: 18,
+                    fontSize: 16,
                     fontWeight: FontWeight.w600,
                     letterSpacing: 0.5,
                   ),

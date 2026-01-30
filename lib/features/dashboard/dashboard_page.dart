@@ -63,7 +63,7 @@ class _DashboardPageState extends State<DashboardPage> {
                   _buildStatsSection(l10n),
                   const SizedBox(height: 20),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    padding: const EdgeInsets.symmetric(horizontal: 24),
                     child: Column(
                       children: [
                         VRMActionCard(
@@ -112,7 +112,7 @@ class _DashboardPageState extends State<DashboardPage> {
 
   Widget _buildTopBar(AppLocalizations l10n) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 24, 20, 8),
+      padding: const EdgeInsets.fromLTRB(24, 24, 24, 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -188,7 +188,7 @@ class _DashboardPageState extends State<DashboardPage> {
 
   Widget _buildMainGreeting(AppLocalizations l10n) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
+      padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -256,7 +256,7 @@ class _DashboardPageState extends State<DashboardPage> {
 
   Widget _buildStatsSection(AppLocalizations l10n) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       child: Row(
         children: [
           VRMStatCard(
@@ -279,7 +279,7 @@ class _DashboardPageState extends State<DashboardPage> {
 
   Widget _buildCalendarSection(AppLocalizations l10n) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -330,7 +330,7 @@ class _DashboardPageState extends State<DashboardPage> {
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
         child: Container(
-          padding: const EdgeInsets.fromLTRB(20, 16, 20, 40),
+          padding: const EdgeInsets.fromLTRB(24, 16, 24, 40),
           decoration: BoxDecoration(
             color: Colors.white.withValues(alpha: 0.8),
             border: Border(
@@ -427,7 +427,7 @@ class _RecentProjectsSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.symmetric(horizontal: 24),
             child: VRMSectionHeader(
               title: l10n.recentProjects,
               actionLabel: l10n.viewAll,
@@ -436,7 +436,7 @@ class _RecentProjectsSection extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.symmetric(horizontal: 24),
             child: Column(
               children: [
                 VRMProjectCard(
