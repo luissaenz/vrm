@@ -74,27 +74,44 @@ class AIService:
             if expected_schema or force_json:
                 params["response_format"] = {"type": "json_object"}
             
+            # --- LOG PETICIÓN ---
+            print("\n" + "="*50)
+            print(f"🚀 ENVIANDO PETICIÓN A IA ({provider.upper()})")
+            print(f"Modelo: {model}")
+            for msg in messages:
+                print(msg.get('content', ''))
+            print("="*50 + "\n")
+            
             # Llamar a la IA
             response = client.chat.completions.create(**params)
             content = response.choices[0].message.content
+            
+            # --- LOG RESPUESTA ---
+            print("\n" + "✨"*25)
+            print(f"📥 RESPUESTA RECIBIDA DE IA ({provider.upper()})")
+            print(content)
+            print("✨"*25 + "\n")
             
             # Validar contra schema si existe
             if expected_schema and content:
                 try:
                     response_json = json.loads(content)
                     validate(instance=response_json, schema=expected_schema)
+                    print("✅ VALIDACIÓN DE SCHEMA: EXITOSA")
                     logger.info("Response validated successfully against schema")
                     return {
                         "content": content,
                         "validated": True
                     }
                 except json.JSONDecodeError as e:
+                    print(f"❌ ERROR: JSON INVÁLIDO -> {e}")
                     logger.error(f"Response is not valid JSON: {e}")
                     return {
                         "content": content,
                         "validation_error": f"Invalid JSON: {str(e)}"
                     }
                 except ValidationError as e:
+                    print(f"❌ ERROR: FALLO DE SCHEMA -> {e.message}")
                     logger.error(f"Schema validation failed: {e.message}")
                     return {
                         "content": content,
@@ -104,6 +121,7 @@ class AIService:
             return {"content": content}
             
         except Exception as e:
+            print(f"🔥 ERROR GENERAL IA: {e}")
             logger.error(f"Error calling {provider}: {e}")
             return {
                 "content": None,
