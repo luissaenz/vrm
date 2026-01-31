@@ -1,12 +1,15 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../shared/widgets/header.dart';
 import '../../shared/widgets/step_indicator.dart';
 import '../../shared/widgets/script_editor.dart';
-import '../assistant/assistant_page.dart';
 import '../fragments/fragment_organization_page.dart';
 import '../../l10n/app_localizations.dart';
 import '../../core/theme.dart';
+import '../../core/api_service.dart';
+import '../onboarding/data/onboarding_repository.dart';
+import './models/script_analysis.dart';
 
 class NewProjectPage extends StatefulWidget {
   const NewProjectPage({super.key});
@@ -17,11 +20,30 @@ class NewProjectPage extends StatefulWidget {
 
 class _NewProjectPageState extends State<NewProjectPage> {
   final TextEditingController _scriptController = TextEditingController();
+  final OnboardingRepository _repository = OnboardingRepository();
+  bool _isLoading = false;
+
+  // Parámetros de ritmo dinámicos
+  double _segmentMinTime = 3.0;
+  double _segmentMaxTime = 10.0;
+  double _segmentRateWpm = 160.0;
 
   @override
   void initState() {
     super.initState();
     _scriptController.addListener(() => setState(() {}));
+    _loadUserPreferences();
+  }
+
+  Future<void> _loadUserPreferences() async {
+    final profile = await _repository.getUserProfile();
+    if (mounted) {
+      setState(() {
+        _segmentMinTime = profile.segmentMinTime;
+        _segmentMaxTime = profile.segmentMaxTime;
+        _segmentRateWpm = profile.segmentRateWpm;
+      });
+    }
   }
 
   @override
@@ -30,42 +52,126 @@ class _NewProjectPageState extends State<NewProjectPage> {
     super.dispose();
   }
 
+  Future<void> _optimizeScript() async {
+    if (_scriptController.text.trim().isEmpty) return;
+
+    setState(() => _isLoading = true);
+
+    try {
+      // 1. Obtener la identidad del usuario
+      final profile = await _repository.getUserProfile();
+      final profileId = ApiService.mapIdentityToProfileId(profile.identity);
+
+      // 2. Llamar al backend
+      final response = await ApiService.callPrompt(
+        category: 'tasks',
+        name: 'SCRIPT_ANALYZER',
+        payload: {
+          "profile_id": profileId,
+          "SCRIPT": _scriptController.text,
+          "segment_minTime": _segmentMinTime,
+          "segment_maxTime": _segmentMaxTime,
+          "segment_RateWpm": _segmentRateWpm,
+          "send_to_ai": true,
+        },
+      );
+
+      // 3. Procesar respuesta
+      if (response['ai_response'] != null &&
+          response['ai_response']['content'] != null) {
+        final analysisJson = response['ai_response']['content'];
+        // Tip: El backend a veces devuelve el JSON como string, lo parseamos
+        final decodedAnalysis = analysisJson is String
+            ? Map<String, dynamic>.from(jsonDecode(analysisJson))
+            : Map<String, dynamic>.from(analysisJson);
+
+        final analysis = ScriptAnalysis.fromJson(decodedAnalysis);
+
+        if (mounted) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) =>
+                  FragmentOrganizationPage(analysis: analysis),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al optimizar: ${e.toString()}')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: AppTheme.backgroundLight,
-      body: SafeArea(
-        child: Column(
-          children: [
-            VRMHeader(
-              title: l10n.newProjectTitle,
-              onBack: () => Navigator.pop(context),
-            ),
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 24,
+      body: Stack(
+        children: [
+          SafeArea(
+            child: Column(
+              children: [
+                VRMHeader(
+                  title: l10n.newProjectTitle,
+                  onBack: () => Navigator.pop(context),
                 ),
-                physics: const BouncingScrollPhysics(),
+                Expanded(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 24,
+                    ),
+                    physics: const BouncingScrollPhysics(),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        VRMStepIndicator(
+                          stepNumber: '1',
+                          title: l10n.step1Title,
+                        ),
+                        const SizedBox(height: 20),
+                        _buildScriptInput(l10n),
+                        const SizedBox(height: 16),
+                        _buildStatsRow(l10n),
+                        const SizedBox(height: 40),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (_isLoading)
+            Container(
+              color: Colors.black.withValues(alpha: 0.3),
+              child: const Center(
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    VRMStepIndicator(stepNumber: '1', title: l10n.step1Title),
-                    const SizedBox(height: 20),
-                    _buildScriptInput(l10n),
-                    const SizedBox(height: 16),
-                    _buildStatsRow(l10n),
-                    const SizedBox(height: 40),
-                    // Vista previa eliminada según requerimiento
+                    CircularProgressIndicator(color: AppTheme.forest),
+                    SizedBox(height: 16),
+                    Text(
+                      "Optimizando con IA...",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ],
                 ),
               ),
             ),
-          ],
-        ),
+        ],
       ),
       bottomNavigationBar: Container(
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 40),
@@ -80,16 +186,9 @@ class _NewProjectPageState extends State<NewProjectPage> {
           ),
         ),
         child: ElevatedButton(
-          onPressed: _scriptController.text.trim().isEmpty
+          onPressed: _scriptController.text.trim().isEmpty || _isLoading
               ? null
-              : () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const FragmentOrganizationPage(),
-                    ),
-                  );
-                },
+              : () => _optimizeScript(),
           style: ElevatedButton.styleFrom(
             backgroundColor: AppTheme.forestDark,
             foregroundColor: Colors.white,
@@ -148,14 +247,9 @@ class _NewProjectPageState extends State<NewProjectPage> {
         ),
       ],
       trailing: VRMScriptEditor.actionButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const AssistantPage()),
-          );
-        },
+        onPressed: _isLoading ? () {} : () => _optimizeScript(),
         icon: Icons.auto_awesome,
-        label: "Optimizar",
+        label: _isLoading ? "Cargando..." : "Optimizar",
         foregroundColor: AppTheme.forest,
       ),
     );
@@ -163,10 +257,13 @@ class _NewProjectPageState extends State<NewProjectPage> {
 
   Widget _buildStatsRow(AppLocalizations l10n) {
     final words = _scriptController.text
-        .split(' ')
+        .split(RegExp(r'\s+'))
         .where((s) => s.isNotEmpty)
         .length;
-    final seconds = (words / 2.5).toStringAsFixed(1);
+
+    // Calculamos los segundos basados en el ritmo (WPM)
+    // segundos = (palabras / WPM) * 60
+    final seconds = (words / _segmentRateWpm * 60).toStringAsFixed(1);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 4),
@@ -176,11 +273,12 @@ class _NewProjectPageState extends State<NewProjectPage> {
           Text.rich(
             TextSpan(
               children: [
+                const TextSpan(text: "Velocidad "),
                 TextSpan(
-                  text: "${_scriptController.text.length} ",
+                  text: "${_segmentRateWpm.toInt()} ",
                   style: const TextStyle(color: AppTheme.forest),
                 ),
-                const TextSpan(text: "CARACTERES"),
+                const TextSpan(text: "PPM"),
               ],
             ),
             style: const TextStyle(
@@ -190,33 +288,35 @@ class _NewProjectPageState extends State<NewProjectPage> {
               letterSpacing: 0.5,
             ),
           ),
-          Row(
-            children: [
-              const Icon(
-                Icons.access_time_rounded,
-                size: 14,
-                color: AppTheme.textMuted,
-              ),
-              const SizedBox(width: 6),
-              Text.rich(
-                TextSpan(
-                  children: [
-                    const TextSpan(text: "APROXIMADAMENTE "),
-                    TextSpan(
-                      text: "$seconds S",
-                      style: const TextStyle(color: AppTheme.forest),
-                    ),
-                  ],
-                ),
-                style: const TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
+          if (_scriptController.text.trim().isNotEmpty)
+            Row(
+              children: [
+                const Icon(
+                  Icons.access_time_rounded,
+                  size: 14,
                   color: AppTheme.textMuted,
-                  letterSpacing: 0.5,
                 ),
-              ),
-            ],
-          ),
+                const SizedBox(width: 6),
+                Text.rich(
+                  TextSpan(
+                    children: [
+                      const TextSpan(text: "Estimación "),
+                      TextSpan(
+                        text: "$seconds S",
+                        style: const TextStyle(color: AppTheme.forest),
+                      ),
+                      const TextSpan(text: " (±5%)"),
+                    ],
+                  ),
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    color: AppTheme.textMuted,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ],
+            ),
         ],
       ),
     );

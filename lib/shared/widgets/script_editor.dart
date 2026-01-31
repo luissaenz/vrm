@@ -45,12 +45,14 @@ class VRMScriptEditor extends StatelessWidget {
                 hintStyle: const TextStyle(
                   color: Color(0xFFCBD5E1), // Slate 300
                   fontSize: 16,
+                  fontWeight: FontWeight.normal,
                   fontStyle: FontStyle.normal,
                 ),
                 border: InputBorder.none,
               ),
               style: const TextStyle(
                 fontSize: 16,
+                fontWeight: FontWeight.normal,
                 height: 1.6,
                 color: Color(0xFF334155), // Slate 700
               ),

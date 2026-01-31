@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "ShortFormScriptAnalysis",
   "type": "object",
-  "required": ["meta", "viability", "segments"],
+  "required": ["meta", "segments"],
   "properties": {
     "meta": {
       "type": "object",
@@ -13,35 +13,40 @@
         "estimated_duration_seconds": { "type": "number", "minimum": 1 }
       }
     },
-    "viability": {
-      "type": "object",
-      "required": ["verdict", "retention_score", "summary"],
-      "properties": {
-        "verdict": {
-          "type": "string",
-          "enum": ["viable", "moderately_viable", "not_viable"]
-        },
-        "retention_score": {
-          "type": "number",
-          "minimum": 0,
-          "maximum": 10
-        },
-        "summary": { "type": "string" }
-      }
-    },
     "segments": {
       "type": "array",
       "minItems": 1,
       "items": {
         "type": "object",
-        "required": ["id", "type", "text"],
+        "required": ["id", "type", "text", "direction", "subtitles", "edit_metadata"],
         "properties": {
           "id": { "type": "integer", "minimum": 1 },
           "type": {
             "type": "string",
             "enum": ["hook", "context", "development", "closure", "cta"]
           },
-          "text": { "type": "string" }
+          "text": { "type": "string" },
+          "direction": {
+            "type": "object",
+            "required": ["tone", "pauses", "emphasis"],
+            "properties": {
+              "tone": { "type": "string" },
+              "pauses": { "type": "string" },
+              "emphasis": { "type": "string" }
+            }
+          },
+          "subtitles": {
+            "type": "string",
+            "description": "Subtítulos optimizados con MAYÚSCULAS y saltos de línea para retención."
+          },
+          "edit_metadata": {
+            "type": "object",
+            "required": ["duration_seconds", "wpm"],
+            "properties": {
+              "duration_seconds": { "type": "number", "minimum": 0 },
+              "wpm": { "type": "number", "minimum": 0 }
+            }
+          }
         }
       }
     }

@@ -5,22 +5,27 @@ import '../preparation/preparation_page.dart';
 import '../../l10n/app_localizations.dart';
 import '../../core/theme.dart';
 
+import '../new_project/models/script_analysis.dart';
+
 class Fragment {
   final String id;
   final String number;
-  final String timeRange;
+  final double duration;
   final String content;
 
   Fragment({
     required this.id,
     required this.number,
-    required this.timeRange,
+    required this.duration,
     required this.content,
   });
+
+  String get timeRange => "Duración: ${duration.toStringAsFixed(1)}s";
 }
 
 class FragmentOrganizationPage extends StatefulWidget {
-  const FragmentOrganizationPage({super.key});
+  final ScriptAnalysis? analysis;
+  const FragmentOrganizationPage({super.key, this.analysis});
 
   @override
   State<FragmentOrganizationPage> createState() =>
@@ -28,49 +33,89 @@ class FragmentOrganizationPage extends StatefulWidget {
 }
 
 class _FragmentOrganizationPageState extends State<FragmentOrganizationPage> {
-  final List<Fragment> _hookFragments = [
-    Fragment(
-      id: 'h1',
-      number: '01',
-      timeRange: '00:00 - 00:07',
-      content:
-          '¿Alguna vez has sentido que tus videos no conectan? El problema no es tu cámara...',
-    ),
-  ];
+  final List<Fragment> _hookFragments = [];
+  final List<Fragment> _valueFragments = [];
+  final List<Fragment> _ctaFragments = [];
 
-  final List<Fragment> _valueFragments = [
-    Fragment(
-      id: 'v1',
-      number: '02',
-      timeRange: '00:07 - 00:15',
-      content:
-          'Punto 1: Define un solo objetivo por video para no confundir a tu audiencia.',
-    ),
-    Fragment(
-      id: 'v2',
-      number: '03',
-      timeRange: '00:15 - 00:23',
-      content:
-          'Punto 2: Usa subtítulos dinámicos para mantener la atención visual constante.',
-    ),
-    Fragment(
-      id: 'v3',
-      number: '04',
-      timeRange: '00:23 - 00:30',
-      content:
-          'Punto 3: Ilumina tu rostro desde el frente para crear una conexión más humana.',
-    ),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    if (widget.analysis != null) {
+      _loadFromAnalysis(widget.analysis!);
+    } else {
+      _loadHardcodedData();
+    }
+  }
 
-  final List<Fragment> _ctaFragments = [
-    Fragment(
-      id: 'c1',
-      number: '05',
-      timeRange: '00:30 - 00:37',
-      content:
-          "Si quieres más tips para creadores, dale al botón de seguir y comenta 'GUION'.",
-    ),
-  ];
+  void _loadFromAnalysis(ScriptAnalysis analysis) {
+    for (var segment in analysis.segments) {
+      final fragment = Fragment(
+        id: segment.id.toString(),
+        number: segment.id.toString().padLeft(2, '0'),
+        duration: segment.editMetadata.durationSeconds,
+        content: segment.text,
+      );
+
+      if (segment.type == 'hook') {
+        _hookFragments.add(fragment);
+      } else if (segment.type == 'development' || segment.type == 'context') {
+        _valueFragments.add(fragment);
+      } else {
+        _ctaFragments.add(fragment);
+      }
+    }
+  }
+
+  String _getSectionTotal(List<Fragment> fragments) {
+    final total = fragments.fold<double>(0, (sum, f) => sum + f.duration);
+    return "${total.toStringAsFixed(1)}S";
+  }
+
+  void _loadHardcodedData() {
+    _hookFragments.add(
+      Fragment(
+        id: 'h1',
+        number: '01',
+        duration: 7.2,
+        content:
+            '¿Alguna vez has sentido que tus videos no conectan? El problema no es tu cámara...',
+      ),
+    );
+
+    _valueFragments.addAll([
+      Fragment(
+        id: 'v1',
+        number: '02',
+        duration: 8.0,
+        content:
+            'Punto 1: Define un solo objetivo por video para no confundir a tu audiencia.',
+      ),
+      Fragment(
+        id: 'v2',
+        number: '03',
+        duration: 7.5,
+        content:
+            'Punto 2: Usa subtítulos dinámicos para mantener la atención visual constante.',
+      ),
+      Fragment(
+        id: 'v3',
+        number: '04',
+        duration: 7.0,
+        content:
+            'Punto 3: Ilumina tu rostro desde el frente para crear una conexión más humana.',
+      ),
+    ]);
+
+    _ctaFragments.add(
+      Fragment(
+        id: 'c1',
+        number: '05',
+        duration: 6.8,
+        content:
+            "Si quieres más tips para creadores, dale al botón de seguir y comenta 'GUION'.",
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -98,21 +143,21 @@ class _FragmentOrganizationPageState extends State<FragmentOrganizationPage> {
                     _buildSectionHeader(
                       icon: Icons.electric_bolt_rounded,
                       title: l10n.hookTitle,
-                      duration: "7.2S",
+                      duration: _getSectionTotal(_hookFragments),
                     ),
                     _buildReorderableList(_hookFragments),
                     const SizedBox(height: 24),
                     _buildSectionHeader(
                       icon: Icons.segment_rounded,
                       title: l10n.valueTitle,
-                      duration: "22.5S",
+                      duration: _getSectionTotal(_valueFragments),
                     ),
                     _buildReorderableList(_valueFragments),
                     const SizedBox(height: 24),
                     _buildSectionHeader(
                       icon: Icons.ads_click_rounded,
                       title: l10n.ctaTitle,
-                      duration: "6.8S",
+                      duration: _getSectionTotal(_ctaFragments),
                     ),
                     _buildReorderableList(_ctaFragments),
                     const SizedBox(height: 140),

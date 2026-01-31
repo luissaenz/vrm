@@ -2,13 +2,6 @@
   "authority_builder": {
     "profile_label": "Construir Autoridad Profesional",
     "alignment_score": 8.4,
-    "ideal_hook": {
-      "description": "Un insight claro y contraintuitivo que demuestre experiencia.",
-      "examples": [
-        "Nadie te cuenta esto cuando empezás a grabar contenido profesional",
-        "El error que te hace parecer amateur en cámara"
-      ]
-    },
     "recommended_rhythm": {
       "pace": "controlled",
       "reason": "Un ritmo seguro transmite dominio y credibilidad."
@@ -19,20 +12,12 @@
     ],
     "cta_strategy": {
       "goal": "Posicionamiento",
-      "suggested_cta": "Si querés comunicar con autoridad, seguime.",
       "tone": "seguro y profesional"
     }
   },
   "emotional_connector": {
     "profile_label": "Conectar Emocionalmente",
     "alignment_score": 6.7,
-    "ideal_hook": {
-      "description": "Una confesión o experiencia humana que genere empatía.",
-      "examples": [
-        "Esto me pasó la primera vez que me puse frente a una cámara",
-        "Nunca te hablan del miedo a grabarte"
-      ]
-    },
     "recommended_rhythm": {
       "pace": "dynamic",
       "reason": "Un ritmo natural refuerza autenticidad."
@@ -43,20 +28,12 @@
     ],
     "cta_strategy": {
       "goal": "Vínculo",
-      "suggested_cta": "Contame si a vos también te pasa.",
       "tone": "cercano y empático"
     }
   },
   "conversion_driver": {
     "profile_label": "Convertir en Acciones",
     "alignment_score": 9.1,
-    "ideal_hook": {
-      "description": "Un problema específico con una solución clara.",
-      "examples": [
-        "Si tus videos no convierten, probablemente estás cometiendo este error",
-        "La fórmula exacta que uso para que mis reels generen ventas"
-      ]
-    },
     "recommended_rhythm": {
       "pace": "fast",
       "reason": "La urgencia impulsa la acción."
@@ -67,7 +44,6 @@
     ],
     "cta_strategy": {
       "goal": "Conversión",
-      "suggested_cta": "Link en bio para empezar ahora.",
       "tone": "directo y persuasivo"
     }
   }
