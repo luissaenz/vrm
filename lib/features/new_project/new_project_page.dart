@@ -63,10 +63,10 @@ class _NewProjectPageState extends State<NewProjectPage> {
       final profile = await _repository.getUserProfile();
       final profileId = ApiService.mapIdentityToProfileId(profile.identity);
 
-      // 2. Llamar al backend
-      final response = await ApiService.callPrompt(
-        category: 'tasks',
-        name: 'SCRIPT_ANALYZER',
+      /* 
+      // 2. Llamar API Real
+      final response = await ApiService.post(
+        'script/analyze-and-segment',
         payload: {
           "profile_id": profileId,
           "SCRIPT": _scriptController.text,
@@ -81,13 +81,11 @@ class _NewProjectPageState extends State<NewProjectPage> {
       if (response['ai_response'] != null &&
           response['ai_response']['content'] != null) {
         final analysisJson = response['ai_response']['content'];
-        // Tip: El backend a veces devuelve el JSON como string, lo parseamos
         final decodedAnalysis = analysisJson is String
             ? Map<String, dynamic>.from(jsonDecode(analysisJson))
             : Map<String, dynamic>.from(analysisJson);
 
         final analysis = ScriptAnalysis.fromJson(decodedAnalysis);
-
         if (mounted) {
           Navigator.push(
             context,
@@ -97,6 +95,145 @@ class _NewProjectPageState extends State<NewProjectPage> {
             ),
           );
         }
+      }
+      */
+
+      // MOCK PARA DESARROLLO RÁPIDO
+      await Future.delayed(
+        const Duration(seconds: 1),
+      ); // Simular latencia mínima
+
+      final mockResponse = {
+        "meta": {
+          "language": "es",
+          "total_segments": 8,
+          "estimated_duration_seconds": 39.75,
+        },
+        "segments": [
+          {
+            "id": 1,
+            "type": "hook",
+            "text":
+                "Hay una estrategia para adquirir clientes que pocos usan y se llama Content Pillars.",
+            "direction": {
+              "tone": "intrigante, confidencial",
+              "pauses": "Breve pausa después de 'clientes' y 'Content Pillars'",
+              "emphasis": "Énfasis en 'pocos usan' y 'Content Pillars'",
+            },
+            "subtitles":
+                "Hay una estrategia para adquirir clientes\nque POCOS USAN\n\nSe llama CONTENT PILLARS",
+            "edit_metadata": {"duration_seconds": 4.125, "wpm": 160},
+          },
+          {
+            "id": 2,
+            "type": "context",
+            "text": "Se basa en dividir tu contenido en tres pilares claros.",
+            "direction": {
+              "tone": "explicativo, claro",
+              "pauses": "Pausa ligera después de 'contenido'",
+              "emphasis": "Énfasis en 'tres pilares claros'",
+            },
+            "subtitles":
+                "Se basa en DIVIDIR tu contenido\nen TRES PILARES CLAROS",
+            "edit_metadata": {"duration_seconds": 3.75, "wpm": 160},
+          },
+          {
+            "id": 3,
+            "type": "development",
+            "text":
+                "El primero es Atracción. Acá no hablás de vos. Hablás de los objetivos, miedos y obstáculos de tu audiencia.",
+            "direction": {
+              "tone": "directo, empático",
+              "pauses": "Pausa después de 'Atracción' y 'vos'",
+              "emphasis":
+                  "Énfasis en 'no hablás de vos' y 'objetivos, miedos y obstáculos'",
+            },
+            "subtitles":
+                "El primero es ATRACCIÓN\n\nAcá NO HABLÁS DE VOS\n\nHablás de los OBJETIVOS, MIEDOS\ny OBSTÁCULOS de tu audiencia",
+            "edit_metadata": {"duration_seconds": 6.0, "wpm": 160},
+          },
+          {
+            "id": 4,
+            "type": "development",
+            "text": "Este contenido no vende, trae a la gente correcta.",
+            "direction": {
+              "tone": "convincente, afirmativo",
+              "pauses": "Pausa después de 'vende'",
+              "emphasis": "Énfasis en 'no vende' y 'gente correcta'",
+            },
+            "subtitles": "Este contenido NO VENDE\n\nTrae a la GENTE CORRECTA",
+            "edit_metadata": {"duration_seconds": 3.75, "wpm": 160},
+          },
+          {
+            "id": 5,
+            "type": "development",
+            "text":
+                "El segundo pilar es Nutrición. Y esto es clave: repetir tips, repetir ideas, repetir mensajes.",
+            "direction": {
+              "tone": "enfático, revelador",
+              "pauses": "Pausa después de 'Nutrición' y 'clave'",
+              "emphasis": "Énfasis en 'clave' y 'repetir'",
+            },
+            "subtitles":
+                "El segundo pilar es NUTRICIÓN\n\nY esto es CLAVE:\n\nREPETIR tips, REPETIR ideas,\nREPETIR mensajes",
+            "edit_metadata": {"duration_seconds": 5.625, "wpm": 160},
+          },
+          {
+            "id": 6,
+            "type": "development",
+            "text":
+                "La repetición genera posicionamiento. Y el posicionamiento genera confianza.",
+            "direction": {
+              "tone": "lógico, persuasivo",
+              "pauses": "Pausa después de 'posicionamiento'",
+              "emphasis":
+                  "Énfasis en 'genera posicionamiento' y 'genera confianza'",
+            },
+            "subtitles":
+                "La REPETICIÓN genera POSICIONAMIENTO\n\nY el POSICIONAMIENTO genera CONFIANZA",
+            "edit_metadata": {"duration_seconds": 4.5, "wpm": 160},
+          },
+          {
+            "id": 7,
+            "type": "development",
+            "text":
+                "Ahora, el tercer pilar es el que paga las cuentas: Venta. Acá el contenido no vende en el post. El contenido lleva la conversación al inbox o a WhatsApp.",
+            "direction": {
+              "tone": "directo, práctico",
+              "pauses": "Pausa después de 'cuentas', 'Venta' y 'post'",
+              "emphasis":
+                  "Énfasis en 'paga las cuentas', 'no vende en el post' y 'inbox o WhatsApp'",
+            },
+            "subtitles":
+                "Ahora, el tercer pilar es el que\nPAGA LAS CUENTAS: VENTA\n\nAcá el contenido NO VENDE en el post\n\nLleva la conversación al INBOX\n o a WHATSAPP",
+            "edit_metadata": {"duration_seconds": 7.125, "wpm": 160},
+          },
+          {
+            "id": 8,
+            "type": "cta",
+            "text":
+                "Y ahí es donde se crea la oportunidad de venta. Si querés ideas de contenido para cada pilar, escribime “PILARES” en los comentarios.",
+            "direction": {
+              "tone": "conclusivo, llamativo",
+              "pauses": "Pausa después de 'venta' y 'pilar'",
+              "emphasis": "Énfasis en 'oportunidad de venta' y '“PILARES”'",
+            },
+            "subtitles":
+                "Y ahí es donde se crea la\nOPORTUNIDAD DE VENTA\n\nSi querés ideas de contenido\npara cada pilar\n\nESCRIBIME “PILARES”\n en los comentarios",
+            "edit_metadata": {"duration_seconds": 5.625, "wpm": 160},
+          },
+        ],
+      };
+
+      final analysis = ScriptAnalysis.fromJson(mockResponse);
+
+      if (mounted) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => FragmentOrganizationPage(analysis: analysis),
+          ),
+        );
       }
     } catch (e) {
       if (mounted) {
