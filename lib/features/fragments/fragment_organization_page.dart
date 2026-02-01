@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../shared/widgets/header.dart';
 import '../../shared/widgets/step_indicator.dart';
-import '../preparation/preparation_page.dart';
+import '../preparation/directors_card_page.dart';
 import '../../l10n/app_localizations.dart';
 import '../../core/theme.dart';
 
@@ -188,7 +188,7 @@ class _FragmentOrganizationPageState extends State<FragmentOrganizationPage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const PreparationPage(),
+                    builder: (context) => const DirectorsCardPage(),
                   ),
                 );
               },
@@ -307,6 +307,7 @@ class _FragmentOrganizationPageState extends State<FragmentOrganizationPage> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: Colors.black.withValues(alpha: 0.05)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.02),
