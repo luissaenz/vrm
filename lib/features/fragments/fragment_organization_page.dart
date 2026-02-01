@@ -145,21 +145,21 @@ class _FragmentOrganizationPageState extends State<FragmentOrganizationPage> {
                       title: l10n.hookTitle,
                       duration: _getSectionTotal(_hookFragments),
                     ),
-                    _buildReorderableList(_hookFragments),
+                    _buildFixedList(_hookFragments),
                     const SizedBox(height: 24),
                     _buildSectionHeader(
                       icon: Icons.segment_rounded,
                       title: l10n.valueTitle,
                       duration: _getSectionTotal(_valueFragments),
                     ),
-                    _buildReorderableList(_valueFragments),
+                    _buildFixedList(_valueFragments),
                     const SizedBox(height: 24),
                     _buildSectionHeader(
                       icon: Icons.ads_click_rounded,
                       title: l10n.ctaTitle,
                       duration: _getSectionTotal(_ctaFragments),
                     ),
-                    _buildReorderableList(_ctaFragments),
+                    _buildFixedList(_ctaFragments),
                     const SizedBox(height: 140),
                   ],
                 ),
@@ -224,21 +224,10 @@ class _FragmentOrganizationPageState extends State<FragmentOrganizationPage> {
     );
   }
 
-  Widget _buildReorderableList(List<Fragment> fragments) {
-    return ReorderableListView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      itemCount: fragments.length,
-      onReorder: (oldIndex, newIndex) {
-        setState(() {
-          if (newIndex > oldIndex) {
-            newIndex -= 1;
-          }
-          final item = fragments.removeAt(oldIndex);
-          fragments.insert(newIndex, item);
-        });
-      },
-      itemBuilder: (context, index) {
+  Widget _buildFixedList(List<Fragment> fragments) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: List.generate(fragments.length, (index) {
         final fragment = fragments[index];
         return _buildFragmentCard(
           key: ValueKey(fragment.id),
@@ -247,12 +236,7 @@ class _FragmentOrganizationPageState extends State<FragmentOrganizationPage> {
           timeRange: fragment.timeRange,
           content: fragment.content,
         );
-      },
-      buildDefaultDragHandles:
-          false, // Quita las líneas de arrastre automáticas
-      proxyDecorator: (widget, index, animation) {
-        return Material(color: Colors.transparent, child: widget);
-      },
+      }),
     );
   }
 
@@ -278,18 +262,30 @@ class _FragmentOrganizationPageState extends State<FragmentOrganizationPage> {
           ),
           const Spacer(),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: const Color(0xFFF3F4F6),
-              borderRadius: BorderRadius.circular(12),
+              color: const Color(0xFFF8FAFC),
+              borderRadius: BorderRadius.circular(99),
+              border: Border.all(color: const Color(0xFFF1F5F9)),
             ),
-            child: Text(
-              duration,
-              style: const TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color: AppTheme.textMain,
-              ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.speed_rounded,
+                  size: 14,
+                  color: Color(0xFF475569),
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  duration,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF475569),
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -366,15 +362,7 @@ class _FragmentOrganizationPageState extends State<FragmentOrganizationPage> {
               ],
             ),
           ),
-          const SizedBox(width: 12),
-          ReorderableDragStartListener(
-            index: index,
-            child: const Icon(
-              Icons.grid_view_rounded,
-              color: AppTheme.border,
-              size: 20,
-            ),
-          ),
+          const SizedBox(width: 8),
         ],
       ),
     );

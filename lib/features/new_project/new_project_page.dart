@@ -10,6 +10,7 @@ import '../../core/theme.dart';
 import '../../core/api_service.dart';
 import '../onboarding/data/onboarding_repository.dart';
 import './models/script_analysis.dart';
+import '../../shared/widgets/widget_progress.dart';
 
 class NewProjectPage extends StatefulWidget {
   const NewProjectPage({super.key});
@@ -152,24 +153,14 @@ class _NewProjectPageState extends State<NewProjectPage> {
             ),
           ),
           if (_isLoading)
-            Container(
-              color: Colors.black.withValues(alpha: 0.3),
-              child: const Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    CircularProgressIndicator(color: AppTheme.forest),
-                    SizedBox(height: 16),
-                    Text(
-                      "Optimizando con IA...",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+            WidgetProgress(
+              title: "Dividiendo en fragmentos",
+              subtitle: "El agente IA está procesando el guión.",
+              description:
+                  "Dividir el guión en bloques facilitará la retencion de los mismos mejorando la expresividad y la calidad del video generado.",
+              progress:
+                  0.0, // Podemos hacerlo dinámico si el backend enviara progreso
+              duration: const Duration(seconds: 40),
             ),
         ],
       ),
@@ -236,11 +227,6 @@ class _NewProjectPageState extends State<NewProjectPage> {
           backgroundColor: const Color(0xFFF1F5F9),
           foregroundColor: const Color(0xFF64748B),
         ),
-        const SizedBox(width: 4),
-        VRMScriptEditor.actionIcon(
-          onPressed: () {},
-          icon: Icons.file_upload_outlined,
-        ),
         VRMScriptEditor.actionIcon(
           onPressed: () {},
           icon: Icons.mic_none_outlined,
@@ -249,7 +235,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
       trailing: VRMScriptEditor.actionButton(
         onPressed: _isLoading ? () {} : () => _optimizeScript(),
         icon: Icons.auto_awesome,
-        label: _isLoading ? "Cargando..." : "Optimizar",
+        label: _isLoading ? "Cargando..." : "Asistente AI",
         foregroundColor: AppTheme.forest,
       ),
     );
@@ -261,62 +247,75 @@ class _NewProjectPageState extends State<NewProjectPage> {
         .where((s) => s.isNotEmpty)
         .length;
 
-    // Calculamos los segundos basados en el ritmo (WPM)
-    // segundos = (palabras / WPM) * 60
     final seconds = (words / _segmentRateWpm * 60).toStringAsFixed(1);
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 0),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text.rich(
-            TextSpan(
-              children: [
-                const TextSpan(text: "Velocidad "),
-                TextSpan(
-                  text: "${_segmentRateWpm.toInt()} ",
-                  style: const TextStyle(color: AppTheme.forest),
-                ),
-                const TextSpan(text: "PPM"),
-              ],
-            ),
-            style: const TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w700,
-              color: AppTheme.textMuted,
-              letterSpacing: 0.5,
-            ),
+          _buildStatBadge(
+            icon: Icons.speed_rounded,
+            label: "Velocidad",
+            value: "${_segmentRateWpm.toInt()} ppm",
           ),
           if (_scriptController.text.trim().isNotEmpty)
-            Row(
-              children: [
-                const Icon(
-                  Icons.access_time_rounded,
-                  size: 14,
-                  color: AppTheme.textMuted,
-                ),
-                const SizedBox(width: 6),
-                Text.rich(
-                  TextSpan(
-                    children: [
-                      const TextSpan(text: "Estimación "),
-                      TextSpan(
-                        text: "$seconds S",
-                        style: const TextStyle(color: AppTheme.forest),
-                      ),
-                      const TextSpan(text: " (±5%)"),
-                    ],
-                  ),
-                  style: const TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w700,
-                    color: AppTheme.textMuted,
-                    letterSpacing: 0.5,
-                  ),
-                ),
-              ],
+            _buildStatBadge(
+              icon: Icons.access_time_rounded,
+              label: "Estimación",
+              value: "$seconds s",
+              extra: "(±5%)",
             ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatBadge({
+    required IconData icon,
+    required String label,
+    required String value,
+    String? extra,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8FAFC), // Slate 50
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(
+          color: const Color(0xFFF1F5F9), // Slate 100
+          width: 1,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            icon,
+            size: 16,
+            color: const Color(0xFF334155), // Slate 700
+          ),
+          const SizedBox(width: 10),
+          Text(
+            value,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: Color(0xFF1E293B), // Slate 800
+              letterSpacing: -0.2,
+            ),
+          ),
+          if (extra != null) ...[
+            const SizedBox(width: 4),
+            Text(
+              extra,
+              style: const TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: Color(0xFF64748B), // Slate 500
+              ),
+            ),
+          ],
         ],
       ),
     );
