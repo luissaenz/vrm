@@ -11,6 +11,7 @@ import '../../core/api_service.dart';
 import '../onboarding/data/onboarding_repository.dart';
 import './models/script_analysis.dart';
 import '../../shared/widgets/widget_progress.dart';
+import '../../shared/widgets/widget_estimation.dart';
 
 class NewProjectPage extends StatefulWidget {
   const NewProjectPage({super.key});
@@ -117,8 +118,8 @@ class _NewProjectPageState extends State<NewProjectPage> {
                 "Hay una estrategia para adquirir clientes que pocos usan y se llama Content Pillars.",
             "direction": {
               "tone": "intrigante, confidencial",
-              "pauses": "Breve pausa después de 'clientes' y 'Content Pillars'",
-              "emphasis": "Énfasis en 'pocos usan' y 'Content Pillars'",
+              "pauses": "'clientes','Content Pillars'",
+              "emphasis": "'pocos usan','Content Pillars'",
             },
             "subtitles":
                 "Hay una estrategia para adquirir clientes\nque POCOS USAN\n\nSe llama CONTENT PILLARS",
@@ -130,8 +131,8 @@ class _NewProjectPageState extends State<NewProjectPage> {
             "text": "Se basa en dividir tu contenido en tres pilares claros.",
             "direction": {
               "tone": "explicativo, claro",
-              "pauses": "Pausa ligera después de 'contenido'",
-              "emphasis": "Énfasis en 'tres pilares claros'",
+              "pauses": "'contenido'",
+              "emphasis": "'tres pilares claros'",
             },
             "subtitles":
                 "Se basa en DIVIDIR tu contenido\nen TRES PILARES CLAROS",
@@ -144,9 +145,8 @@ class _NewProjectPageState extends State<NewProjectPage> {
                 "El primero es Atracción. Acá no hablás de vos. Hablás de los objetivos, miedos y obstáculos de tu audiencia.",
             "direction": {
               "tone": "directo, empático",
-              "pauses": "Pausa después de 'Atracción' y 'vos'",
-              "emphasis":
-                  "Énfasis en 'no hablás de vos' y 'objetivos, miedos y obstáculos'",
+              "pauses": "'Atracción','vos'",
+              "emphasis": "'no hablás de vos','objetivos, miedos y obstáculos'",
             },
             "subtitles":
                 "El primero es ATRACCIÓN\n\nAcá NO HABLÁS DE VOS\n\nHablás de los OBJETIVOS, MIEDOS\ny OBSTÁCULOS de tu audiencia",
@@ -158,8 +158,8 @@ class _NewProjectPageState extends State<NewProjectPage> {
             "text": "Este contenido no vende, trae a la gente correcta.",
             "direction": {
               "tone": "convincente, afirmativo",
-              "pauses": "Pausa después de 'vende'",
-              "emphasis": "Énfasis en 'no vende' y 'gente correcta'",
+              "pauses": "'vende'",
+              "emphasis": "'no vende','gente correcta'",
             },
             "subtitles": "Este contenido NO VENDE\n\nTrae a la GENTE CORRECTA",
             "edit_metadata": {"duration_seconds": 3.75, "wpm": 160},
@@ -171,8 +171,8 @@ class _NewProjectPageState extends State<NewProjectPage> {
                 "El segundo pilar es Nutrición. Y esto es clave: repetir tips, repetir ideas, repetir mensajes.",
             "direction": {
               "tone": "enfático, revelador",
-              "pauses": "Pausa después de 'Nutrición' y 'clave'",
-              "emphasis": "Énfasis en 'clave' y 'repetir'",
+              "pauses": "'Nutrición','clave'",
+              "emphasis": "'clave','repetir'",
             },
             "subtitles":
                 "El segundo pilar es NUTRICIÓN\n\nY esto es CLAVE:\n\nREPETIR tips, REPETIR ideas,\nREPETIR mensajes",
@@ -185,9 +185,8 @@ class _NewProjectPageState extends State<NewProjectPage> {
                 "La repetición genera posicionamiento. Y el posicionamiento genera confianza.",
             "direction": {
               "tone": "lógico, persuasivo",
-              "pauses": "Pausa después de 'posicionamiento'",
-              "emphasis":
-                  "Énfasis en 'genera posicionamiento' y 'genera confianza'",
+              "pauses": "'posicionamiento'",
+              "emphasis": "'genera posicionamiento','genera confianza'",
             },
             "subtitles":
                 "La REPETICIÓN genera POSICIONAMIENTO\n\nY el POSICIONAMIENTO genera CONFIANZA",
@@ -200,9 +199,9 @@ class _NewProjectPageState extends State<NewProjectPage> {
                 "Ahora, el tercer pilar es el que paga las cuentas: Venta. Acá el contenido no vende en el post. El contenido lleva la conversación al inbox o a WhatsApp.",
             "direction": {
               "tone": "directo, práctico",
-              "pauses": "Pausa después de 'cuentas', 'Venta' y 'post'",
+              "pauses": "'cuentas','Venta','post'",
               "emphasis":
-                  "Énfasis en 'paga las cuentas', 'no vende en el post' y 'inbox o WhatsApp'",
+                  "'paga las cuentas','no vende en el post','inbox o WhatsApp'",
             },
             "subtitles":
                 "Ahora, el tercer pilar es el que\nPAGA LAS CUENTAS: VENTA\n\nAcá el contenido NO VENDE en el post\n\nLleva la conversación al INBOX\n o a WHATSAPP",
@@ -215,8 +214,8 @@ class _NewProjectPageState extends State<NewProjectPage> {
                 "Y ahí es donde se crea la oportunidad de venta. Si querés ideas de contenido para cada pilar, escribime “PILARES” en los comentarios.",
             "direction": {
               "tone": "conclusivo, llamativo",
-              "pauses": "Pausa después de 'venta' y 'pilar'",
-              "emphasis": "Énfasis en 'oportunidad de venta' y '“PILARES”'",
+              "pauses": "'venta','pilar'",
+              "emphasis": "'oportunidad de venta','“PILARES”'",
             },
             "subtitles":
                 "Y ahí es donde se crea la\nOPORTUNIDAD DE VENTA\n\nSi querés ideas de contenido\npara cada pilar\n\nESCRIBIME “PILARES”\n en los comentarios",
@@ -384,77 +383,12 @@ class _NewProjectPageState extends State<NewProjectPage> {
         .where((s) => s.isNotEmpty)
         .length;
 
-    final seconds = (words / _segmentRateWpm * 60).toStringAsFixed(1);
+    final seconds = words / _segmentRateWpm * 60;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 0),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          _buildStatBadge(
-            icon: Icons.speed_rounded,
-            label: "Velocidad",
-            value: "${_segmentRateWpm.toInt()} ppm",
-          ),
-          if (_scriptController.text.trim().isNotEmpty)
-            _buildStatBadge(
-              icon: Icons.access_time_rounded,
-              label: "Estimación",
-              value: "$seconds s",
-              extra: "(±5%)",
-            ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatBadge({
-    required IconData icon,
-    required String label,
-    required String value,
-    String? extra,
-  }) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC), // Slate 50
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(
-          color: const Color(0xFFF1F5F9), // Slate 100
-          width: 1,
-        ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            icon,
-            size: 16,
-            color: const Color(0xFF334155), // Slate 700
-          ),
-          const SizedBox(width: 10),
-          Text(
-            value,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w700,
-              color: Color(0xFF1E293B), // Slate 800
-              letterSpacing: -0.2,
-            ),
-          ),
-          if (extra != null) ...[
-            const SizedBox(width: 4),
-            Text(
-              extra,
-              style: const TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                color: Color(0xFF64748B), // Slate 500
-              ),
-            ),
-          ],
-        ],
-      ),
+    return Estimation(
+      speedPpm: _segmentRateWpm,
+      durationSeconds: seconds,
+      tolerance: 5,
     );
   }
 }

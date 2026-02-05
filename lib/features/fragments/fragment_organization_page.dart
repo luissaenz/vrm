@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../shared/widgets/header.dart';
 import '../../shared/widgets/step_indicator.dart';
 import '../preparation/directors_card_page.dart';
+import '../preparation/preparation_page.dart';
 import '../../l10n/app_localizations.dart';
 import '../../core/theme.dart';
 
@@ -13,11 +14,14 @@ class Fragment {
   final double duration;
   final String content;
 
+  final ScriptSegment? segment;
+
   Fragment({
     required this.id,
     required this.number,
     required this.duration,
     required this.content,
+    this.segment,
   });
 
   String get timeRange => "Duración: ${duration.toStringAsFixed(1)}s";
@@ -54,6 +58,7 @@ class _FragmentOrganizationPageState extends State<FragmentOrganizationPage> {
         number: segment.id.toString().padLeft(2, '0'),
         duration: segment.editMetadata.durationSeconds,
         content: segment.text,
+        segment: segment,
       );
 
       if (segment.type == 'hook') {
@@ -185,10 +190,12 @@ class _FragmentOrganizationPageState extends State<FragmentOrganizationPage> {
           children: [
             ElevatedButton(
               onPressed: () {
+                if (widget.analysis == null) return;
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const DirectorsCardPage(),
+                    builder: (context) =>
+                        PreparationPage(analysis: widget.analysis!),
                   ),
                 );
               },
@@ -231,10 +238,8 @@ class _FragmentOrganizationPageState extends State<FragmentOrganizationPage> {
         final fragment = fragments[index];
         return _buildFragmentCard(
           key: ValueKey(fragment.id),
+          fragment: fragment,
           index: index,
-          number: fragment.number,
-          timeRange: fragment.timeRange,
-          content: fragment.content,
         );
       }),
     );
@@ -295,15 +300,12 @@ class _FragmentOrganizationPageState extends State<FragmentOrganizationPage> {
 
   Widget _buildFragmentCard({
     required Key key,
+    required Fragment fragment,
     required int index,
-    required String number,
-    required String timeRange,
-    required String content,
   }) {
     return Container(
       key: key,
       margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(24),
@@ -316,55 +318,74 @@ class _FragmentOrganizationPageState extends State<FragmentOrganizationPage> {
           ),
         ],
       ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 40,
-            height: 40,
-            decoration: const BoxDecoration(
-              color: Color(0xFFF3F4F6),
-              shape: BoxShape.circle,
-            ),
-            child: Center(
-              child: Text(
-                number,
-                style: const TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: AppTheme.textMuted,
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () {
+          if (widget.analysis != null) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => DirectorsCardPage(
+                  analysis: widget.analysis!,
+                  initialIndex: index,
                 ),
               ),
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  timeRange,
-                  style: const TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: AppTheme.textMain,
+            );
+          }
+        },
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: const BoxDecoration(
+                  color: Color(0xFFF3F4F6),
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: Text(
+                    fragment.number,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: AppTheme.textMuted,
+                    ),
                   ),
                 ),
-                const SizedBox(height: 6),
-                Text(
-                  '"$content"',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: AppTheme.textMuted,
-                    height: 1.5,
-                    fontStyle: FontStyle.italic,
-                  ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      fragment.timeRange,
+                      style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.textMain,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      '"${fragment.content}"',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: AppTheme.textMuted,
+                        height: 1.5,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+              const SizedBox(width: 8),
+            ],
           ),
-          const SizedBox(width: 8),
-        ],
+        ),
       ),
     );
   }

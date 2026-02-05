@@ -8,10 +8,14 @@ import '../../l10n/app_localizations.dart';
 import '../../core/theme.dart';
 import '../recording/recording_page.dart';
 
+import '../new_project/models/script_analysis.dart';
+
 enum PreparationPhase { fixation, decision }
 
 class PreparationPage extends StatefulWidget {
-  const PreparationPage({super.key});
+  final ScriptAnalysis analysis;
+
+  const PreparationPage({super.key, required this.analysis});
 
   @override
   State<PreparationPage> createState() => _PreparationPageState();
@@ -24,14 +28,15 @@ class _PreparationPageState extends State<PreparationPage> {
   PreparationPhase _currentPhase = PreparationPhase.fixation;
   bool _isVoiceControlActive = false;
   bool _isPaused = false;
-  int _currentFixationStep = 0;
-  int _fixationTotalSteps = 0;
+  int _currentSegmentIndex = 0;
 
   // Phase 1: Fixation (Simulated reading)
-  double _readingProgress = 0.0;
+  int _charsReadCount = 0;
+  int _totalReadingTimeMs = 0;
+  int _elapsedReadingTimeMs = 0;
+  List<_HighlightEvent> _timeline = [];
   Timer? _readingTimer;
-  final String _scriptText =
-      "Hola, mi nombre es Juan y quiero presentar mi proyecto.";
+  String get _scriptText => widget.analysis.segments[_currentSegmentIndex].text;
 
   // Phase 2: Decision (Countdown)
   int _countdown = 3;
@@ -110,11 +115,122 @@ class _PreparationPageState extends State<PreparationPage> {
     super.dispose();
   }
 
+  void _startFixationTimer() {
+    const interval = Duration(milliseconds: 20);
+    _readingTimer?.cancel();
+    _readingTimer = Timer.periodic(interval, (timer) {
+      if (!mounted || _currentPhase != PreparationPhase.fixation || _isPaused) {
+        timer.cancel();
+        return;
+      }
+      setState(() {
+        _elapsedReadingTimeMs += interval.inMilliseconds;
+        int newIndex = 0;
+        for (var event in _timeline) {
+          if (event.timeMs <= _elapsedReadingTimeMs) {
+            newIndex = event.charIndex;
+          } else {
+            break;
+          }
+        }
+        _charsReadCount = newIndex;
+        if (_elapsedReadingTimeMs >= _totalReadingTimeMs) {
+          timer.cancel();
+          _onReadingFinished();
+        }
+      });
+    });
+  }
+
+  void _startDecisionTimer() {
+    _countdownTimer?.cancel();
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted || _isPaused) {
+        timer.cancel();
+        return;
+      }
+
+      if (_countdown > 1) {
+        setState(() {
+          _countdown--;
+          _countdownProgress += 0.33;
+        });
+      } else {
+        timer.cancel();
+        setState(() {
+          _countdown = 0;
+          _countdownProgress = 1.0;
+        });
+        _onDecisionPhaseTimeout();
+      }
+    });
+  }
+
+  void _onDecisionPhaseTimeout() {
+    _stopListening();
+    if (!mounted) return;
+    if (_isPaused) return;
+    if (_currentPhase != PreparationPhase.decision) return;
+
+    // Avanzamos al siguiente segmento (con bucle)
+    setState(() {
+      _currentSegmentIndex =
+          (_currentSegmentIndex + 1) % widget.analysis.segments.length;
+    });
+
+    _startFixationPhase();
+  }
+
+  void _onVoiceCommand(String command) {
+    if (_currentPhase != PreparationPhase.decision) return;
+    final l10n = AppLocalizations.of(context)!;
+    final cmd = command.toLowerCase().trim();
+    if (cmd == l10n.record.toLowerCase() ||
+        cmd == 'record' ||
+        cmd == 'grabar') {
+      _navigateToRecording();
+    } else if (cmd == 'volver' || cmd == 'return' || cmd == 'back') {
+      Navigator.pop(context);
+    }
+  }
+
+  void _navigateToRecording() {
+    _readingTimer?.cancel();
+    _countdownTimer?.cancel();
+    _flutterTts.stop();
+    _stopListening();
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const RecordingPage()),
+    );
+  }
+
+  void _togglePause() {
+    setState(() {
+      _isPaused = !_isPaused;
+      if (_isPaused) {
+        _flutterTts.stop();
+        _readingTimer?.cancel();
+        _countdownTimer?.cancel();
+      } else {
+        if (_currentPhase == PreparationPhase.fixation) {
+          _flutterTts.speak(_scriptText);
+          _startFixationTimer();
+        } else {
+          _startDecisionTimer();
+        }
+      }
+    });
+  }
+
   void _startFixationPhase() {
+    _buildReadingTimeline();
+
     setState(() {
       _currentPhase = PreparationPhase.fixation;
       _isVoiceControlActive = false;
-      _readingProgress = 0.0;
+      _charsReadCount = 0;
+      _elapsedReadingTimeMs = 0;
       _countdown = 3;
       _countdownProgress = 0.0;
     });
@@ -124,38 +240,66 @@ class _PreparationPageState extends State<PreparationPage> {
       _flutterTts.speak(_scriptText);
     }
 
-    // Coordinate visual progress with expected duration (~2.5s for this string at 0.5 rate)
-    // In a real app, we'd use setProgressHandler, but here we keep the smooth simulation
-    const duration = Duration(milliseconds: 2800);
-    const interval = Duration(milliseconds: 50);
-    _fixationTotalSteps = duration.inMilliseconds ~/ interval.inMilliseconds;
+    _startFixationTimer();
+  }
 
-    _readingTimer?.cancel();
-    _readingTimer = Timer.periodic(interval, (timer) {
-      if (!mounted || _currentPhase != PreparationPhase.fixation || _isPaused) {
-        timer.cancel();
-        return;
-      }
-      setState(() {
-        _currentFixationStep++;
-        _readingProgress = (_currentFixationStep / _fixationTotalSteps).clamp(
-          0.0,
-          1.0,
-        );
-        if (_currentFixationStep >= _fixationTotalSteps) {
-          timer.cancel();
-          if (kIsWeb) {
-            _onReadingFinished();
-          }
+  void _buildReadingTimeline() {
+    final segment = widget.analysis.segments[_currentSegmentIndex];
+    final double ppm = segment.editMetadata.wpm;
+    final String text = segment.text;
+    final pauseRefs = _parseReferences(segment.direction.pauses);
+    final punctuationRegex = RegExp(r'[.,;:!?]');
+
+    List<int> pauseIndices = [];
+    for (var ref in pauseRefs) {
+      int start = 0;
+      while ((start = text.indexOf(ref, start)) != -1) {
+        int endOfRef = start + ref.length;
+        if (endOfRef < text.length &&
+            punctuationRegex.hasMatch(text[endOfRef])) {
+          pauseIndices.add(endOfRef + 1);
+        } else {
+          pauseIndices.add(endOfRef);
         }
-      });
-    });
+        start += ref.length;
+      }
+    }
+    pauseIndices = pauseIndices.toSet().toList()..sort();
+
+    final words = text.split(RegExp(r'\s+'));
+    final msPerWord = (60000 / ppm).round();
+
+    _timeline = [];
+    int currentTime = 0;
+    int currentTextPos = 0;
+
+    _timeline.add(_HighlightEvent(timeMs: 0, charIndex: 0));
+
+    for (var word in words) {
+      if (word.isEmpty) continue;
+      int wordStart = text.indexOf(word, currentTextPos);
+      if (wordStart == -1) continue;
+      int wordEnd = wordStart + word.length;
+
+      currentTime += msPerWord;
+      _timeline.add(_HighlightEvent(timeMs: currentTime, charIndex: wordEnd));
+
+      bool hasPause = pauseIndices.any(
+        (p) => p >= currentTextPos && p <= wordEnd + 1,
+      );
+      if (hasPause) {
+        currentTime += 100;
+        _timeline.add(_HighlightEvent(timeMs: currentTime, charIndex: wordEnd));
+      }
+
+      currentTextPos = wordEnd;
+    }
+
+    _totalReadingTimeMs = currentTime;
   }
 
   void _onReadingFinished() {
     if (_isPaused) return;
-
-    // 1. La cuenta regresiva comenzará 500ms luego que termine el audio.
     Future.delayed(const Duration(milliseconds: 500), () {
       if (mounted && !_isPaused) {
         _startDecisionPhase();
@@ -194,131 +338,7 @@ class _PreparationPageState extends State<PreparationPage> {
       _countdown = 3;
       _countdownProgress = 0.0;
     });
-
-    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (!mounted || _isPaused) {
-        timer.cancel();
-        return;
-      }
-      setState(() {
-        if (_countdown > 1) {
-          _countdown--;
-          _countdownProgress += 0.33;
-        } else {
-          timer.cancel();
-          _countdown = 0;
-          _countdownProgress = 1.0;
-          _onDecisionPhaseTimeout();
-        }
-      });
-    });
-  }
-
-  // Simulated Voice Command Handler
-  void _onVoiceCommand(String command) {
-    if (_currentPhase != PreparationPhase.decision) return;
-
-    final l10n = AppLocalizations.of(context)!;
-    final cmd = command.toLowerCase().trim();
-
-    // English & Spanish commands
-    if (cmd == l10n.record.toLowerCase() ||
-        cmd == 'record' ||
-        cmd == 'grabar') {
-      _navigateToRecording();
-    } else if (cmd == 'volver' || cmd == 'return' || cmd == 'back') {
-      Navigator.pop(context);
-    }
-  }
-
-  void _navigateToRecording() {
-    _readingTimer?.cancel();
-    _countdownTimer?.cancel();
-    _flutterTts.stop();
-    _stopListening();
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const RecordingPage()),
-    );
-  }
-
-  void _onDecisionPhaseTimeout() {
-    _stopListening();
-    if (!mounted) return;
-
-    // Si está pausado, no avanzamos. El flujo se detiene aquí.
-    if (_isPaused) return;
-
-    Future.delayed(const Duration(seconds: 1), () {
-      // Re-verificamos la pausa después del retraso de 1 segundo
-      if (mounted && _currentPhase == PreparationPhase.decision && !_isPaused) {
-        _startFixationPhase();
-      }
-    });
-  }
-
-  void _togglePause() {
-    setState(() {
-      _isPaused = !_isPaused;
-      if (_isPaused) {
-        _flutterTts.stop();
-        _readingTimer?.cancel();
-        _countdownTimer?.cancel();
-        // 3, al presionar pausa no se debe deshabilitar el control por voz
-      } else {
-        if (_currentPhase == PreparationPhase.fixation) {
-          _flutterTts.speak(_scriptText);
-          _startFixationTimer();
-        } else {
-          _startDecisionTimer();
-        }
-      }
-    });
-  }
-
-  void _startFixationTimer() {
-    const interval = Duration(milliseconds: 50);
-    _readingTimer?.cancel();
-    _readingTimer = Timer.periodic(interval, (timer) {
-      if (!mounted || _currentPhase != PreparationPhase.fixation || _isPaused) {
-        timer.cancel();
-        return;
-      }
-      setState(() {
-        _currentFixationStep++;
-        _readingProgress = (_currentFixationStep / _fixationTotalSteps).clamp(
-          0.0,
-          1.0,
-        );
-        if (_currentFixationStep >= _fixationTotalSteps) {
-          timer.cancel();
-          if (kIsWeb) {
-            _onReadingFinished();
-          }
-        }
-      });
-    });
-  }
-
-  void _startDecisionTimer() {
-    _countdownTimer?.cancel();
-    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (!mounted || _isPaused) {
-        timer.cancel();
-        return;
-      }
-      setState(() {
-        if (_countdown > 1) {
-          _countdown--;
-          _countdownProgress += 0.33;
-        } else {
-          timer.cancel();
-          _countdown = 0;
-          _countdownProgress = 1.0;
-          _onDecisionPhaseTimeout();
-        }
-      });
-    });
+    _startDecisionTimer();
   }
 
   @override
@@ -413,7 +433,8 @@ class _PreparationPageState extends State<PreparationPage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                l10n.fragmentCount("1", "5").toUpperCase(),
+                "FRAGMENTO ${_currentSegmentIndex + 1} DE ${widget.analysis.segments.length}"
+                    .toUpperCase(),
                 style: TextStyle(
                   fontSize: 10,
                   fontWeight: FontWeight.bold,
@@ -428,7 +449,8 @@ class _PreparationPageState extends State<PreparationPage> {
           ClipRRect(
             borderRadius: BorderRadius.circular(999),
             child: LinearProgressIndicator(
-              value: 0.2,
+              value:
+                  (_currentSegmentIndex + 1) / widget.analysis.segments.length,
               backgroundColor: AppTheme.forest.withValues(alpha: 0.1),
               valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.forest),
               minHeight: 4,
@@ -468,14 +490,8 @@ class _PreparationPageState extends State<PreparationPage> {
   Widget _buildScriptHeader(AppLocalizations l10n) {
     return Row(
       children: [
-        Icon(
-          Icons.volume_up,
-          size: 18,
-          color: AppTheme.forest.withValues(alpha: 0.4),
-        ),
-        const SizedBox(width: 8),
         Text(
-          l10n.systemReads.toUpperCase(),
+          "SEGMENTO A GRABAR",
           style: TextStyle(
             fontSize: 10,
             fontWeight: FontWeight.bold,
@@ -488,46 +504,129 @@ class _PreparationPageState extends State<PreparationPage> {
   }
 
   Widget _buildHighlightedScript() {
-    // Split text into two parts based on progress
-    int charsToShow = (_scriptText.length * _readingProgress).round();
-    String finishedText = _scriptText.substring(0, charsToShow);
-    String remainingText = _scriptText.substring(charsToShow);
+    final segment = widget.analysis.segments[_currentSegmentIndex];
+    final text = segment.text;
+    final emphasisRefs = _parseReferences(segment.direction.emphasis);
+    final pauseRefs = _parseReferences(segment.direction.pauses);
 
-    // 2. mientras esté activa la cuenta regresiva el texto debe aparecer como deshabilitado
+    // Identificar rangos de énfasis (negrita)
+    List<RangeValues> emphasisRanges = [];
+    for (var ref in emphasisRefs) {
+      int start = 0;
+      while ((start = text.indexOf(ref, start)) != -1) {
+        emphasisRanges.add(
+          RangeValues(start.toDouble(), (start + ref.length).toDouble()),
+        );
+        start += ref.length;
+      }
+    }
+
+    // Identificar puntos de pausa
+    List<int> pausePoints = [];
+    final punctuationRegex = RegExp(r'[.,;:!?]');
+    for (var ref in pauseRefs) {
+      int start = 0;
+      while ((start = text.indexOf(ref, start)) != -1) {
+        int endOfRef = start + ref.length;
+        if (endOfRef < text.length &&
+            punctuationRegex.hasMatch(text[endOfRef])) {
+          pausePoints.add(endOfRef + 1);
+        } else {
+          pausePoints.add(endOfRef);
+        }
+        start += ref.length;
+      }
+    }
+    pausePoints = pausePoints.toSet().toList()..sort();
+
+    // Construir los spans usando marcadores
+    final Set<int> markers = {0, text.length};
+    for (var r in emphasisRanges) {
+      markers.add(r.start.toInt());
+      markers.add(r.end.toInt());
+    }
+    for (var p in pausePoints) {
+      markers.add(p);
+    }
+
+    final List<int> sortedMarkers = markers.toList()..sort();
+    final List<InlineSpan> spans = [];
+
+    // Lógica de progreso de lectura (solo para el color base)
+    int charsToShow = _charsReadCount;
+
+    for (int i = 0; i < sortedMarkers.length - 1; i++) {
+      int start = sortedMarkers[i];
+      int end = sortedMarkers[i + 1];
+
+      if (pausePoints.contains(start)) {
+        spans.add(_buildPauseIcon());
+      }
+
+      if (start < end) {
+        String chunk = text.substring(start, end);
+        bool isBold = emphasisRanges.any(
+          (r) => start >= r.start && end <= r.end,
+        );
+
+        // Determinar si este chunk ya fue "leído"
+        bool isRead = start < charsToShow;
+        final Color baseColor = isBold
+            ? const Color(0xFFC2410C)
+            : AppTheme.forest;
+
+        spans.add(
+          TextSpan(
+            text: chunk,
+            style: TextStyle(
+              fontSize: 30,
+              fontWeight: isBold ? FontWeight.bold : FontWeight.w600,
+              height: 1.3,
+              letterSpacing: -0.5,
+              color: isRead ? baseColor : baseColor.withValues(alpha: 0.5),
+            ),
+          ),
+        );
+      }
+    }
+
+    if (pausePoints.contains(text.length)) {
+      spans.add(_buildPauseIcon());
+    }
+
     final bool isDisabled = _currentPhase == PreparationPhase.decision;
 
     return AnimatedOpacity(
       duration: const Duration(milliseconds: 300),
       opacity: isDisabled ? 0.3 : 1.0,
-      child: Text.rich(
-        TextSpan(
-          children: [
-            TextSpan(
-              text: finishedText,
-              style: TextStyle(
-                fontSize: 30,
-                fontWeight: FontWeight.w600,
-                color: isDisabled ? AppTheme.textMuted : AppTheme.forest,
-                height: 1.3,
-                letterSpacing: -0.5,
-              ),
-            ),
-            TextSpan(
-              text: remainingText,
-              style: TextStyle(
-                fontSize: 30,
-                fontWeight: FontWeight.w600,
-                color: isDisabled
-                    ? AppTheme.textMuted.withValues(alpha: 0.3)
-                    : AppTheme.forest.withValues(alpha: 0.3),
-                height: 1.3,
-                letterSpacing: -0.5,
-              ),
-            ),
-          ],
+      child: Text.rich(TextSpan(children: spans)),
+    );
+  }
+
+  WidgetSpan _buildPauseIcon() {
+    return WidgetSpan(
+      alignment: PlaceholderAlignment.middle,
+      child: Container(
+        width: 28,
+        height: 28,
+        margin: const EdgeInsets.symmetric(horizontal: 6),
+        decoration: const BoxDecoration(
+          color: Color(0xFFF1F5F9),
+          shape: BoxShape.circle,
+        ),
+        child: const Icon(
+          Icons.pause_rounded,
+          size: 16,
+          color: Color(0xFF94A3B8),
         ),
       ),
     );
+  }
+
+  List<String> _parseReferences(String input) {
+    if (input.isEmpty) return [];
+    final regex = RegExp(r"'([^']*)'");
+    return regex.allMatches(input).map((m) => m.group(1)!).toList();
   }
 
   Widget _buildCentralVisual(AppLocalizations l10n) {
@@ -856,6 +955,13 @@ class _PreparationPageState extends State<PreparationPage> {
       ],
     );
   }
+}
+
+class _HighlightEvent {
+  final int timeMs;
+  final int charIndex;
+
+  _HighlightEvent({required this.timeMs, required this.charIndex});
 }
 
 class _SoundWaveAnimation extends StatefulWidget {
