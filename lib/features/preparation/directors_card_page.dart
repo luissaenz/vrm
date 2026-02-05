@@ -75,7 +75,7 @@ class _DirectorsCardPageState extends State<DirectorsCardPage> {
           onTap: () => Navigator.pop(context),
         ),
         Text(
-          "DETALLE DE SEGMENTO",
+          "FRAGMENT DETAIL",
           style: TextStyle(
             fontSize: 10,
             fontWeight: FontWeight.bold,
