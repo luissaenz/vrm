@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ProjectState",
+  "description": "Estado completo de un proyecto (Persistencia local en JSON)",
+  "type": "object",
+  "properties": {
+    "project_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Identificador único del proyecto"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Fecha de creación del proyecto"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Última actualización"
+    },
+    "input": {
+      "description": "Datos de ingesta (InputSchema)",
+      "type": "object"
+    },
+    "script": {
+      "description": "Guion procesado (ScriptBundle)",
+      "type": "object"
+    },
+    "assets": {
+      "type": "array",
+      "description": "Lista de assets de video generados",
+      "items": {
+        "type": "object"
+      }
+    }
+  },
+  "required": ["project_id", "created_at"],
+  "additionalProperties": false
+}

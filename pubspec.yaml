@@ -52,6 +52,9 @@ dependencies:
     sdk: flutter
   flutter_tts: ^4.2.5
   speech_to_text: ^7.3.0
+  
+  # Plugin Architecture
+  uuid: ^4.0.0
 
 dev_dependencies:
   flutter_test:

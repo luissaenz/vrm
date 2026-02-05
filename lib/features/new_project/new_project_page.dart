@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../shared/widgets/header.dart';
@@ -7,7 +6,6 @@ import '../../shared/widgets/script_editor.dart';
 import '../fragments/fragment_organization_page.dart';
 import '../../l10n/app_localizations.dart';
 import '../../core/theme.dart';
-import '../../core/api_service.dart';
 import '../onboarding/data/onboarding_repository.dart';
 import './models/script_analysis.dart';
 import '../../shared/widgets/widget_progress.dart';
@@ -26,8 +24,6 @@ class _NewProjectPageState extends State<NewProjectPage> {
   bool _isLoading = false;
 
   // Parámetros de ritmo dinámicos
-  double _segmentMinTime = 3.0;
-  double _segmentMaxTime = 10.0;
   double _segmentRateWpm = 160.0;
 
   @override
@@ -41,8 +37,6 @@ class _NewProjectPageState extends State<NewProjectPage> {
     final profile = await _repository.getUserProfile();
     if (mounted) {
       setState(() {
-        _segmentMinTime = profile.segmentMinTime;
-        _segmentMaxTime = profile.segmentMaxTime;
         _segmentRateWpm = profile.segmentRateWpm;
       });
     }
@@ -60,9 +54,9 @@ class _NewProjectPageState extends State<NewProjectPage> {
     setState(() => _isLoading = true);
 
     try {
-      // 1. Obtener la identidad del usuario
-      final profile = await _repository.getUserProfile();
-      final profileId = ApiService.mapIdentityToProfileId(profile.identity);
+      // 1. Obtener la identidad del usuario (para uso futuro con API)
+      // final profile = await _repository.getUserProfile();
+      // final profileId = ApiService.mapIdentityToProfileId(profile.identity);
 
       /* 
       // 2. Llamar API Real

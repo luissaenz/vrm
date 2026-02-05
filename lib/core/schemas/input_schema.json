@@ -1,0 +1,28 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "InputSchema",
+  "description": "Contrato de ingesta de ideas (Manual, RSS, Tendencias, API)",
+  "type": "object",
+  "properties": {
+    "idea_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Identificador único de la idea"
+    },
+    "raw_topic": {
+      "type": "string",
+      "description": "Tema o título principal ingresado por el usuario"
+    },
+    "source_type": {
+      "type": "string",
+      "enum": ["manual", "rss", "api"],
+      "description": "Tipo de fuente de donde proviene la idea"
+    },
+    "context_data": {
+      "type": "string",
+      "description": "Texto plano adicional para procesar (descripción, notas, etc.)"
+    }
+  },
+  "required": ["idea_id", "raw_topic", "source_type"],
+  "additionalProperties": false
+}

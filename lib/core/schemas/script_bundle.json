@@ -1,0 +1,48 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ScriptBundle",
+  "description": "Guion micro-fragmentado (Chunking) - Lista enlazada de fragmentos",
+  "type": "object",
+  "properties": {
+    "script_id": {
+      "type": "string",
+      "format": "uuid",
+      "description": "Identificador único del guion"
+    },
+    "total_chunks": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Número total de fragmentos (chunks)"
+    },
+    "chunks": {
+      "type": "array",
+      "description": "Lista ordenada de micro-fragmentos",
+      "items": {
+        "type": "object",
+        "properties": {
+          "order": {
+            "type": "integer",
+            "minimum": 1,
+            "description": "Posición secuencial del fragmento"
+          },
+          "text": {
+            "type": "string",
+            "description": "Texto del fragmento a grabar"
+          },
+          "estimated_duration_sec": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Duración estimada en segundos"
+          },
+          "emotional_tone": {
+            "type": "string",
+            "description": "Tono emocional sugerido (neutral, excited, serious, etc.)"
+          }
+        },
+        "required": ["order", "text"]
+      }
+    }
+  },
+  "required": ["script_id", "total_chunks", "chunks"],
+  "additionalProperties": false
+}
