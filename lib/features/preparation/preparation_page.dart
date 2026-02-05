@@ -6,8 +6,7 @@ import 'package:speech_to_text/speech_to_text.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import '../../l10n/app_localizations.dart';
 import '../../core/theme.dart';
-// TODO: Implement RecordingPage
-// import '../recording/recording_page.dart';
+import '../recording/recording_page.dart';
 
 import '../new_project/models/script_analysis.dart';
 
@@ -200,12 +199,12 @@ class _PreparationPageState extends State<PreparationPage> {
     _countdownTimer?.cancel();
     _flutterTts.stop();
     _stopListening();
-    // TODO: Implement RecordingPage and uncomment navigation
-    debugPrint('RecordingPage not yet implemented');
-    // Navigator.push(
-    //   context,
-    //   MaterialPageRoute(builder: (context) => const RecordingPage()),
-    // );
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => RecordingPage(analysis: widget.analysis),
+      ),
+    );
   }
 
   void _togglePause() {

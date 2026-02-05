@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../../shared/widgets/header.dart';
 import '../../shared/widgets/step_indicator.dart';
 import '../preparation/directors_card_page.dart';
-import '../preparation/preparation_page.dart';
+import '../recording/recording_page.dart';
 import '../../l10n/app_localizations.dart';
 import '../../core/theme.dart';
 
@@ -195,7 +195,7 @@ class _FragmentOrganizationPageState extends State<FragmentOrganizationPage> {
                   context,
                   MaterialPageRoute(
                     builder: (context) =>
-                        PreparationPage(analysis: widget.analysis!),
+                        RecordingPage(analysis: widget.analysis!),
                   ),
                 );
               },
