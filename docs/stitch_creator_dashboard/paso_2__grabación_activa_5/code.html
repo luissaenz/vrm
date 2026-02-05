@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html class="dark" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>HUD: Guía de Comandos de Voz</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "forest-green": "#2D4B44",
+                        "forest-active": "#4A6E65",
+                        "forest-accent": "#2DD4BF",
+                        "background-dark": "#0A0A0A",
+                        "voice-blue": "#3B82F6",
+                    },
+                    fontFamily: {
+                        "sans": ["Space Grotesk", "sans-serif"]
+                    }
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        @layer utilities {
+            .glass-morphism {
+                @apply bg-black/40 backdrop-blur-xl border border-white/10;
+            }
+            .hud-blur {
+                @apply bg-forest-green/20 backdrop-blur-md border-r border-white/5;
+            }
+        }
+    </style>
+<style>
+        body {
+            min-height: 100dvh;
+            background-color: #000;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-black font-sans antialiased overflow-hidden">
+<div class="relative h-screen w-full flex flex-col bg-black overflow-hidden">
+<div class="absolute inset-0 z-0">
+<img alt="Portrait for recording" class="w-full h-full object-cover opacity-60" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCL9dX83u1D_SXYW2N8R_Ucyk65smO7Bfs2tSpBIvic_sGgaEbOxpatjkiPmJi9HHiCEq2Kjt9-qsDxuEkokpWlep477_ICd15Asg_LSnmkZ0NzOiJh6P1jfGpNGMAkioVWTg6poYl9S1-GVHu7QRpE124-VNuHHLQEwfB-5FszKeHIm2bBkO4KmMFtLmxjxnOqJihZ1Y-eG5N3yl9QsDaP1R2NgOTG0yEvSQzyDdgD2eSWGAvsgVEgTfpDS30peMYFAwIcDergpfop"/>
+<div class="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/80"></div>
+</div>
+<div class="absolute inset-0 z-10 pointer-events-none opacity-10">
+<div class="grid grid-cols-3 grid-rows-3 h-full w-full">
+<div class="border-r border-b border-white/30"></div>
+<div class="border-r border-b border-white/30"></div>
+<div class="border-b border-white/30"></div>
+<div class="border-r border-b border-white/30"></div>
+<div class="border-r border-b border-white/30"></div>
+<div class="border-b border-white/30"></div>
+<div class="border-r border-white/30"></div>
+<div class="border-r border-white/30"></div>
+<div></div>
+</div>
+</div>
+<div class="absolute inset-y-0 left-0 z-50 w-64 hud-blur transform transition-transform duration-500 flex flex-col pt-16 px-6">
+<div class="mb-8">
+<div class="flex items-center gap-2 mb-6">
+<span class="material-symbols-outlined text-forest-accent text-lg">record_voice_over</span>
+<h2 class="text-white font-bold text-xs tracking-widest uppercase">Comandos</h2>
+</div>
+<div class="space-y-6">
+<div>
+<p class="text-[10px] text-forest-accent/60 font-bold uppercase tracking-widest mb-3">Navegación</p>
+<ul class="space-y-3">
+<li class="group">
+<p class="text-white/90 text-sm font-medium">"Siguiente"</p>
+<p class="text-[10px] text-white/40">Avanza al siguiente fragmento</p>
+</li>
+<li class="group">
+<p class="text-white/90 text-sm font-medium">"Repetir"</p>
+<p class="text-[10px] text-white/40">Reinicia la toma actual</p>
+</li>
+</ul>
+</div>
+<div>
+<p class="text-[10px] text-forest-accent/60 font-bold uppercase tracking-widest mb-3">Control</p>
+<ul class="space-y-3">
+<li class="group">
+<p class="text-white/90 text-sm font-medium">"Pausar"</p>
+<p class="text-[10px] text-white/40">Detiene la grabación</p>
+</li>
+<li class="group">
+<p class="text-white/90 text-sm font-medium">"Dame más tiempo"</p>
+<p class="text-[10px] text-white/40">Extiende el teleprompter</p>
+</li>
+</ul>
+</div>
+</div>
+</div>
+<div class="mt-auto pb-12">
+<div class="p-4 rounded-2xl bg-white/5 border border-white/10">
+<p class="text-[10px] text-white/60 leading-relaxed italic">
+                        "Consejo: Habla con naturalidad, el asistente te escucha en tiempo real."
+                    </p>
+</div>
+</div>
+</div>
+<div class="relative z-40 w-full pt-12 px-6 flex flex-col items-center">
+<div class="w-full flex items-center justify-between mb-4 px-2">
+<button class="flex items-center justify-center size-10 rounded-full bg-black/30 backdrop-blur-md text-white">
+<span class="material-symbols-outlined text-2xl">close</span>
+</button>
+<div class="px-4 py-1.5 rounded-full bg-black/30 backdrop-blur-md">
+<span class="text-white text-[10px] font-bold tracking-[0.2em] uppercase">Fragmento 2 / 5</span>
+</div>
+<button class="flex items-center justify-center size-10 rounded-full bg-black/30 backdrop-blur-md text-white">
+<span class="material-symbols-outlined text-2xl">cameraswitch</span>
+</button>
+</div>
+<div class="w-full glass-morphism rounded-[2rem] p-6 shadow-2xl opacity-40">
+<p class="text-center text-xl font-medium leading-relaxed tracking-tight">
+<span class="text-white/40">Hola a todos, </span>
+<span class="text-white">hoy vamos a ver lo increíble que es esto para crear contenido rápido.</span>
+</p>
+</div>
+</div>
+<div class="relative z-20 flex-1 flex items-center justify-center">
+<div class="relative">
+<div class="absolute inset-0 size-32 bg-voice-blue/20 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2 left-1/2 top-1/2"></div>
+<div class="size-24 rounded-full bg-gradient-to-tr from-voice-blue to-blue-400 shadow-[0_0_50px_rgba(59,130,246,0.5)] border border-white/20 flex items-center justify-center">
+<div class="size-20 rounded-full bg-black/10 backdrop-blur-sm border border-white/10 flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-3xl opacity-80">mic</span>
+</div>
+</div>
+</div>
+</div>
+<div class="relative z-40 pb-12 px-8 w-full flex flex-col items-center gap-8">
+<div class="flex items-center gap-3 bg-black/40 px-4 py-2 rounded-full backdrop-blur-md">
+<div class="relative flex items-center justify-center size-2">
+<span class="absolute inline-flex h-full w-full rounded-full bg-voice-blue opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2 w-2 bg-voice-blue"></span>
+</div>
+<p class="text-white/70 text-[11px] font-bold tracking-[0.15em] uppercase">
+                    Modo Escucha: Standby
+                </p>
+</div>
+<div class="w-full flex items-center justify-between">
+<button class="flex flex-col items-center gap-2 group">
+<div class="flex items-center justify-center size-12 rounded-full glass-morphism text-white">
+<span class="material-symbols-outlined text-2xl">grid_view</span>
+</div>
+<span class="text-[9px] text-white/50 font-bold tracking-widest uppercase">Grid</span>
+</button>
+<button class="relative flex items-center justify-center size-24 rounded-full bg-white/20 backdrop-blur-md border border-white/30 shadow-2xl active:scale-95 transition-transform">
+<div class="size-16 rounded-full bg-white/10 border border-white/20 flex items-center justify-center">
+<div class="size-8 bg-white/80 rounded-sm"></div>
+</div>
+</button>
+<button class="flex flex-col items-center gap-2 group">
+<div class="flex items-center justify-center size-12 rounded-full glass-morphism text-white">
+<span class="material-symbols-outlined text-2xl">menu</span>
+</div>
+<span class="text-[9px] text-white/50 font-bold tracking-widest uppercase">Menú</span>
+</button>
+</div>
+</div>
+<div class="h-6 w-full"></div>
+</div>
+
+</body></html>

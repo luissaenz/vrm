@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html class="dark" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Estado Agente: Comando Detectado</title>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "forest-green": "#2D4B44",
+                        "forest-active": "#4A6E65",
+                        "forest-accent": "#2DD4BF",
+                        "forest-glow": "#34D399",
+                        "background-dark": "#0A0A0A",
+                    },
+                    fontFamily: {
+                        "sans": ["Space Grotesk", "sans-serif"]
+                    }
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        @layer utilities {
+            .glass-morphism {
+                @apply bg-black/40 backdrop-blur-xl border border-white/10;
+            }
+            .agent-glow {
+                box-shadow: 0 0 40px 10px rgba(45, 212, 191, 0.4);
+            }
+            .text-glow {
+                text-shadow: 0 0 15px rgba(45, 212, 191, 0.6);
+            }
+        }
+    </style>
+<style>
+        body {
+            min-height: 100dvh;
+            background-color: #000;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-black font-sans antialiased overflow-hidden">
+<div class="relative h-screen w-full flex flex-col bg-black overflow-hidden">
+<div class="absolute inset-0 z-0">
+<img alt="Portrait for recording" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCL9dX83u1D_SXYW2N8R_Ucyk65smO7Bfs2tSpBIvic_sGgaEbOxpatjkiPmJi9HHiCEq2Kjt9-qsDxuEkokpWlep477_ICd15Asg_LSnmkZ0NzOiJh6P1jfGpNGMAkioVWTg6poYl9S1-GVHu7QRpE124-VNuHHLQEwfB-5FszKeHIm2bBkO4KmMFtLmxjxnOqJihZ1Y-eG5N3yl9QsDaP1R2NgOTG0yEvSQzyDdgD2eSWGAvsgVEgTfpDS30peMYFAwIcDergpfop"/>
+<div class="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/70"></div>
+</div>
+<div class="absolute inset-0 z-10 pointer-events-none opacity-20">
+<div class="grid grid-cols-3 grid-rows-3 h-full w-full">
+<div class="border-r border-b border-white/30"></div>
+<div class="border-r border-b border-white/30"></div>
+<div class="border-b border-white/30"></div>
+<div class="border-r border-b border-white/30"></div>
+<div class="border-r border-b border-white/30"></div>
+<div class="border-b border-white/30"></div>
+<div class="border-r border-white/30"></div>
+<div class="border-r border-white/30"></div>
+<div></div>
+</div>
+</div>
+<div class="relative z-40 w-full pt-12 px-6 flex flex-col items-center">
+<div class="w-full flex items-center justify-between mb-4 px-2">
+<button class="flex items-center justify-center size-10 rounded-full bg-black/30 backdrop-blur-md text-white">
+<span class="material-symbols-outlined text-2xl">close</span>
+</button>
+<div class="px-4 py-1.5 rounded-full bg-black/30 backdrop-blur-md">
+<span class="text-white text-[10px] font-bold tracking-[0.2em] uppercase">Fragmento 3 / 5</span>
+</div>
+<button class="flex items-center justify-center size-10 rounded-full bg-black/30 backdrop-blur-md text-white">
+<span class="material-symbols-outlined text-2xl">cameraswitch</span>
+</button>
+</div>
+<div class="w-full glass-morphism rounded-[2rem] p-6 shadow-2xl relative overflow-hidden">
+<div class="transition-all duration-300 transform">
+<p class="text-center text-xl font-medium leading-relaxed tracking-tight">
+<span class="text-white">Ahora veremos cómo </span>
+<span class="text-white relative inline-block">
+                            la automatización
+                            <span class="absolute -bottom-1 left-0 w-full h-0.5 bg-forest-accent rounded-full"></span>
+</span>
+<span class="text-white"> transforma tu flujo de trabajo diario por completo.</span>
+</p>
+</div>
+</div>
+</div>
+<div class="relative z-20 flex-1 flex items-center justify-center pointer-events-none">
+</div>
+<div class="relative z-40 pb-12 px-8 w-full flex flex-col items-center gap-8">
+<div class="flex flex-col items-center gap-2">
+<div class="flex items-center gap-2.5 px-4 py-2 bg-forest-accent/20 backdrop-blur-xl border border-forest-accent/30 rounded-full shadow-[0_0_20px_rgba(45,212,191,0.2)]">
+<span class="text-forest-accent text-sm">✅</span>
+<p class="text-forest-accent text-[12px] font-bold tracking-[0.1em] uppercase text-glow">
+                        Comando detectado: SIGUIENTE
+                    </p>
+</div>
+</div>
+<div class="w-full flex items-center justify-between">
+<button class="flex flex-col items-center gap-2 group">
+<div class="flex items-center justify-center size-12 rounded-full glass-morphism text-white group-active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-2xl">grid_view</span>
+</div>
+<span class="text-[9px] text-white/50 font-bold tracking-widest uppercase">Grid</span>
+</button>
+<button class="relative flex items-center justify-center size-24 rounded-full bg-white transition-all duration-200">
+<div class="size-20 bg-forest-accent rounded-full agent-glow flex items-center justify-center">
+<div class="size-8 bg-forest-green rounded-md"></div>
+</div>
+<div class="absolute inset-[-8px] rounded-full border-2 border-forest-accent/50 scale-105"></div>
+</button>
+<button class="flex flex-col items-center gap-2 group">
+<div class="flex items-center justify-center size-12 rounded-full glass-morphism text-white group-active:scale-90 transition-transform">
+<span class="material-symbols-outlined text-2xl">menu</span>
+</div>
+<span class="text-[9px] text-white/50 font-bold tracking-widest uppercase">Menú</span>
+</button>
+</div>
+</div>
+<div class="h-6 w-full"></div>
+</div>
+
+</body></html>

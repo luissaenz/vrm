@@ -7,7 +7,8 @@ import 'package:vrm_app/shared/widgets/action_card.dart';
 import 'package:vrm_app/shared/widgets/project_card.dart';
 import 'package:vrm_app/shared/widgets/calendar_day.dart';
 import 'package:vrm_app/features/new_project/new_project_page.dart';
-import 'package:vrm_app/features/influencer_profile/influencer_profile_page.dart';
+// TODO: Implement InfluencerProfilePage
+// import 'package:vrm_app/features/influencer_profile/influencer_profile_page.dart';
 import 'package:vrm_app/features/onboarding/data/onboarding_repository.dart';
 import 'package:vrm_app/features/onboarding/data/user_profile.dart';
 import '../../core/theme.dart';
@@ -86,13 +87,17 @@ class _DashboardPageState extends State<DashboardPage> {
                           icon: Icons.person_search_rounded,
                           actionIcon: Icons.arrow_forward_rounded,
                           onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    const InfluencerProfilePage(),
-                              ),
+                            // TODO: Implement InfluencerProfilePage
+                            debugPrint(
+                              'InfluencerProfilePage not yet implemented',
                             );
+                            // Navigator.push(
+                            //   context,
+                            //   MaterialPageRoute(
+                            //     builder: (context) =>
+                            //         const InfluencerProfilePage(),
+                            //   ),
+                            // );
                           },
                         ),
                       ],
@@ -367,12 +372,14 @@ class _DashboardPageState extends State<DashboardPage> {
                 l10n.profile,
                 false,
                 () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const InfluencerProfilePage(),
-                    ),
-                  );
+                  // TODO: Implement InfluencerProfilePage
+                  debugPrint('InfluencerProfilePage not yet implemented');
+                  // Navigator.push(
+                  //   context,
+                  //   MaterialPageRoute(
+                  //     builder: (context) => const InfluencerProfilePage(),
+                  //   ),
+                  // );
                 },
               ),
             ],

@@ -10,6 +10,7 @@ import '../onboarding/data/onboarding_repository.dart';
 import './models/script_analysis.dart';
 import '../../shared/widgets/widget_progress.dart';
 import '../../shared/widgets/widget_estimation.dart';
+import '../assistant/script_studio_page.dart';
 
 class NewProjectPage extends StatefulWidget {
   const NewProjectPage({super.key});
@@ -363,9 +364,14 @@ class _NewProjectPageState extends State<NewProjectPage> {
         ),
       ],
       trailing: VRMScriptEditor.actionButton(
-        onPressed: _isLoading ? () {} : () => _optimizeScript(),
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const ScriptStudioPage()),
+          );
+        },
         icon: Icons.auto_awesome,
-        label: _isLoading ? "Cargando..." : "Asistente AI",
+        label: "Asistente AI",
         foregroundColor: AppTheme.forest,
       ),
     );
