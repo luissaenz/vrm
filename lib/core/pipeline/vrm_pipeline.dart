@@ -7,6 +7,7 @@ import '../models/input_schema.dart';
 import '../models/script_bundle.dart';
 import '../models/asset_manifest.dart';
 import '../exceptions/pipeline_exceptions.dart';
+import '../services/schema_validator.dart';
 
 /// Pipeline Lineal Modular (NO Orquestador IA)
 /// Actúa como invocador determinista de plugins intercambiables
@@ -37,6 +38,9 @@ class VRMPipeline {
         () => ideaSource.fetchIdea(initialParams),
       );
 
+      // AUTOMATIZACIÓN: Validar contrato de ingesta
+      await SchemaValidator.validate('input_schema', input.toJson());
+
       // Fase 2: Procesar guion
       debugPrint(
         '[Pipeline] Stage 2: Processing script with plugin ${scriptProcessor.pluginId}',
@@ -48,6 +52,9 @@ class VRMPipeline {
         scriptProcessor.pluginId,
         () => scriptProcessor.process(input, scriptConfig),
       );
+
+      // AUTOMATIZACIÓN: Validar contrato de guion
+      await SchemaValidator.validate('script_bundle', script.toJson());
 
       // Fase 3: Post-procesar video
       debugPrint(
@@ -66,6 +73,9 @@ class VRMPipeline {
         postProcessor.pluginId,
         () => postProcessor.enhance(rawAsset),
       );
+
+      // AUTOMATIZACIÓN: Validar contrato de asset
+      await SchemaValidator.validate('asset_manifest', processedAsset.toJson());
 
       // Fase 4: Métricas
       debugPrint(
