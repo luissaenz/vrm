@@ -34,6 +34,7 @@ class _RecordingPageState extends State<RecordingPage>
 
   // Theme colors from HTML
   static const Color _forestGreen = Color(0xFF2D4B44);
+  static const Color _recordingRed = Color(0xFFFF3B30);
   static const Color _backgroundDark = Color(0xFF0A0A0A);
 
   @override
@@ -417,23 +418,53 @@ class _RecordingPageState extends State<RecordingPage>
             borderRadius: BorderRadius.circular(999),
             child: BackdropFilter(
               filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-              child: Container(
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: 6,
                 ),
                 decoration: BoxDecoration(
-                  color: Colors.black.withValues(alpha: 0.3),
+                  color: _recordingState == RecordingState.recording
+                      ? _recordingRed.withValues(alpha: 0.9)
+                      : Colors.black.withValues(alpha: 0.3),
                   borderRadius: BorderRadius.circular(999),
                 ),
-                child: Text(
-                  'FRAGMENTO $current / $total',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 2.0,
-                  ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (_recordingState == RecordingState.recording) ...[
+                      AnimatedBuilder(
+                        animation: _pulseAnimation,
+                        builder: (context, child) {
+                          return Container(
+                            width: 6,
+                            height: 6,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(
+                                alpha:
+                                    0.5 +
+                                    (0.5 * (1.4 - _pulseAnimation.value) / 0.4),
+                              ),
+                              shape: BoxShape.circle,
+                            ),
+                          );
+                        },
+                      ),
+                      const SizedBox(width: 8),
+                    ],
+                    Text(
+                      _recordingState == RecordingState.recording
+                          ? 'GRABANDO FRAGMENTO $current / $total'
+                          : 'FRAGMENTO $current / $total',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 2.0,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -686,7 +717,7 @@ class _RecordingPageState extends State<RecordingPage>
         child: Stack(
           alignment: Alignment.center,
           children: [
-            // Outer ring
+            // Outer border (separated 6px from button)
             AnimatedContainer(
               duration: const Duration(milliseconds: 300),
               width: 108,
@@ -694,9 +725,11 @@ class _RecordingPageState extends State<RecordingPage>
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: Colors.white.withValues(
-                    alpha: isCountingDown ? 0.1 : 0.2,
-                  ),
+                  color: isRecording
+                      ? Colors.white.withValues(alpha: 0.2)
+                      : Colors.white.withValues(
+                          alpha: isCountingDown ? 0.05 : 0.1,
+                        ),
                   width: 1,
                 ),
               ),
@@ -716,8 +749,10 @@ class _RecordingPageState extends State<RecordingPage>
                     ? []
                     : [
                         BoxShadow(
-                          color: Colors.white.withValues(alpha: 0.3),
-                          blurRadius: 30,
+                          color: isRecording
+                              ? _recordingRed.withValues(alpha: 0.4)
+                              : Colors.white.withValues(alpha: 0.3),
+                          blurRadius: isRecording ? 20 : 30,
                           spreadRadius: 0,
                         ),
                       ],
@@ -727,13 +762,13 @@ class _RecordingPageState extends State<RecordingPage>
             // Inner square/circle
             AnimatedContainer(
               duration: const Duration(milliseconds: 200),
-              width: 32,
-              height: 32,
+              width: isRecording ? 40 : 32,
+              height: isRecording ? 40 : 32,
               decoration: BoxDecoration(
                 color: isCountingDown
                     ? _forestGreen.withValues(alpha: 0.5)
-                    : _forestGreen,
-                borderRadius: BorderRadius.circular(isRecording ? 4 : 6),
+                    : (isRecording ? _recordingRed : _forestGreen),
+                borderRadius: BorderRadius.circular(isRecording ? 8 : 6),
               ),
             ),
           ],
