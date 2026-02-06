@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
+import 'dart:async';
+import 'dart:math';
 import '../new_project/models/script_analysis.dart';
+
+enum RecordingState { idle, countdown, recording }
 
 class RecordingPage extends StatefulWidget {
   final ScriptAnalysis analysis;
@@ -17,15 +21,19 @@ class RecordingPage extends StatefulWidget {
 }
 
 class _RecordingPageState extends State<RecordingPage>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
-  bool _isRecording = false;
-  int _currentWordIndex = 0;
+  late AnimationController _countdownController;
+  late Animation<double> _countdownProgress;
+
+  RecordingState _recordingState = RecordingState.idle;
+  final int _currentWordIndex = 0;
+  int _countdownValue = 3;
+  Timer? _countdownTimer;
 
   // Theme colors from HTML
   static const Color _forestGreen = Color(0xFF2D4B44);
-  static const Color _forestAccent = Color(0xFF2DD4BF);
   static const Color _backgroundDark = Color(0xFF0A0A0A);
 
   @override
@@ -39,19 +47,23 @@ class _RecordingPageState extends State<RecordingPage>
     _pulseAnimation = Tween<double>(begin: 1.0, end: 1.4).animate(
       CurvedAnimation(parent: _pulseController, curve: Curves.easeInOut),
     );
+
+    _countdownController = AnimationController(
+      duration: const Duration(milliseconds: 1000),
+      vsync: this,
+    );
+
+    _countdownProgress = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _countdownController, curve: Curves.linear),
+    );
   }
 
   @override
   void dispose() {
+    _countdownTimer?.cancel();
     _pulseController.dispose();
+    _countdownController.dispose();
     super.dispose();
-  }
-
-  String get _currentSegmentText {
-    if (widget.currentFragmentIndex < widget.analysis.segments.length) {
-      return widget.analysis.segments[widget.currentFragmentIndex].text;
-    }
-    return "Hola a todos, hoy vamos a ver lo increíble que es esto para crear contenido rápido.";
   }
 
   List<InlineSpan> _buildTextSpans() {
@@ -181,10 +193,100 @@ class _RecordingPageState extends State<RecordingPage>
     return regex.allMatches(input).map((m) => m.group(1)!).toList();
   }
 
+  void _startCountdown() {
+    setState(() {
+      _recordingState = RecordingState.countdown;
+      _countdownValue = 3;
+    });
+
+    // Start first ring animation
+    _countdownController.forward(from: 0.0);
+
+    _countdownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (_countdownValue > 1) {
+        setState(() {
+          _countdownValue--;
+        });
+        // Restart ring animation for next number
+        _countdownController.forward(from: 0.0);
+      } else {
+        timer.cancel();
+        _startActualRecording();
+      }
+    });
+  }
+
+  void _startActualRecording() {
+    setState(() {
+      _recordingState = RecordingState.recording;
+    });
+    // TODO: Start actual camera recording
+  }
+
+  void _stopRecording() {
+    setState(() {
+      _recordingState = RecordingState.idle;
+    });
+    // TODO: Stop camera and save recording
+  }
+
+  Widget _buildCountdownOverlay() {
+    return Stack(
+      children: [
+        // Black overlay (60% opacity)
+        Positioned.fill(
+          child: Container(color: Colors.black.withValues(alpha: 0.6)),
+        ),
+
+        // Countdown center
+        Center(
+          child: SizedBox(
+            width: 256,
+            height: 256,
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                // Progress ring
+                AnimatedBuilder(
+                  animation: _countdownProgress,
+                  builder: (context, child) {
+                    return CustomPaint(
+                      size: const Size(256, 256),
+                      painter: CountdownRingPainter(
+                        progress: _countdownProgress.value,
+                      ),
+                    );
+                  },
+                ),
+
+                // Countdown number with glow
+                Text(
+                  '$_countdownValue',
+                  style: TextStyle(
+                    fontSize: 120,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    shadows: [
+                      Shadow(
+                        color: Colors.white.withValues(alpha: 0.4),
+                        blurRadius: 40,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final totalFragments = widget.analysis.segments.length;
     final currentFragment = widget.currentFragmentIndex + 1;
+    final isCountingDown = _recordingState == RecordingState.countdown;
 
     return Scaffold(
       backgroundColor: Colors.black,
@@ -196,26 +298,33 @@ class _RecordingPageState extends State<RecordingPage>
           // Grid overlay (z-10)
           _buildGridOverlay(),
 
-          // UI Elements (z-40)
-          SafeArea(
-            child: Column(
-              children: [
-                // Top bar
-                _buildTopBar(currentFragment, totalFragments),
+          // UI Elements (z-40) with conditional dimming
+          AnimatedOpacity(
+            opacity: isCountingDown ? 0.4 : 1.0,
+            duration: const Duration(milliseconds: 300),
+            child: SafeArea(
+              child: Column(
+                children: [
+                  // Top bar
+                  _buildTopBar(currentFragment, totalFragments),
 
-                // Script text card
-                _buildScriptCard(),
+                  // Script text card
+                  _buildScriptCard(),
 
-                // Spacer
-                const Spacer(),
+                  // Spacer
+                  const Spacer(),
 
-                // Bottom controls
-                _buildBottomControls(),
+                  // Bottom controls
+                  _buildBottomControls(),
 
-                const SizedBox(height: 48),
-              ],
+                  const SizedBox(height: 48),
+                ],
+              ),
             ),
           ),
+
+          // Countdown overlay (shown only during countdown)
+          if (isCountingDown) _buildCountdownOverlay(),
         ],
       ),
     );
@@ -560,11 +669,16 @@ class _RecordingPageState extends State<RecordingPage>
   }
 
   Widget _buildRecordButton() {
+    final isCountingDown = _recordingState == RecordingState.countdown;
+    final isRecording = _recordingState == RecordingState.recording;
+
     return GestureDetector(
       onTap: () {
-        setState(() {
-          _isRecording = !_isRecording;
-        });
+        if (_recordingState == RecordingState.idle) {
+          _startCountdown();
+        } else if (_recordingState == RecordingState.recording) {
+          _stopRecording();
+        }
       },
       child: SizedBox(
         width: 108, // 96 + 12 (6px on each side)
@@ -573,32 +687,40 @@ class _RecordingPageState extends State<RecordingPage>
           alignment: Alignment.center,
           children: [
             // Outer ring
-            Container(
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
               width: 108,
               height: 108,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: Colors.white.withValues(alpha: 0.2),
+                  color: Colors.white.withValues(
+                    alpha: isCountingDown ? 0.1 : 0.2,
+                  ),
                   width: 1,
                 ),
               ),
             ),
 
             // White circle with shadow
-            Container(
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
               width: 96,
               height: 96,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Colors.white.withValues(
+                  alpha: isCountingDown ? 0.2 : 1.0,
+                ),
                 shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.white.withValues(alpha: 0.3),
-                    blurRadius: 30,
-                    spreadRadius: 0,
-                  ),
-                ],
+                boxShadow: isCountingDown
+                    ? []
+                    : [
+                        BoxShadow(
+                          color: Colors.white.withValues(alpha: 0.3),
+                          blurRadius: 30,
+                          spreadRadius: 0,
+                        ),
+                      ],
               ),
             ),
 
@@ -608,13 +730,60 @@ class _RecordingPageState extends State<RecordingPage>
               width: 32,
               height: 32,
               decoration: BoxDecoration(
-                color: _forestGreen,
-                borderRadius: BorderRadius.circular(_isRecording ? 4 : 6),
+                color: isCountingDown
+                    ? _forestGreen.withValues(alpha: 0.5)
+                    : _forestGreen,
+                borderRadius: BorderRadius.circular(isRecording ? 4 : 6),
               ),
             ),
           ],
         ),
       ),
     );
+  }
+}
+
+// Custom painter for countdown ring
+class CountdownRingPainter extends CustomPainter {
+  final double progress;
+
+  CountdownRingPainter({required this.progress});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = (size.width / 2) - 10;
+
+    // Background ring
+    final bgPaint = Paint()
+      ..color = Colors.white.withValues(alpha: 0.1)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.0;
+
+    canvas.drawCircle(center, radius, bgPaint);
+
+    // Progress ring
+    final progressPaint = Paint()
+      ..color = Colors.white.withValues(alpha: 0.8)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5
+      ..strokeCap = StrokeCap.round
+      ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4);
+
+    const startAngle = -pi / 2;
+    final sweepAngle = 2 * pi * progress;
+
+    canvas.drawArc(
+      Rect.fromCircle(center: center, radius: radius),
+      startAngle,
+      sweepAngle,
+      false,
+      progressPaint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(CountdownRingPainter oldDelegate) {
+    return oldDelegate.progress != progress;
   }
 }

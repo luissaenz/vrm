@@ -14,8 +14,8 @@ class _ScriptStudioAdvancePageState extends State<ScriptStudioAdvancePage> {
   String _selectedObjective = 'educar';
   String _selectedCallToAction = 'auto';
   String _selectedApproach = 'auto';
-  Set<String> _selectedHooks = {'polemico'};
-  Set<String> _selectedEnergies = {'motivacional'};
+  final Set<String> _selectedHooks = {'polemico'};
+  final Set<String> _selectedEnergies = {'motivacional'};
   String _selectedAudience = 'pro';
   double _speechRate = 150.0; // WPM
   bool _rememberSettings = true;
@@ -270,7 +270,7 @@ class _ScriptStudioAdvancePageState extends State<ScriptStudioAdvancePage> {
             ],
           ),
           child: DropdownButtonFormField<String>(
-            value: _selectedCallToAction,
+            initialValue: _selectedCallToAction,
             decoration: const InputDecoration(
               border: InputBorder.none,
               contentPadding: EdgeInsets.symmetric(
@@ -326,7 +326,7 @@ class _ScriptStudioAdvancePageState extends State<ScriptStudioAdvancePage> {
             ],
           ),
           child: DropdownButtonFormField<String>(
-            value: _selectedApproach,
+            initialValue: _selectedApproach,
             decoration: const InputDecoration(
               border: InputBorder.none,
               contentPadding: EdgeInsets.symmetric(
@@ -684,7 +684,7 @@ class _ScriptStudioAdvancePageState extends State<ScriptStudioAdvancePage> {
             onChanged: (value) {
               setState(() => _rememberSettings = value);
             },
-            activeColor: AppTheme.forestVibrant,
+            activeThumbColor: AppTheme.forestVibrant,
           ),
         ],
       ),
