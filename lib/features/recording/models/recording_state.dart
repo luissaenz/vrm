@@ -1,0 +1,1 @@
+enum RecordingState { idle, countdown, recording, commandRecorded }

@@ -24,7 +24,7 @@ class ConfigStep extends StatelessWidget {
             _buildHeader(context),
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                padding: const EdgeInsets.symmetric(horizontal: 20.0),
                 child: Column(
                   children: [
                     const SizedBox(height: 24),
@@ -369,7 +369,7 @@ class ConfigStep extends StatelessWidget {
 
   Widget _buildFooter(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(24, 8, 24, 32),
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

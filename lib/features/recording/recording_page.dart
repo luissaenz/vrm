@@ -4,7 +4,9 @@ import 'dart:async';
 import 'dart:math';
 import '../new_project/models/script_analysis.dart';
 
-enum RecordingState { idle, countdown, recording }
+import 'models/recording_state.dart';
+import 'models/voice_indicator_state.dart';
+import 'widgets/voice_indicator.dart';
 
 class RecordingPage extends StatefulWidget {
   final ScriptAnalysis analysis;
@@ -28,12 +30,15 @@ class _RecordingPageState extends State<RecordingPage>
   late Animation<double> _countdownProgress;
 
   RecordingState _recordingState = RecordingState.idle;
+  late int _activeFragmentIndex;
   final int _currentWordIndex = 0;
   int _countdownValue = 3;
   Timer? _countdownTimer;
+  bool _isCommandHeard = false;
 
   // Theme colors from HTML
   static const Color _forestGreen = Color(0xFF2D4B44);
+  static const Color _forestAccent = Color(0xFF2DD4BF);
   static const Color _recordingRed = Color(0xFFFF3B30);
   static const Color _backgroundDark = Color(0xFF0A0A0A);
 
@@ -57,6 +62,8 @@ class _RecordingPageState extends State<RecordingPage>
     _countdownProgress = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _countdownController, curve: Curves.linear),
     );
+
+    _activeFragmentIndex = widget.currentFragmentIndex;
   }
 
   @override
@@ -68,7 +75,7 @@ class _RecordingPageState extends State<RecordingPage>
   }
 
   List<InlineSpan> _buildTextSpans() {
-    final segment = widget.analysis.segments[widget.currentFragmentIndex];
+    final segment = widget.analysis.segments[_activeFragmentIndex];
     final text = segment.text;
     final emphasisRefs = _parseReferences(segment.direction.emphasis);
     final pauseRefs = _parseReferences(segment.direction.pauses);
@@ -135,13 +142,14 @@ class _RecordingPageState extends State<RecordingPage>
 
         // Determinar si este chunk ya fue "leído"
         bool isRead = start < charsToShow;
-        bool isCurrent = start <= charsToShow && charsToShow < end;
 
         Color textColor;
         if (isRead) {
-          textColor = Colors.white.withValues(alpha: 0.4);
-        } else if (isCurrent) {
-          textColor = Colors.white;
+          textColor = isBold
+              ? const Color(0xFFFF9500).withOpacity(0.4)
+              : Colors.white.withOpacity(0.4);
+        } else if (isBold) {
+          textColor = const Color(0xFFFF9500);
         } else {
           textColor = Colors.white;
         }
@@ -194,6 +202,10 @@ class _RecordingPageState extends State<RecordingPage>
     return regex.allMatches(input).map((m) => m.group(1)!).toList();
   }
 
+  bool get _isRecordingActive =>
+      _recordingState == RecordingState.recording ||
+      _recordingState == RecordingState.commandRecorded;
+
   void _startCountdown() {
     setState(() {
       _recordingState = RecordingState.countdown;
@@ -221,7 +233,43 @@ class _RecordingPageState extends State<RecordingPage>
     setState(() {
       _recordingState = RecordingState.recording;
     });
-    // TODO: Start actual camera recording
+    _countdownController.stop();
+
+    // Fase 3: Transición automática a comando grabado tras 5 segundos
+    Timer(const Duration(seconds: 5), () {
+      if (mounted && _recordingState == RecordingState.recording) {
+        setState(() {
+          _recordingState = RecordingState.commandRecorded;
+          _isCommandHeard = false;
+        });
+
+        // Fase 4: A los 2 segundos pasar a 'heard'
+        Timer(const Duration(seconds: 2), () {
+          if (mounted && _recordingState == RecordingState.commandRecorded) {
+            setState(() {
+              _isCommandHeard = true;
+            });
+
+            // Fase 5: 1 segundo después pasar a idle y siguiente fragmento
+            Timer(const Duration(seconds: 1), () {
+              if (mounted &&
+                  _recordingState == RecordingState.commandRecorded) {
+                setState(() {
+                  _recordingState = RecordingState.idle;
+                  _isCommandHeard = false;
+                  // Avanzar al siguiente fragmento (cíclico para la demo)
+                  _activeFragmentIndex =
+                      (_activeFragmentIndex + 1) %
+                      widget.analysis.segments.length;
+                });
+              }
+            });
+          }
+        });
+      }
+    });
+
+    // TODO: Trigger actual audio recording
   }
 
   void _stopRecording() {
@@ -286,7 +334,7 @@ class _RecordingPageState extends State<RecordingPage>
   @override
   Widget build(BuildContext context) {
     final totalFragments = widget.analysis.segments.length;
-    final currentFragment = widget.currentFragmentIndex + 1;
+    final currentFragment = _activeFragmentIndex + 1;
     final isCountingDown = _recordingState == RecordingState.countdown;
 
     return Scaffold(
@@ -411,6 +459,7 @@ class _RecordingPageState extends State<RecordingPage>
           _buildGlassButton(
             icon: Icons.close,
             onTap: () => Navigator.of(context).pop(),
+            isEnabled: !_isRecordingActive,
           ),
 
           // Fragment counter
@@ -476,6 +525,7 @@ class _RecordingPageState extends State<RecordingPage>
             onTap: () {
               // TODO: Implement camera switch
             },
+            isEnabled: !_isRecordingActive,
           ),
         ],
       ),
@@ -485,6 +535,7 @@ class _RecordingPageState extends State<RecordingPage>
   Widget _buildGlassButton({
     required IconData icon,
     required VoidCallback onTap,
+    bool isEnabled = true,
   }) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(999),
@@ -493,15 +544,19 @@ class _RecordingPageState extends State<RecordingPage>
         child: Material(
           color: Colors.transparent,
           child: InkWell(
-            onTap: onTap,
-            child: Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.3),
-                shape: BoxShape.circle,
+            onTap: isEnabled ? onTap : null,
+            child: AnimatedOpacity(
+              duration: const Duration(milliseconds: 300),
+              opacity: isEnabled ? 1.0 : 0.3,
+              child: Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.3),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, color: Colors.white, size: 24),
               ),
-              child: Icon(icon, color: Colors.white, size: 24),
             ),
           ),
         ),
@@ -565,6 +620,7 @@ class _RecordingPageState extends State<RecordingPage>
                 onTap: () {
                   // TODO: Toggle grid
                 },
+                isEnabled: !_isRecordingActive,
               ),
 
               // Record button
@@ -577,6 +633,7 @@ class _RecordingPageState extends State<RecordingPage>
                 onTap: () {
                   // TODO: Open menu
                 },
+                isEnabled: !_isRecordingActive,
               ),
             ],
           ),
@@ -586,70 +643,21 @@ class _RecordingPageState extends State<RecordingPage>
   }
 
   Widget _buildVoiceIndicator() {
-    // Darker green for the dot
-    const Color dotColor = Color(0xFF1FA88A);
+    VoiceIndicatorState indicatorState;
 
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        // Pulsing dot with fixed size to prevent layout shifts
-        SizedBox(
-          width: 9, // 6 * 1.4 = 8.4, rounded up
-          height: 9,
-          child: AnimatedBuilder(
-            animation: _pulseAnimation,
-            builder: (context, child) {
-              return Stack(
-                alignment: Alignment.center,
-                children: [
-                  // Outer pulse
-                  Container(
-                    width: 6 * _pulseAnimation.value,
-                    height: 6 * _pulseAnimation.value,
-                    decoration: BoxDecoration(
-                      color: dotColor.withValues(
-                        alpha: 1.0 - (_pulseAnimation.value - 1.0),
-                      ),
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                  // Inner dot
-                  Container(
-                    width: 6,
-                    height: 6,
-                    decoration: const BoxDecoration(
-                      color: dotColor,
-                      shape: BoxShape.circle,
-                    ),
-                  ),
-                ],
-              );
-            },
-          ),
-        ),
+    if (_recordingState == RecordingState.recording) {
+      indicatorState = VoiceIndicatorState.disabled;
+    } else if (_recordingState == RecordingState.commandRecorded) {
+      indicatorState = _isCommandHeard
+          ? VoiceIndicatorState.heard
+          : VoiceIndicatorState.listening;
+    } else {
+      indicatorState = VoiceIndicatorState.listening;
+    }
 
-        const SizedBox(width: 12),
-
-        // "Escuchando" text with pulse animation
-        AnimatedBuilder(
-          animation: _pulseAnimation,
-          builder: (context, child) {
-            return Text(
-              'ESCUCHANDO',
-              style: TextStyle(
-                color: Colors.white.withValues(
-                  alpha:
-                      1.0 -
-                      ((_pulseAnimation.value - 1.0) * 0.75), // 1.0 to 0.7
-                ),
-                fontSize: 13,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 2.0,
-              ),
-            );
-          },
-        ),
-      ],
+    return VRMVoiceIndicator(
+      state: indicatorState,
+      pulseAnimation: _pulseAnimation,
     );
   }
 
@@ -657,6 +665,7 @@ class _RecordingPageState extends State<RecordingPage>
     required IconData icon,
     required String label,
     required VoidCallback onTap,
+    bool isEnabled = true,
   }) {
     return Column(
       children: [
@@ -667,19 +676,23 @@ class _RecordingPageState extends State<RecordingPage>
             child: Material(
               color: Colors.transparent,
               child: InkWell(
-                onTap: onTap,
-                child: Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.4),
-                    shape: BoxShape.circle,
-                    border: Border.all(
-                      color: Colors.white.withValues(alpha: 0.1),
-                      width: 1,
+                onTap: isEnabled ? onTap : null,
+                child: AnimatedOpacity(
+                  duration: const Duration(milliseconds: 300),
+                  opacity: isEnabled ? 1.0 : 0.4,
+                  child: Container(
+                    width: 48,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.4),
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: Colors.white.withValues(alpha: 0.1),
+                        width: 1,
+                      ),
                     ),
+                    child: Icon(icon, color: Colors.white, size: 24),
                   ),
-                  child: Icon(icon, color: Colors.white, size: 24),
                 ),
               ),
             ),
@@ -702,12 +715,14 @@ class _RecordingPageState extends State<RecordingPage>
   Widget _buildRecordButton() {
     final isCountingDown = _recordingState == RecordingState.countdown;
     final isRecording = _recordingState == RecordingState.recording;
+    final isCommandRecorded = _recordingState == RecordingState.commandRecorded;
 
     return GestureDetector(
       onTap: () {
         if (_recordingState == RecordingState.idle) {
           _startCountdown();
-        } else if (_recordingState == RecordingState.recording) {
+        } else if (_recordingState == RecordingState.recording ||
+            _recordingState == RecordingState.commandRecorded) {
           _stopRecording();
         }
       },
@@ -725,12 +740,14 @@ class _RecordingPageState extends State<RecordingPage>
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: isRecording
-                      ? Colors.white.withValues(alpha: 0.2)
-                      : Colors.white.withValues(
-                          alpha: isCountingDown ? 0.05 : 0.1,
-                        ),
-                  width: 1,
+                  color: isCommandRecorded
+                      ? _forestAccent.withValues(alpha: 0.5)
+                      : (isRecording
+                            ? Colors.white.withValues(alpha: 0.2)
+                            : Colors.white.withValues(
+                                alpha: isCountingDown ? 0.05 : 0.1,
+                              )),
+                  width: isCommandRecorded ? 2 : 1,
                 ),
               ),
             ),
@@ -749,27 +766,48 @@ class _RecordingPageState extends State<RecordingPage>
                     ? []
                     : [
                         BoxShadow(
-                          color: isRecording
-                              ? _recordingRed.withValues(alpha: 0.4)
-                              : Colors.white.withValues(alpha: 0.3),
-                          blurRadius: isRecording ? 20 : 30,
-                          spreadRadius: 0,
+                          color: isCommandRecorded
+                              ? _forestAccent.withValues(alpha: 0.4)
+                              : (isRecording
+                                    ? _recordingRed.withValues(alpha: 0.4)
+                                    : Colors.white.withValues(alpha: 0.3)),
+                          blurRadius: isCommandRecorded
+                              ? 40
+                              : (isRecording ? 20 : 30),
+                          spreadRadius: isCommandRecorded ? 10 : 0,
                         ),
                       ],
               ),
             ),
 
-            // Inner square/circle
+            // Inner circle/square
             AnimatedContainer(
               duration: const Duration(milliseconds: 200),
-              width: isRecording ? 40 : 32,
-              height: isRecording ? 40 : 32,
+              width: isCommandRecorded ? 80 : (isRecording ? 40 : 32),
+              height: isCommandRecorded ? 80 : (isRecording ? 40 : 32),
               decoration: BoxDecoration(
-                color: isCountingDown
-                    ? _forestGreen.withValues(alpha: 0.5)
-                    : (isRecording ? _recordingRed : _forestGreen),
-                borderRadius: BorderRadius.circular(isRecording ? 8 : 6),
+                color: isCommandRecorded
+                    ? _forestAccent
+                    : (isCountingDown
+                          ? _forestGreen.withValues(alpha: 0.5)
+                          : (isRecording ? _recordingRed : _forestGreen)),
+                shape: isCommandRecorded ? BoxShape.circle : BoxShape.rectangle,
+                borderRadius: isCommandRecorded
+                    ? null
+                    : BorderRadius.circular(isRecording ? 8 : 6),
               ),
+              child: isCommandRecorded
+                  ? Center(
+                      child: Container(
+                        width: 32,
+                        height: 32,
+                        decoration: BoxDecoration(
+                          color: _forestGreen,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                      ),
+                    )
+                  : null,
             ),
           ],
         ),

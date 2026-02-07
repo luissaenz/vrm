@@ -19,7 +19,7 @@ class _WelcomeStepState extends State<WelcomeStep> {
         children: [
           SafeArea(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
               child: Column(
                 children: [
                   _buildHeader(),

@@ -138,7 +138,7 @@ class _FragmentOrganizationPageState extends State<FragmentOrganizationPage> {
             ),
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
+                padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -174,7 +174,7 @@ class _FragmentOrganizationPageState extends State<FragmentOrganizationPage> {
         ),
       ),
       bottomSheet: Container(
-        padding: const EdgeInsets.fromLTRB(24, 16, 24, 40),
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 40),
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.bottomCenter,
