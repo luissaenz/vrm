@@ -1,3 +1,5 @@
 Respond always in Spanish and keep the answers short and concise.
 - A los Widgets Reutilizables de carga los llamaremos Widgets Progress.
 - Cuando generes una vista O un widget, ten en cuenta su implementación tanto en modo claro como oscuro.
+- Cuando el usuario mencione charlar o planificar una funcionalidad, genera un intercambio de ideas (preguntas, aportaciones, críticas). NUNCA procedas a codificar sin una orden expresa para hacerlo.
+- Durante el proceso de definición de una tarea o funcionalidad, responde siempre solo "Entiendo", salvo que se te haga una pregunta o necesites clarificación técnica específica.

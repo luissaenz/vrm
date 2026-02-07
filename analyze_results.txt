@@ -1,0 +1,6 @@
+Analyzing vrm...                                                
+
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\recording\recording_page.dart:163:41 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\recording\recording_page.dart:164:30 - deprecated_member_use
+   info - The imported package 'path_provider_platform_interface' isn't a dependency of the importing package - test\repository_test.dart:5:8 - depend_on_referenced_packages
+
