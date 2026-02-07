@@ -158,11 +158,12 @@ class _RecordingPageState extends State<RecordingPage>
         if (isRead) {
           textColor = isBold
               ? const Color(0xFFFB923C).withValues(alpha: 0.3)
-              : colors.textPrimary.withValues(alpha: 0.3);
+              : (context.isDarkMode ? colors.textPrimary : Colors.white)
+                    .withValues(alpha: 0.3);
         } else if (isBold) {
           textColor = const Color(0xFFFB923C);
         } else {
-          textColor = colors.textPrimary;
+          textColor = context.isDarkMode ? colors.textPrimary : Colors.white;
         }
 
         spans.add(
@@ -172,8 +173,8 @@ class _RecordingPageState extends State<RecordingPage>
               fontSize: 20,
               fontWeight: isBold ? FontWeight.w900 : FontWeight.w500,
               height: 1.625,
-              letterSpacing: -0.5,
               color: textColor,
+              letterSpacing: -0.2,
             ),
           ),
         );
@@ -192,14 +193,18 @@ class _RecordingPageState extends State<RecordingPage>
     return WidgetSpan(
       alignment: PlaceholderAlignment.middle,
       child: Container(
-        width: 20,
-        height: 20,
+        width: 18,
+        height: 18,
         margin: const EdgeInsets.symmetric(horizontal: 4),
         decoration: BoxDecoration(
-          color: colors.cardBorder.withValues(alpha: 0.5),
+          color: Colors.white.withValues(alpha: 0.15),
           shape: BoxShape.circle,
         ),
-        child: Icon(Icons.pause_rounded, size: 12, color: colors.textSecondary),
+        child: Icon(
+          Icons.pause_rounded,
+          size: 10,
+          color: Colors.white.withValues(alpha: 0.5),
+        ),
       ),
     );
   }
@@ -487,14 +492,18 @@ class _RecordingPageState extends State<RecordingPage>
                 decoration: BoxDecoration(
                   color: _recordingState == RecordingState.recording
                       ? const Color(0xFFFF3B30).withValues(alpha: 0.9)
-                      : context.appColors.cardBackground.withValues(
-                          alpha: 0.85,
-                        ),
+                      : (context.isDarkMode
+                            ? context.appColors.cardBackground.withValues(
+                                alpha: 0.85,
+                              )
+                            : Colors.black.withValues(alpha: 0.4)),
                   borderRadius: BorderRadius.circular(999),
                   border: Border.all(
                     color: _recordingState == RecordingState.recording
                         ? Colors.white.withValues(alpha: 0.2)
-                        : context.appColors.cardBorder,
+                        : (context.isDarkMode
+                              ? context.appColors.cardBorder
+                              : Colors.white.withValues(alpha: 0.1)),
                   ),
                 ),
                 child: Row(
@@ -570,11 +579,15 @@ class _RecordingPageState extends State<RecordingPage>
                 width: 40,
                 height: 40,
                 decoration: BoxDecoration(
-                  color: context.appColors.cardBackground.withValues(
-                    alpha: 0.3,
-                  ),
+                  color: context.isDarkMode
+                      ? context.appColors.cardBackground.withValues(alpha: 0.3)
+                      : Colors.black.withValues(alpha: 0.4),
                   shape: BoxShape.circle,
-                  border: Border.all(color: context.appColors.cardBorder),
+                  border: Border.all(
+                    color: context.isDarkMode
+                        ? context.appColors.cardBorder
+                        : Colors.white.withValues(alpha: 0.1),
+                  ),
                 ),
                 child: Icon(icon, color: Colors.white, size: 24),
               ),
@@ -595,10 +608,14 @@ class _RecordingPageState extends State<RecordingPage>
           child: Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: context.colorScheme.surface.withValues(alpha: 0.4),
+              color: context.isDarkMode
+                  ? context.colorScheme.surface.withValues(alpha: 0.4)
+                  : Colors.black.withValues(alpha: 0.4),
               borderRadius: BorderRadius.circular(32),
               border: Border.all(
-                color: context.appColors.cardBorder.withValues(alpha: 0.5),
+                color: context.isDarkMode
+                    ? context.appColors.cardBorder.withValues(alpha: 0.5)
+                    : Colors.white.withValues(alpha: 0.1),
                 width: 1,
               ),
             ),
@@ -689,12 +706,16 @@ class _RecordingPageState extends State<RecordingPage>
                     width: 48,
                     height: 48,
                     decoration: BoxDecoration(
-                      color: context.appColors.cardBackground.withValues(
-                        alpha: 0.8,
-                      ),
+                      color: context.isDarkMode
+                          ? context.appColors.cardBackground.withValues(
+                              alpha: 0.8,
+                            )
+                          : Colors.black.withValues(alpha: 0.4),
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: context.appColors.cardBorder,
+                        color: context.isDarkMode
+                            ? context.appColors.cardBorder
+                            : Colors.white.withValues(alpha: 0.1),
                         width: 1,
                       ),
                     ),
@@ -1047,12 +1068,14 @@ class _RecordingPageState extends State<RecordingPage>
                 shape: BoxShape.circle,
                 border: Border.all(
                   color: isCommandRecorded
-                      ? primaryColor.withValues(alpha: 0.5)
+                      ? const Color(0xFF2DD4BF).withValues(alpha: 0.5)
                       : (isRecording
                             ? Colors.white.withValues(alpha: 0.2)
-                            : colors.cardBorder.withValues(
-                                alpha: isCountingDown ? 0.05 : 0.2,
-                              )),
+                            : (context.isDarkMode
+                                  ? colors.cardBorder.withValues(
+                                      alpha: isCountingDown ? 0.05 : 0.2,
+                                    )
+                                  : Colors.white.withValues(alpha: 0.1))),
                   width: isCommandRecorded ? 2 : 1,
                 ),
               ),
@@ -1064,16 +1087,18 @@ class _RecordingPageState extends State<RecordingPage>
               width: 96,
               height: 96,
               decoration: BoxDecoration(
-                color: Colors.white.withValues(
-                  alpha: isCountingDown ? 0.2 : 1.0,
-                ),
+                color: isCommandRecorded
+                    ? primaryColor.withValues(alpha: 0.1)
+                    : Colors.white.withValues(
+                        alpha: isCountingDown ? 0.2 : 1.0,
+                      ),
                 shape: BoxShape.circle,
                 boxShadow: isCountingDown
                     ? []
                     : [
                         BoxShadow(
                           color: isCommandRecorded
-                              ? primaryColor.withValues(alpha: 0.4)
+                              ? const Color(0xFF2DD4BF).withValues(alpha: 0.4)
                               : (isRecording
                                     ? const Color(
                                         0xFFFF3B30,
@@ -1095,12 +1120,15 @@ class _RecordingPageState extends State<RecordingPage>
               height: isCommandRecorded ? 80 : (isRecording ? 40 : 32),
               decoration: BoxDecoration(
                 color: isCommandRecorded
-                    ? primaryColor
-                    : (isCountingDown
-                          ? colors.cardBackground.withValues(alpha: 0.5)
-                          : (isRecording
-                                ? const Color(0xFFFF3B30)
-                                : colors.cardBackground)),
+                    ? const Color(0xFF2DD4BF)
+                    : (isRecording
+                          ? const Color(0xFFFF3B30)
+                          : (isCountingDown
+                                ? (context.isDarkMode
+                                          ? colors.cardBackground
+                                          : Colors.black)
+                                      .withValues(alpha: 0.5)
+                                : primaryColor)),
                 shape: isCommandRecorded ? BoxShape.circle : BoxShape.rectangle,
                 borderRadius: isCommandRecorded
                     ? null
@@ -1112,7 +1140,11 @@ class _RecordingPageState extends State<RecordingPage>
                         width: 32,
                         height: 32,
                         decoration: BoxDecoration(
-                          color: colors.cardBackground,
+                          color: isCommandRecorded
+                              ? const Color(0xFF2D4B44)
+                              : (context.isDarkMode
+                                    ? colors.cardBackground
+                                    : Colors.black),
                           borderRadius: BorderRadius.circular(6),
                         ),
                       ),

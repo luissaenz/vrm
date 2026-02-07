@@ -317,7 +317,6 @@ class _IdentityStepState extends State<IdentityStep> {
   }
 
   Widget _buildActionButtons() {
-    final colors = context.appColors;
     final isDark = context.isDarkMode;
     return Column(
       children: [

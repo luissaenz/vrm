@@ -67,7 +67,7 @@ class _DashboardPageState extends State<DashboardPage> {
                     VRMActionCard(
                       title: l10n.newProject,
                       subtitle: l10n.voiceControlActive,
-                      icon: Icons.keyboard_voice,
+                      icon: Icons.mic,
                       onTap: () {
                         Navigator.push(
                           context,
@@ -86,13 +86,6 @@ class _DashboardPageState extends State<DashboardPage> {
                       onTap: () {
                         // TODO: Implement InfluencerProfilePage
                         debugPrint('InfluencerProfilePage not yet implemented');
-                        // Navigator.push(
-                        //   context,
-                        //   MaterialPageRoute(
-                        //     builder: (context) =>
-                        //         const InfluencerProfilePage(),
-                        //   ),
-                        // );
                       },
                     ),
                   ],
@@ -259,22 +252,25 @@ class _DashboardPageState extends State<DashboardPage> {
   Widget _buildStatsSection(AppLocalizations l10n) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Row(
-        children: [
-          VRMStatCard(
-            value: '5',
-            label: l10n.streakLabel,
-            icon: Icons.local_fire_department,
-            color: const Color(0xFFF97316), // Orange 500
-          ),
-          const SizedBox(width: 12),
-          VRMStatCard(
-            value: '42',
-            label: l10n.fragments,
-            icon: Icons.mic,
-            color: const Color(0xFF10B981), // Emerald 500
-          ),
-        ],
+      child: IntrinsicHeight(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            VRMStatCard(
+              value: '5',
+              label: l10n.streakLabel,
+              icon: Icons.local_fire_department,
+              color: const Color(0xFFF97316), // Orange 500
+            ),
+            const SizedBox(width: 12),
+            VRMStatCard(
+              value: '42',
+              label: l10n.fragments,
+              icon: Icons.mic,
+              color: const Color(0xFF10B981), // Emerald 500
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -328,6 +324,23 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   Widget _buildBottomNav(BuildContext context, AppLocalizations l10n) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.bottomCenter,
+          end: Alignment.topCenter,
+          colors: [
+            context.colorScheme.surface,
+            context.colorScheme.surface.withValues(alpha: 0.0),
+          ],
+          stops: const [0.6, 1.0],
+        ),
+      ),
+      child: _buildActualNavBar(context, l10n),
+    );
+  }
+
+  Widget _buildActualNavBar(BuildContext context, AppLocalizations l10n) {
     return ClipRRect(
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),

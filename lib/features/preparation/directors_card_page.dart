@@ -38,7 +38,7 @@ class _DirectorsCardPageState extends State<DirectorsCardPage> {
       backgroundColor: context.colorScheme.surface,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 120),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -57,11 +57,24 @@ class _DirectorsCardPageState extends State<DirectorsCardPage> {
                 tolerance: 0,
               ),
               const SizedBox(height: 48),
-              _buildNavigationButtons(),
-              const SizedBox(height: 40),
             ],
           ),
         ),
+      ),
+      bottomNavigationBar: Container(
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 40),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.bottomCenter,
+            end: Alignment.topCenter,
+            colors: [
+              context.colorScheme.surface,
+              context.colorScheme.surface.withValues(alpha: 0.0),
+            ],
+            stops: const [0.6, 1.0],
+          ),
+        ),
+        child: _buildNavigationButtons(),
       ),
     );
   }
