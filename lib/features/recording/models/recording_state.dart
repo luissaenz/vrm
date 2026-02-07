@@ -1,1 +1,1 @@
-enum RecordingState { idle, countdown, recording, commandRecorded }
+enum RecordingState { idle, countdown, recording, commandRecorded, menu }

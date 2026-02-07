@@ -36,6 +36,9 @@ class _RecordingPageState extends State<RecordingPage>
   Timer? _countdownTimer;
   bool _isCommandHeard = false;
 
+  late AnimationController _menuController;
+  late Animation<Offset> _menuAnimation;
+
   // Theme colors from HTML
   static const Color _forestGreen = Color(0xFF2D4B44);
   static const Color _forestAccent = Color(0xFF2DD4BF);
@@ -63,6 +66,16 @@ class _RecordingPageState extends State<RecordingPage>
       CurvedAnimation(parent: _countdownController, curve: Curves.linear),
     );
 
+    _menuController = AnimationController(
+      duration: const Duration(milliseconds: 400),
+      vsync: this,
+    );
+
+    _menuAnimation =
+        Tween<Offset>(begin: const Offset(0.0, 1.0), end: Offset.zero).animate(
+          CurvedAnimation(parent: _menuController, curve: Curves.easeOutCubic),
+        );
+
     _activeFragmentIndex = widget.currentFragmentIndex;
   }
 
@@ -71,6 +84,7 @@ class _RecordingPageState extends State<RecordingPage>
     _countdownTimer?.cancel();
     _pulseController.dispose();
     _countdownController.dispose();
+    _menuController.dispose();
     super.dispose();
   }
 
@@ -374,6 +388,9 @@ class _RecordingPageState extends State<RecordingPage>
 
           // Countdown overlay (shown only during countdown)
           if (isCountingDown) _buildCountdownOverlay(),
+
+          // Menu overlay (z-50)
+          _buildMenuOverlay(),
         ],
       ),
     );
@@ -631,7 +648,10 @@ class _RecordingPageState extends State<RecordingPage>
                 icon: Icons.menu,
                 label: 'MENÚ',
                 onTap: () {
-                  // TODO: Open menu
+                  setState(() {
+                    _recordingState = RecordingState.menu;
+                  });
+                  _menuController.forward();
                 },
                 isEnabled: !_isRecordingActive,
               ),
@@ -639,25 +659,6 @@ class _RecordingPageState extends State<RecordingPage>
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildVoiceIndicator() {
-    VoiceIndicatorState indicatorState;
-
-    if (_recordingState == RecordingState.recording) {
-      indicatorState = VoiceIndicatorState.disabled;
-    } else if (_recordingState == RecordingState.commandRecorded) {
-      indicatorState = _isCommandHeard
-          ? VoiceIndicatorState.heard
-          : VoiceIndicatorState.listening;
-    } else {
-      indicatorState = VoiceIndicatorState.listening;
-    }
-
-    return VRMVoiceIndicator(
-      state: indicatorState,
-      pulseAnimation: _pulseAnimation,
     );
   }
 
@@ -703,6 +704,303 @@ class _RecordingPageState extends State<RecordingPage>
           label,
           style: TextStyle(
             color: Colors.white.withValues(alpha: 0.5),
+            fontSize: 9,
+            fontWeight: FontWeight.bold,
+            letterSpacing: 1.5,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildVoiceIndicator() {
+    VoiceIndicatorState indicatorState;
+
+    if (_recordingState == RecordingState.recording) {
+      indicatorState = VoiceIndicatorState.disabled;
+    } else if (_recordingState == RecordingState.commandRecorded) {
+      indicatorState = _isCommandHeard
+          ? VoiceIndicatorState.heard
+          : VoiceIndicatorState.listening;
+    } else {
+      indicatorState = VoiceIndicatorState.listening;
+    }
+
+    return VRMVoiceIndicator(
+      state: indicatorState,
+      pulseAnimation: _pulseAnimation,
+    );
+  }
+
+  void _closeMenu() {
+    _menuController.reverse().then((_) {
+      if (mounted) {
+        setState(() {
+          _recordingState = RecordingState.idle;
+        });
+      }
+    });
+  }
+
+  Widget _buildMenuOverlay() {
+    return AnimatedBuilder(
+      animation: _menuController,
+      builder: (context, child) {
+        if (_menuController.isDismissed &&
+            _recordingState != RecordingState.menu) {
+          return const SizedBox.shrink();
+        }
+
+        return Stack(
+          children: [
+            // Backdrop dimming/tap to close
+            Positioned.fill(
+              child: GestureDetector(
+                onTap: _closeMenu,
+                child: AnimatedOpacity(
+                  duration: const Duration(milliseconds: 300),
+                  opacity: _menuController.value,
+                  child: Container(color: Colors.black.withValues(alpha: 0.4)),
+                ),
+              ),
+            ),
+
+            // Bottom Menu Sheet
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: SlideTransition(
+                position: _menuAnimation,
+                child: Container(
+                  height: MediaQuery.of(context).size.height * 0.48,
+                  decoration: const BoxDecoration(
+                    color: Colors.black,
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(56),
+                    ),
+                    border: Border(
+                      top: BorderSide(color: Colors.white10, width: 1),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black,
+                        blurRadius: 60,
+                        spreadRadius: 20,
+                        offset: Offset(0, -20),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      // Top handle
+                      const SizedBox(height: 16),
+                      Container(
+                        width: 48,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                      ),
+
+                      const SizedBox(height: 24),
+
+                      // Header with "Cerrar" and status
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 40),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            GestureDetector(
+                              onTap: _closeMenu,
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.expand_more,
+                                    color: Colors.white.withValues(alpha: 0.6),
+                                    size: 24,
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    'CERRAR',
+                                    style: TextStyle(
+                                      color: Colors.white.withValues(
+                                        alpha: 0.6,
+                                      ),
+                                      fontSize: 9,
+                                      fontWeight: FontWeight.bold,
+                                      letterSpacing: 2,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Row(
+                              children: [
+                                Text(
+                                  '64.2 GB',
+                                  style: TextStyle(
+                                    color: Colors.white.withValues(alpha: 0.4),
+                                    fontSize: 9,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Icon(
+                                  Icons.battery_5_bar,
+                                  size: 18,
+                                  color: Colors.white.withValues(alpha: 0.4),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(height: 48),
+
+                      // Grid of options
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 40),
+                          child: GridView.count(
+                            crossAxisCount: 3,
+                            mainAxisSpacing: 48,
+                            crossAxisSpacing: 24,
+                            physics: const NeverScrollableScrollPhysics(),
+                            children: [
+                              _buildMenuFeature(
+                                icon: Icons.grid_view,
+                                label: 'GRILLA',
+                                isActive: true,
+                              ),
+                              _buildMenuFeature(
+                                icon: Icons.directions_run,
+                                label: 'CALLE',
+                                isActive: false,
+                              ),
+                              _buildMenuFeature(
+                                icon: Icons.mic,
+                                label: 'VOZ',
+                                isActive: true,
+                              ),
+                              _buildMenuFeature(
+                                icon: Icons.auto_fix_high,
+                                label: 'FILTROS',
+                                isActive: false,
+                              ),
+                              _buildMenuFeature(
+                                icon: Icons.lightbulb,
+                                label: 'LUCES',
+                                isActive: false,
+                              ),
+                              _buildMenuFeature(
+                                icon: Icons.headphones,
+                                label: 'AUDÍFONOS',
+                                isActive: false,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+
+                      // Pagination dots
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 48),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Container(
+                              width: 6,
+                              height: 6,
+                              decoration: const BoxDecoration(
+                                color: Colors.white,
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.white,
+                                    blurRadius: 10,
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            ...List.generate(
+                              3,
+                              (index) => Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 5,
+                                ),
+                                child: Container(
+                                  width: 6,
+                                  height: 6,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withValues(alpha: 0.2),
+                                    shape: BoxShape.circle,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildMenuFeature({
+    required IconData icon,
+    required String label,
+    required bool isActive,
+  }) {
+    return Column(
+      children: [
+        Container(
+          width: 64,
+          height: 64,
+          decoration: BoxDecoration(
+            color: isActive
+                ? _forestGreen
+                : Colors.white.withValues(alpha: 0.05),
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: isActive
+                  ? Colors.transparent
+                  : Colors.white.withValues(alpha: 0.1),
+              width: 1,
+            ),
+            boxShadow: isActive
+                ? [
+                    BoxShadow(
+                      color: _forestGreen.withValues(alpha: 0.4),
+                      blurRadius: 20,
+                    ),
+                  ]
+                : [],
+          ),
+          child: Icon(
+            icon,
+            color: isActive
+                ? Colors.white
+                : Colors.white.withValues(alpha: 0.9),
+            size: 32,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Text(
+          label,
+          style: TextStyle(
+            color: isActive
+                ? Colors.white.withValues(alpha: 0.8)
+                : Colors.white.withValues(alpha: 0.4),
             fontSize: 9,
             fontWeight: FontWeight.bold,
             letterSpacing: 1.5,
