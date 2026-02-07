@@ -28,29 +28,29 @@ class ConfigStep extends StatelessWidget {
                 child: Column(
                   children: [
                     const SizedBox(height: 24),
-                    _buildCoachAvatar(),
+                    _buildCoachAvatar(context),
                     const SizedBox(height: 32),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16),
                       child: Text(
                         _getGreeting(context),
                         textAlign: TextAlign.center,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: AppTheme.forest,
+                          fontWeight: FontWeight.w800,
+                          color: context.appColors.textPrimary,
                           height: 1.2,
                         ),
                       ),
                     ),
                     const SizedBox(height: 12),
-                    const Text(
+                    Text(
                       'COACH DE VIDEO AI',
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 2.0,
-                        color: AppTheme.earth,
+                        color: context.appColors.forestVibrant,
                       ),
                     ),
                     const SizedBox(height: 40),
@@ -68,6 +68,7 @@ class ConfigStep extends StatelessWidget {
   }
 
   Widget _buildHeader(BuildContext context) {
+    final colors = context.appColors;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
       child: Row(
@@ -76,17 +77,18 @@ class ConfigStep extends StatelessWidget {
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: AppTheme.earth.withValues(alpha: 0.05),
+              color: colors.cardBackground,
               shape: BoxShape.circle,
+              border: Border.all(color: colors.cardBorder),
             ),
             child: IconButton(
               onPressed: onBack,
               padding: EdgeInsets.zero,
               constraints: const BoxConstraints(),
-              icon: const Icon(
+              icon: Icon(
                 Icons.arrow_back_ios_new,
                 size: 18,
-                color: AppTheme.forest,
+                color: context.colorScheme.primary,
               ),
             ),
           ),
@@ -94,10 +96,10 @@ class ConfigStep extends StatelessWidget {
             child: Text(
               AppLocalizations.of(context)!.configTitle,
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 17,
-                color: AppTheme.forest,
+                color: colors.textPrimary,
                 letterSpacing: -0.5,
               ),
             ),
@@ -108,7 +110,10 @@ class ConfigStep extends StatelessWidget {
     );
   }
 
-  Widget _buildCoachAvatar() {
+  Widget _buildCoachAvatar(BuildContext context) {
+    final primaryColor = context.colorScheme.primary;
+    final isDark = context.isDarkMode;
+
     return Center(
       child: Stack(
         alignment: Alignment.center,
@@ -118,13 +123,20 @@ class ConfigStep extends StatelessWidget {
             height: 192,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(color: AppTheme.forest, width: 2),
+              border: Border.all(color: primaryColor, width: 2),
               boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
+                if (isDark)
+                  BoxShadow(
+                    color: primaryColor.withValues(alpha: 0.2),
+                    blurRadius: 30,
+                    spreadRadius: -5,
+                  )
+                else
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.05),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
               ],
             ),
             child: const ClipOval(
@@ -140,8 +152,15 @@ class ConfigStep extends StatelessWidget {
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: AppTheme.forest.withValues(alpha: 0.9),
+              color: primaryColor.withValues(alpha: 0.9),
               shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.2),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
             child: const Icon(Icons.play_arrow, color: Colors.white, size: 24),
           ),
@@ -173,28 +192,31 @@ class ConfigStep extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 4),
           child: Text(
             l10n.configSummaryLabel,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 10,
-              fontWeight: FontWeight.bold,
+              fontWeight: FontWeight.w800,
               letterSpacing: 2.5,
-              color: AppTheme.earth,
+              color: context.appColors.textSecondary,
             ),
           ),
         ),
         const SizedBox(height: 16),
         _buildConfigItem(
+          context,
           Icons.speed,
           _getTeleprompterSpeed(context),
           l10n.configTeleprompterLabel,
         ),
         const SizedBox(height: 16),
         _buildConfigItem(
+          context,
           Icons.auto_fix_high,
           _getSolutionTitle(context),
           _getSolutionSubtitle(context),
         ),
         const SizedBox(height: 16),
         _buildConfigItem(
+          context,
           Icons.star_rounded,
           _getPremiumFeatureTitle(context),
           _getPremiumFeatureSubtitle(context),
@@ -275,23 +297,35 @@ class ConfigStep extends StatelessWidget {
   }
 
   Widget _buildConfigItem(
+    BuildContext context,
     IconData icon,
     String title,
     String subtitle, {
     bool isPremium = false,
   }) {
+    final colors = context.appColors;
+    final primaryColor = context.colorScheme.primary;
+    final isDark = context.isDarkMode;
+
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colors.cardBackground,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: const Color(0xFFF3F4F6)),
+        border: Border.all(color: colors.cardBorder),
         boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 20,
-            offset: const Offset(0, 8),
-          ),
+          if (isDark)
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.2),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            )
+          else
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.03),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
+            ),
         ],
       ),
       child: Row(
@@ -300,11 +334,14 @@ class ConfigStep extends StatelessWidget {
             padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
               color: isPremium
-                  ? AppTheme.forest.withValues(alpha: 0.1)
-                  : AppTheme.backgroundLight,
+                  ? primaryColor.withValues(alpha: 0.1)
+                  : colors.offWhite.withValues(alpha: isDark ? 1.0 : 0.5),
               shape: BoxShape.circle,
+              border: isDark && !isPremium
+                  ? Border.all(color: colors.cardBorder)
+                  : null,
             ),
-            child: Icon(icon, color: AppTheme.forest, size: 22),
+            child: Icon(icon, color: primaryColor, size: 22),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -315,10 +352,10 @@ class ConfigStep extends StatelessWidget {
                   children: [
                     Text(
                       title,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 15,
-                        color: AppTheme.forest,
+                        color: colors.textPrimary,
                         letterSpacing: -0.3,
                       ),
                     ),
@@ -330,13 +367,13 @@ class ConfigStep extends StatelessWidget {
                           vertical: 2,
                         ),
                         decoration: BoxDecoration(
-                          color: AppTheme.forest,
+                          color: primaryColor,
                           borderRadius: BorderRadius.circular(4),
                         ),
-                        child: const Text(
+                        child: Text(
                           'PREMIUM',
                           style: TextStyle(
-                            color: Colors.white,
+                            color: isDark ? colors.offWhite : Colors.white,
                             fontSize: 8,
                             fontWeight: FontWeight.bold,
                           ),
@@ -348,9 +385,9 @@ class ConfigStep extends StatelessWidget {
                 const SizedBox(height: 4),
                 Text(
                   subtitle,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
-                    color: AppTheme.earth,
+                    color: colors.textSecondary,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -359,7 +396,7 @@ class ConfigStep extends StatelessWidget {
           ),
           Icon(
             isPremium ? Icons.lock_outline : Icons.check_circle,
-            color: AppTheme.forest,
+            color: primaryColor,
             size: 24,
           ),
         ],
@@ -376,14 +413,18 @@ class ConfigStep extends StatelessWidget {
           ElevatedButton(
             onPressed: onFinish,
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.forest,
-              foregroundColor: Colors.white,
+              backgroundColor: context.isDarkMode
+                  ? context.appColors.forestVibrant
+                  : context.colorScheme.primary,
+              foregroundColor: context.isDarkMode
+                  ? context.appColors.offWhite
+                  : Colors.white,
               minimumSize: const Size(double.infinity, 64),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(16),
               ),
-              elevation: 8,
-              shadowColor: AppTheme.forest.withValues(alpha: 0.3),
+              elevation: context.isDarkMode ? 0 : 8,
+              shadowColor: context.colorScheme.primary.withValues(alpha: 0.3),
             ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -392,12 +433,12 @@ class ConfigStep extends StatelessWidget {
                   AppLocalizations.of(context)!.configCta,
                   style: const TextStyle(
                     fontSize: 16,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w800,
                     letterSpacing: 0.5,
                   ),
                 ),
-                SizedBox(width: 12),
-                Icon(Icons.videocam_outlined, size: 22),
+                const SizedBox(width: 12),
+                const Icon(Icons.videocam_outlined, size: 22),
               ],
             ),
           ),

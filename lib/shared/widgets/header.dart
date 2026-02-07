@@ -15,6 +15,7 @@ class VRMHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 24, 16, 16),
       child: Row(
@@ -26,9 +27,9 @@ class VRMHeader extends StatelessWidget {
               width: 40,
               height: 40,
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: colors.cardBackground,
                 shape: BoxShape.circle,
-                border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
+                border: Border.all(color: colors.cardBorder),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withValues(alpha: 0.05),
@@ -37,15 +38,15 @@ class VRMHeader extends StatelessWidget {
                   ),
                 ],
               ),
-              child: Icon(icon, size: 20, color: AppTheme.forest),
+              child: Icon(icon, size: 20, color: context.colorScheme.primary),
             ),
           ),
           Text(
             title,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: AppTheme.forest,
+              color: context.colorScheme.primary,
               letterSpacing: -0.2,
             ),
           ),

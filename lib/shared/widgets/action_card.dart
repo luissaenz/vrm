@@ -20,6 +20,10 @@ class VRMActionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final primaryColor = context.colorScheme.primary;
+    final isDark = context.isDarkMode;
+    final colors = context.appColors;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -27,11 +31,14 @@ class VRMActionCard extends StatelessWidget {
         height: 84,
         padding: const EdgeInsets.symmetric(horizontal: 24),
         decoration: BoxDecoration(
-          color: AppTheme.forest,
-          borderRadius: BorderRadius.circular(99),
+          color: isDark ? colors.cardBackground : primaryColor,
+          borderRadius: BorderRadius.circular(24), // Rounded 24 as in HTML
+          border: isDark ? Border.all(color: colors.cardBorder) : null,
           boxShadow: [
             BoxShadow(
-              color: AppTheme.forest.withValues(alpha: 0.15),
+              color: (isDark ? colors.cardBorder : primaryColor).withValues(
+                alpha: 0.15,
+              ),
               blurRadius: 24,
               offset: const Offset(0, 12),
             ),
@@ -56,9 +63,11 @@ class VRMActionCard extends StatelessWidget {
                 Row(
                   children: [
                     Icon(
-                      icon, // Usar el icono pasado por parámetro en lugar de hardcoded Icons.keyboard_voice
+                      icon,
                       size: 14,
-                      color: Colors.white.withValues(alpha: 0.8),
+                      color: isDark
+                          ? colors.forestVibrant
+                          : Colors.white.withValues(alpha: 0.8),
                     ),
                     const SizedBox(width: 6),
                     Text(
@@ -77,12 +86,14 @@ class VRMActionCard extends StatelessWidget {
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.1),
+                color: isDark
+                    ? colors.forestVibrant
+                    : Colors.white.withValues(alpha: 0.1),
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 actionIcon ?? Icons.add,
-                color: Colors.white,
+                color: isDark ? colors.offWhite : Colors.white,
                 size: 24,
               ),
             ),

@@ -17,19 +17,22 @@ class VRMCalendarDay extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
+    final primaryColor = context.colorScheme.primary;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
         width: 76,
         padding: const EdgeInsets.symmetric(vertical: 14),
         decoration: BoxDecoration(
-          color: isSelected ? AppTheme.forest : Colors.white,
+          color: isSelected ? primaryColor : colors.cardBackground,
           borderRadius: BorderRadius.circular(20),
-          border: isSelected ? null : Border.all(color: AppTheme.earthBorder),
+          border: isSelected ? null : Border.all(color: colors.cardBorder),
           boxShadow: isSelected
               ? [
                   BoxShadow(
-                    color: AppTheme.forest.withValues(alpha: 0.2),
+                    color: primaryColor.withValues(alpha: 0.2),
                     blurRadius: 15,
                     offset: const Offset(0, 8),
                   ),
@@ -45,7 +48,7 @@ class VRMCalendarDay extends StatelessWidget {
                 fontWeight: FontWeight.bold,
                 color: isSelected
                     ? Colors.white.withValues(alpha: 0.7)
-                    : AppTheme.textMuted.withValues(alpha: 0.8),
+                    : colors.textSecondary.withValues(alpha: 0.8),
                 letterSpacing: 1.0,
               ),
             ),
@@ -55,7 +58,7 @@ class VRMCalendarDay extends StatelessWidget {
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
-                color: isSelected ? Colors.white : AppTheme.textMain,
+                color: isSelected ? Colors.white : colors.textPrimary,
               ),
             ),
             const SizedBox(height: 8),
@@ -65,7 +68,7 @@ class VRMCalendarDay extends StatelessWidget {
               decoration: BoxDecoration(
                 color: isSelected
                     ? Colors.white
-                    : (isSelected ? Colors.transparent : AppTheme.forest),
+                    : (isSelected ? Colors.transparent : primaryColor),
                 shape: BoxShape.circle,
               ),
             ),

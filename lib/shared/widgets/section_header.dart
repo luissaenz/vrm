@@ -17,15 +17,16 @@ class VRMSectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(
           title,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
-            color: AppTheme.textMain,
+            color: colors.textPrimary,
           ),
         ),
         if (actionLabel != null)
@@ -33,10 +34,10 @@ class VRMSectionHeader extends StatelessWidget {
             onTap: onActionPressed,
             child: Text(
               actionLabel!,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
-                color: AppTheme.forest,
+                color: context.colorScheme.primary,
               ),
             ),
           )
@@ -45,11 +46,11 @@ class VRMSectionHeader extends StatelessWidget {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: colors.cardBackground,
               shape: BoxShape.circle,
-              border: Border.all(color: AppTheme.earthBorder),
+              border: Border.all(color: colors.cardBorder),
             ),
-            child: Icon(icon, color: AppTheme.forest, size: 20),
+            child: Icon(icon, color: colors.forest, size: 20),
           ),
       ],
     );

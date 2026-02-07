@@ -19,11 +19,12 @@ class VRMScriptEditor extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     return Container(
       decoration: BoxDecoration(
-        color: AppTheme.surface,
+        color: colors.cardBackground,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.grey.withValues(alpha: 0.1)),
+        border: Border.all(color: colors.cardBorder),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),
@@ -42,28 +43,21 @@ class VRMScriptEditor extends StatelessWidget {
               maxLines: maxLines,
               decoration: InputDecoration(
                 hintText: hintText,
-                hintStyle: const TextStyle(
-                  color: Color(0xFFCBD5E1), // Slate 300
-                  fontSize: 16,
-                  fontWeight: FontWeight.normal,
-                  fontStyle: FontStyle.normal,
-                ),
+                hintStyle: TextStyle(color: colors.textTertiary, fontSize: 16),
                 border: InputBorder.none,
               ),
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.normal,
                 height: 1.6,
-                color: Color(0xFF334155), // Slate 700
+                color: colors.textPrimary,
               ),
             ),
           ),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             decoration: BoxDecoration(
-              border: Border(
-                top: BorderSide(color: Colors.grey.withValues(alpha: 0.05)),
-              ),
+              border: Border(top: BorderSide(color: colors.cardBorder)),
             ),
             child: Row(
               children: [
@@ -100,32 +94,37 @@ class VRMScriptEditor extends StatelessWidget {
     Color? backgroundColor,
     Color? foregroundColor,
   }) {
-    return InkWell(
-      onTap: onPressed,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(
-          color: backgroundColor ?? Colors.transparent,
+    return Builder(
+      builder: (context) {
+        final defaultColor = context.colorScheme.primary;
+        return InkWell(
+          onTap: onPressed,
           borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 18, color: foregroundColor ?? AppTheme.forest),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: TextStyle(
-                color: foregroundColor ?? AppTheme.forest,
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                letterSpacing: 0.5,
-              ),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: backgroundColor ?? Colors.transparent,
+              borderRadius: BorderRadius.circular(12),
             ),
-          ],
-        ),
-      ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(icon, size: 18, color: foregroundColor ?? defaultColor),
+                const SizedBox(width: 6),
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: foregroundColor ?? defaultColor,
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.5,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -133,13 +132,17 @@ class VRMScriptEditor extends StatelessWidget {
     required VoidCallback onPressed,
     required IconData icon,
   }) {
-    return InkWell(
-      onTap: onPressed,
-      borderRadius: BorderRadius.circular(10),
-      child: Container(
-        padding: const EdgeInsets.all(8),
-        child: Icon(icon, size: 20, color: const Color(0xFF94A3B8)),
-      ),
+    return Builder(
+      builder: (context) {
+        return InkWell(
+          onTap: onPressed,
+          borderRadius: BorderRadius.circular(10),
+          child: Container(
+            padding: const EdgeInsets.all(8),
+            child: Icon(icon, size: 20, color: context.appColors.textTertiary),
+          ),
+        );
+      },
     );
   }
 }

@@ -127,7 +127,7 @@ class _FragmentOrganizationPageState extends State<FragmentOrganizationPage> {
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      backgroundColor: AppTheme.backgroundLight,
+      backgroundColor: context.colorScheme.surface,
       body: SafeArea(
         child: Column(
           children: [
@@ -180,8 +180,8 @@ class _FragmentOrganizationPageState extends State<FragmentOrganizationPage> {
             begin: Alignment.bottomCenter,
             end: Alignment.topCenter,
             colors: [
-              AppTheme.backgroundLight,
-              AppTheme.backgroundLight.withValues(alpha: 0.0),
+              context.colorScheme.surface,
+              context.colorScheme.surface.withValues(alpha: 0.0),
             ],
           ),
         ),
@@ -200,14 +200,18 @@ class _FragmentOrganizationPageState extends State<FragmentOrganizationPage> {
                 );
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.forestDark,
-                foregroundColor: Colors.white,
+                backgroundColor: context.isDarkMode
+                    ? context.appColors.forestVibrant
+                    : context.appColors.forestDark,
+                foregroundColor: context.isDarkMode
+                    ? context.appColors.offWhite
+                    : Colors.white,
                 minimumSize: const Size(double.infinity, 56),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
-                elevation: 8,
-                shadowColor: AppTheme.forest.withValues(alpha: 0.3),
+                elevation: context.isDarkMode ? 0 : 8,
+                shadowColor: context.colorScheme.primary.withValues(alpha: 0.3),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -250,18 +254,19 @@ class _FragmentOrganizationPageState extends State<FragmentOrganizationPage> {
     required String title,
     required String duration,
   }) {
+    final colors = context.appColors;
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Row(
         children: [
-          Icon(icon, size: 18, color: AppTheme.textMain),
+          Icon(icon, size: 18, color: colors.textPrimary),
           const SizedBox(width: 12),
           Text(
             title,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,
-              color: AppTheme.textMain,
+              color: colors.textPrimary,
               letterSpacing: -0.2,
             ),
           ),
@@ -269,25 +274,25 @@ class _FragmentOrganizationPageState extends State<FragmentOrganizationPage> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
             decoration: BoxDecoration(
-              color: const Color(0xFFF8FAFC),
+              color: colors.cardBackground.withValues(alpha: 0.5),
               borderRadius: BorderRadius.circular(99),
-              border: Border.all(color: const Color(0xFFF1F5F9)),
+              border: Border.all(color: colors.cardBorder),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(
+                Icon(
                   Icons.speed_rounded,
                   size: 14,
-                  color: Color(0xFF475569),
+                  color: colors.textSecondary,
                 ),
                 const SizedBox(width: 6),
                 Text(
                   duration,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF475569),
+                    color: colors.textSecondary,
                   ),
                 ),
               ],
@@ -303,19 +308,28 @@ class _FragmentOrganizationPageState extends State<FragmentOrganizationPage> {
     required Fragment fragment,
     required int index,
   }) {
+    final colors = context.appColors;
+    final isDark = context.isDarkMode;
     return Container(
       key: key,
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colors.cardBackground,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.black.withValues(alpha: 0.05)),
+        border: Border.all(color: colors.cardBorder),
         boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
+          if (isDark)
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.2),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            )
+          else
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.02),
+              blurRadius: 20,
+              offset: const Offset(0, 10),
+            ),
         ],
       ),
       clipBehavior: Clip.antiAlias,
@@ -341,17 +355,17 @@ class _FragmentOrganizationPageState extends State<FragmentOrganizationPage> {
               Container(
                 width: 40,
                 height: 40,
-                decoration: const BoxDecoration(
-                  color: Color(0xFFF3F4F6),
+                decoration: BoxDecoration(
+                  color: colors.earthLight.withValues(alpha: 0.5),
                   shape: BoxShape.circle,
                 ),
                 child: Center(
                   child: Text(
                     fragment.number,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
-                      color: AppTheme.textMuted,
+                      color: colors.textSecondary,
                     ),
                   ),
                 ),
@@ -363,18 +377,18 @@ class _FragmentOrganizationPageState extends State<FragmentOrganizationPage> {
                   children: [
                     Text(
                       fragment.timeRange,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
-                        color: AppTheme.textMain,
+                        color: colors.textPrimary,
                       ),
                     ),
                     const SizedBox(height: 6),
                     Text(
                       '"${fragment.content}"',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 14,
-                        color: AppTheme.textMuted,
+                        color: colors.textSecondary,
                         height: 1.5,
                         fontStyle: FontStyle.italic,
                       ),

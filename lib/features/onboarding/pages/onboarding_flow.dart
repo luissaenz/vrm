@@ -49,7 +49,7 @@ class _OnboardingFlowState extends State<OnboardingFlow> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.backgroundLight,
+      backgroundColor: context.colorScheme.surface,
       body: PageView(
         controller: _pageController,
         physics: const NeverScrollableScrollPhysics(),

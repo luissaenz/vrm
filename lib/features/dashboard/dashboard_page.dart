@@ -46,7 +46,7 @@ class _DashboardPageState extends State<DashboardPage> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      backgroundColor: AppTheme.offWhite,
+      backgroundColor: context.colorScheme.surface,
       extendBody: true,
       bottomNavigationBar: _buildBottomNav(context, l10n),
       body: SafeArea(
@@ -121,7 +121,10 @@ class _DashboardPageState extends State<DashboardPage> {
                 height: 44,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white, width: 2),
+                  border: Border.all(
+                    color: context.appColors.cardBorder,
+                    width: 2,
+                  ),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withValues(alpha: 0.05),
@@ -146,16 +149,16 @@ class _DashboardPageState extends State<DashboardPage> {
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
-                      color: AppTheme.textMuted,
+                      color: context.appColors.textSecondary,
                       letterSpacing: 0.5,
                     ),
                   ),
                   Text(
                     _getProfileLabel(),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
-                      color: AppTheme.textMain,
+                      color: context.appColors.textPrimary,
                     ),
                   ),
                 ],
@@ -166,18 +169,19 @@ class _DashboardPageState extends State<DashboardPage> {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: context.appColors.cardBackground,
               shape: BoxShape.circle,
-              border: Border.all(color: AppTheme.earthBorder),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.02),
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
-                ),
-              ],
+              border: Border.all(
+                color: context.appColors.cardBorder.withValues(alpha: 0.5),
+              ),
             ),
-            child: const Icon(Icons.settings, size: 20, color: AppTheme.forest),
+            child: Icon(
+              Icons.settings,
+              size: 20,
+              color: context.isDarkMode
+                  ? Colors.white
+                  : context.colorScheme.primary,
+            ),
           ),
         ],
       ),
@@ -192,20 +196,20 @@ class _DashboardPageState extends State<DashboardPage> {
         children: [
           Text(
             _getMainTitle(),
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 32,
               fontWeight: FontWeight.w800,
-              color: AppTheme.textMain,
+              color: context.appColors.textPrimary,
               letterSpacing: -1,
             ),
           ),
           const SizedBox(height: 6),
           Text(
             _getMainSubtitle(),
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w500,
-              color: AppTheme.textMuted,
+              color: context.appColors.textSecondary,
             ),
           ),
         ],
@@ -254,21 +258,21 @@ class _DashboardPageState extends State<DashboardPage> {
 
   Widget _buildStatsSection(AppLocalizations l10n) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Row(
         children: [
           VRMStatCard(
-            value: l10n.days('5'),
+            value: '5',
             label: l10n.streakLabel,
             icon: Icons.local_fire_department,
-            color: const Color(0xFFEA580C), // Orange 600
+            color: const Color(0xFFF97316), // Orange 500
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 12),
           VRMStatCard(
             value: '42',
             label: l10n.fragments,
             icon: Icons.mic,
-            color: AppTheme.forest,
+            color: const Color(0xFF10B981), // Emerald 500
           ),
         ],
       ),
@@ -324,15 +328,19 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   Widget _buildBottomNav(BuildContext context, AppLocalizations l10n) {
-    return ClipRect(
+    return ClipRRect(
       child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+        filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
         child: Container(
           padding: const EdgeInsets.fromLTRB(20, 16, 20, 40),
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.8),
+            color: context.isDarkMode
+                ? context.colorScheme.surface.withValues(alpha: 0.95)
+                : Colors.white.withValues(alpha: 0.95),
             border: Border(
-              top: BorderSide(color: AppTheme.earthBorder, width: 1),
+              top: BorderSide(
+                color: context.appColors.cardBorder.withValues(alpha: 0.2),
+              ),
             ),
           ),
           child: Row(
@@ -397,7 +405,9 @@ class _DashboardPageState extends State<DashboardPage> {
           Icon(
             icon,
             size: 24,
-            color: isActive ? AppTheme.forest : AppTheme.textMuted,
+            color: isActive
+                ? context.colorScheme.primary
+                : context.appColors.textSecondary,
           ),
           const SizedBox(height: 6),
           Text(
@@ -406,7 +416,9 @@ class _DashboardPageState extends State<DashboardPage> {
               fontSize: 10,
               fontWeight: FontWeight.bold,
               letterSpacing: 1.0,
-              color: isActive ? AppTheme.forest : AppTheme.textMuted,
+              color: isActive
+                  ? context.colorScheme.primary
+                  : context.appColors.textSecondary,
             ),
           ),
         ],
@@ -421,6 +433,8 @@ class _RecentProjectsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final isDark = context.isDarkMode;
+
     return Padding(
       padding: const EdgeInsets.only(top: 32),
       child: Column(
@@ -447,8 +461,12 @@ class _RecentProjectsSection extends StatelessWidget {
                   badgeText: l10n.draft,
                   progressLabel: l10n.progressLabel,
                   icon: Icons.smartphone_rounded,
-                  badgeBg: const Color(0xFFFFF7ED),
-                  badgeTextCol: const Color(0xFFC2410C), // Orange 700
+                  badgeBg: isDark
+                      ? Colors.orange.withValues(alpha: 0.1)
+                      : const Color(0xFFFFF7ED),
+                  badgeTextCol: isDark
+                      ? const Color(0xFFF97316)
+                      : const Color(0xFFC2410C),
                 ),
                 const SizedBox(height: 4),
                 VRMProjectCard(
@@ -459,8 +477,12 @@ class _RecentProjectsSection extends StatelessWidget {
                   badgeText: l10n.ready,
                   progressLabel: l10n.progressLabel,
                   icon: Icons.flight_rounded,
-                  badgeBg: const Color(0xFFECFDF5),
-                  badgeTextCol: const Color(0xFF047857), // Emerald 700
+                  badgeBg: isDark
+                      ? const Color(0xFF10B981).withValues(alpha: 0.1)
+                      : const Color(0xFFECFDF5),
+                  badgeTextCol: isDark
+                      ? const Color(0xFF10B981)
+                      : const Color(0xFF047857),
                 ),
               ],
             ),

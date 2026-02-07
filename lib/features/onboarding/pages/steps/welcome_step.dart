@@ -22,15 +22,15 @@ class _WelcomeStepState extends State<WelcomeStep> {
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
               child: Column(
                 children: [
-                  _buildHeader(),
+                  _buildHeader(context),
                   const SizedBox(height: 32),
-                  _buildHeadline(),
+                  _buildHeadline(context),
                   const SizedBox(height: 32),
                   const Spacer(),
-                  _buildCoachContainer(),
+                  _buildCoachContainer(context),
                   const Spacer(),
                   const SizedBox(height: 32),
-                  _buildActionFooter(),
+                  _buildActionFooter(context),
                 ],
               ),
             ),
@@ -40,40 +40,44 @@ class _WelcomeStepState extends State<WelcomeStep> {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(BuildContext context) {
     return SizedBox(
       height: 48,
       child: Center(
         child: Text(
           AppLocalizations.of(context)!.welcomeTitle.toUpperCase(),
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            letterSpacing: 2.0,
-            fontSize: 14,
-            color: AppTheme.forest,
+          style: TextStyle(
+            fontWeight: FontWeight.w800,
+            letterSpacing: 4.0,
+            fontSize: 12,
+            color: context.colorScheme.primary,
           ),
         ),
       ),
     );
   }
 
-  Widget _buildHeadline() {
+  Widget _buildHeadline(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Text(
         AppLocalizations.of(context)!.welcomeHeadline,
         textAlign: TextAlign.center,
         style: TextStyle(
-          fontSize: 30,
-          fontWeight: FontWeight.w600,
-          color: AppTheme.earth,
-          height: 1.2,
+          fontSize: 32,
+          fontWeight: FontWeight.w800,
+          color: context.appColors.textPrimary,
+          height: 1.1,
+          letterSpacing: -1,
         ),
       ),
     );
   }
 
-  Widget _buildCoachContainer() {
+  Widget _buildCoachContainer(BuildContext context) {
+    final isDark = context.isDarkMode;
+    final primaryColor = context.colorScheme.primary;
+
     return Center(
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 340),
@@ -82,13 +86,20 @@ class _WelcomeStepState extends State<WelcomeStep> {
           child: Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(40),
-              color: const Color(0xFFE5E7EB),
+              color: context.appColors.cardBackground,
               boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.15),
-                  blurRadius: 40,
-                  offset: const Offset(0, 20),
-                ),
+                if (isDark)
+                  BoxShadow(
+                    color: primaryColor.withValues(alpha: 0.15),
+                    blurRadius: 40,
+                    spreadRadius: -5,
+                  )
+                else
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.15),
+                    blurRadius: 40,
+                    offset: const Offset(0, 20),
+                  ),
               ],
             ),
             child: ClipRRect(
@@ -137,35 +148,45 @@ class _WelcomeStepState extends State<WelcomeStep> {
     );
   }
 
-  Widget _buildActionFooter() {
+  Widget _buildActionFooter(BuildContext context) {
+    final isDark = context.isDarkMode;
     return Column(
       children: [
         ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 320),
           child: ElevatedButton(
             onPressed: widget.onNext,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF2D3E39),
-              foregroundColor: Colors.white,
-              minimumSize: const Size(double.infinity, 64),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(999),
-              ),
-              elevation: 4,
-            ),
+            style:
+                ElevatedButton.styleFrom(
+                  backgroundColor: isDark
+                      ? context.appColors.forestVibrant
+                      : context.colorScheme.primary,
+                  foregroundColor: isDark
+                      ? context.appColors.offWhite
+                      : Colors.white,
+                  minimumSize: const Size(double.infinity, 64),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  elevation: isDark ? 0 : 4,
+                ).copyWith(
+                  overlayColor: WidgetStateProperty.all(
+                    Colors.white.withValues(alpha: 0.1),
+                  ),
+                ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  AppLocalizations.of(context)!.welcomeCta,
+                  AppLocalizations.of(context)!.welcomeCta.toUpperCase(),
                   style: const TextStyle(
                     fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 0.5,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 1.5,
                   ),
                 ),
-                SizedBox(width: 12),
-                Icon(Icons.arrow_forward),
+                const SizedBox(width: 12),
+                const Icon(Icons.arrow_forward, size: 20),
               ],
             ),
           ),

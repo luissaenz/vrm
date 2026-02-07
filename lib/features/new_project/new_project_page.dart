@@ -247,7 +247,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      backgroundColor: AppTheme.backgroundLight,
+      backgroundColor: context.colorScheme.surface,
       body: Stack(
         children: [
           SafeArea(
@@ -302,8 +302,8 @@ class _NewProjectPageState extends State<NewProjectPage> {
             begin: Alignment.bottomCenter,
             end: Alignment.topCenter,
             colors: [
-              AppTheme.backgroundLight,
-              AppTheme.backgroundLight.withValues(alpha: 0.0),
+              context.colorScheme.surface,
+              context.colorScheme.surface.withValues(alpha: 0.0),
             ],
           ),
         ),
@@ -311,16 +311,25 @@ class _NewProjectPageState extends State<NewProjectPage> {
           onPressed: _scriptController.text.trim().isEmpty || _isLoading
               ? null
               : () => _optimizeScript(),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppTheme.forestDark,
-            foregroundColor: Colors.white,
-            minimumSize: const Size(double.infinity, 56),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            elevation: 8,
-            shadowColor: AppTheme.forest.withValues(alpha: 0.3),
-          ),
+          style:
+              ElevatedButton.styleFrom(
+                backgroundColor: context.isDarkMode
+                    ? context.appColors.forestVibrant
+                    : context.appColors.forestDark,
+                foregroundColor: context.isDarkMode
+                    ? context.appColors.offWhite
+                    : Colors.white,
+                minimumSize: const Size(double.infinity, 56),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                elevation: context.isDarkMode ? 0 : 8,
+                shadowColor: context.colorScheme.primary.withValues(alpha: 0.3),
+              ).copyWith(
+                overlayColor: WidgetStateProperty.all(
+                  Colors.white.withValues(alpha: 0.1),
+                ),
+              ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -328,9 +337,10 @@ class _NewProjectPageState extends State<NewProjectPage> {
               const SizedBox(width: 8),
               Text(
                 l10n.splitIntoFragments.toUpperCase(),
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  letterSpacing: 0.5,
+                style: TextStyle(
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 1.2,
+                  fontSize: 14,
                 ),
               ),
             ],
@@ -355,8 +365,8 @@ class _NewProjectPageState extends State<NewProjectPage> {
           },
           icon: Icons.paste_outlined,
           label: "Pegar",
-          backgroundColor: const Color(0xFFF1F5F9),
-          foregroundColor: const Color(0xFF64748B),
+          backgroundColor: context.appColors.earthLight,
+          foregroundColor: context.appColors.textSecondary,
         ),
         VRMScriptEditor.actionIcon(
           onPressed: () {},
@@ -372,7 +382,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
         },
         icon: Icons.auto_awesome,
         label: "Asistente AI",
-        foregroundColor: AppTheme.forest,
+        foregroundColor: context.colorScheme.primary,
       ),
     );
   }

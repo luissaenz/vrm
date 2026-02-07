@@ -29,21 +29,32 @@ class VRMProjectCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
+    final primaryColor = context.colorScheme.primary;
+    final isDark = context.isDarkMode;
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: colors.cardBackground,
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: AppTheme.earthBorder),
+          border: Border.all(color: colors.cardBorder),
           boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
+            if (isDark)
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.2),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              )
+            else
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.04),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
           ],
         ),
         child: Column(
@@ -51,13 +62,19 @@ class VRMProjectCard extends StatelessWidget {
             Row(
               children: [
                 Container(
+                  // Added missing Container widget
                   width: 56,
                   height: 56,
                   decoration: BoxDecoration(
-                    color: AppTheme.earthLight.withValues(alpha: 0.5),
+                    color: isDark
+                        ? colors.offWhite.withValues(alpha: 0.6)
+                        : colors.earthLight.withValues(alpha: 0.5),
                     borderRadius: BorderRadius.circular(16),
+                    border: isDark
+                        ? Border.all(color: colors.cardBorder)
+                        : null,
                   ),
-                  child: Icon(icon, color: AppTheme.forest, size: 24),
+                  child: Icon(icon, color: primaryColor, size: 24),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -71,10 +88,10 @@ class VRMProjectCard extends StatelessWidget {
                             child: Text(
                               title,
                               overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 15,
-                                color: AppTheme.textMain,
+                                color: colors.textPrimary,
                               ),
                             ),
                           ),
@@ -84,7 +101,9 @@ class VRMProjectCard extends StatelessWidget {
                               vertical: 3,
                             ),
                             decoration: BoxDecoration(
-                              color: badgeBg,
+                              color: isDark
+                                  ? badgeTextCol.withValues(alpha: 0.1)
+                                  : badgeBg,
                               borderRadius: BorderRadius.circular(99),
                               border: Border.all(
                                 color: badgeTextCol.withValues(alpha: 0.1),
@@ -105,10 +124,10 @@ class VRMProjectCard extends StatelessWidget {
                       const SizedBox(height: 2),
                       Text(
                         time,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.w500,
-                          color: AppTheme.textMuted,
+                          color: colors.textSecondary,
                         ),
                       ),
                     ],
@@ -122,10 +141,10 @@ class VRMProjectCard extends StatelessWidget {
               children: [
                 Text(
                   progressLabel.toUpperCase(),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF64748B),
+                    color: colors.textSecondary,
                   ),
                 ),
                 Text(
@@ -134,8 +153,8 @@ class VRMProjectCard extends StatelessWidget {
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
                     color: progress == 1.0
-                        ? const Color(0xFF059669)
-                        : AppTheme.forest,
+                        ? const Color(0xFF10B981)
+                        : primaryColor,
                   ),
                 ),
               ],
@@ -146,9 +165,9 @@ class VRMProjectCard extends StatelessWidget {
               child: LinearProgressIndicator(
                 value: progress,
                 minHeight: 6,
-                backgroundColor: const Color(0xFFF1F5F9),
+                backgroundColor: isDark ? colors.offWhite : colors.earthLight,
                 valueColor: AlwaysStoppedAnimation<Color>(
-                  progress == 1.0 ? const Color(0xFF10B981) : AppTheme.forest,
+                  progress == 1.0 ? const Color(0xFF10B981) : primaryColor,
                 ),
               ),
             ),

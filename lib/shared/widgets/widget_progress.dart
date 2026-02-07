@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import '../../core/theme.dart';
 
 class WidgetProgress extends StatefulWidget {
   final String title;
@@ -97,19 +98,16 @@ class _WidgetProgressState extends State<WidgetProgress>
 
   @override
   Widget build(BuildContext context) {
-    final primaryColor = const Color(0xFF2CBD0F);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final bgColor = isDark ? const Color(0xFF132210) : const Color(0xFFF6F8F6);
+    final colors = context.appColors;
+    final primaryColor = context.colorScheme.primary;
+    final isDark = context.isDarkMode;
+    final bgColor = context.colorScheme.surface;
 
     // Aesthetic update: avoid solid whites in center, use glassy effect
-    final centerNodeBg = isDark
-        ? const Color(0xFF1E311A).withValues(alpha: 0.8)
-        : Colors.white.withValues(alpha: 0.7);
+    final centerNodeBg = colors.cardBackground.withValues(alpha: 0.8);
 
-    final textColor = isDark ? Colors.white : const Color(0xFF121811);
-    final mutedTextColor = isDark
-        ? const Color(0xFFA3C29C)
-        : const Color(0xFF688961);
+    final textColor = colors.textPrimary;
+    final mutedTextColor = colors.textSecondary;
 
     return Material(
       color: bgColor,
@@ -258,9 +256,9 @@ class _WidgetProgressState extends State<WidgetProgress>
                                 );
                               },
                             ),
-                            const Icon(
+                            Icon(
                               Icons.auto_awesome,
-                              color: Color(0xFF2CBD0F),
+                              color: primaryColor,
                               size: 44,
                             ),
                           ],
@@ -325,9 +323,7 @@ class _WidgetProgressState extends State<WidgetProgress>
                         height: 6,
                         width: double.infinity,
                         decoration: BoxDecoration(
-                          color: isDark
-                              ? const Color(0xFF253A21)
-                              : const Color(0xFFDDE6DB),
+                          color: colors.earthLight,
                           borderRadius: BorderRadius.circular(99),
                         ),
                         child: AnimatedFractionallySizedBox(
@@ -355,15 +351,9 @@ class _WidgetProgressState extends State<WidgetProgress>
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: isDark
-                              ? const Color(0xFF1E311A).withValues(alpha: 0.3)
-                              : Colors.white.withValues(alpha: 0.5),
+                          color: colors.cardBackground.withValues(alpha: 0.3),
                           borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                            color: isDark
-                                ? const Color(0xFF253A21)
-                                : const Color(0xFFDDE6DB),
-                          ),
+                          border: Border.all(color: colors.cardBorder),
                         ),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,

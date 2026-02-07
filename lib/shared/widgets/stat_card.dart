@@ -17,19 +17,27 @@ class VRMStatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.appColors;
     return Expanded(
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: colors.cardBackground,
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: AppTheme.earthBorder),
+          border: Border.all(color: colors.cardBorder),
           boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 4),
-            ),
+            if (context.isDarkMode)
+              BoxShadow(
+                color: color.withValues(alpha: 0.15),
+                blurRadius: 25,
+                spreadRadius: -5,
+              )
+            else
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
           ],
         ),
         child: Column(
@@ -39,7 +47,7 @@ class VRMStatCard extends StatelessWidget {
               width: 36,
               height: 36,
               decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.05),
+                color: color.withValues(alpha: context.isDarkMode ? 0.2 : 0.05),
                 shape: BoxShape.circle,
               ),
               child: Icon(icon, color: color, size: 20),
@@ -47,20 +55,20 @@ class VRMStatCard extends StatelessWidget {
             const SizedBox(height: 12),
             Text(
               value,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-                color: AppTheme.textMain,
+                color: colors.textPrimary,
                 letterSpacing: -0.5,
               ),
             ),
             const SizedBox(height: 2),
             Text(
               label.toUpperCase(),
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
-                color: AppTheme.textMuted,
+                color: colors.textSecondary,
                 letterSpacing: 0.5,
               ),
             ),

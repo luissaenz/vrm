@@ -19,8 +19,8 @@ class VRMStepIndicator extends StatelessWidget {
           Container(
             width: 32,
             height: 32,
-            decoration: const BoxDecoration(
-              color: AppTheme.forest,
+            decoration: BoxDecoration(
+              color: context.colorScheme.primary,
               shape: BoxShape.circle,
             ),
             child: Center(
@@ -38,10 +38,10 @@ class VRMStepIndicator extends StatelessWidget {
         ],
         Text(
           title,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.bold,
-            color: AppTheme.earth,
+            color: context.appColors.textSecondary,
             letterSpacing: 1.1,
           ),
         ),

@@ -58,27 +58,30 @@ class _IdentityStepState extends State<IdentityStep> {
   }
 
   Widget _buildHeadline() {
+    final colors = context.appColors;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
         children: [
           Text(
             AppLocalizations.of(context)!.identityHeadline,
-            style: const TextStyle(
-              fontSize: 30,
-              fontWeight: FontWeight.bold,
-              color: AppTheme.earth,
-              letterSpacing: -0.5,
+            style: TextStyle(
+              fontSize: 32,
+              fontWeight: FontWeight.w800,
+              color: colors.textPrimary,
+              letterSpacing: -1,
+              height: 1.1,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
           Text(
             AppLocalizations.of(context)!.identitySubheadline,
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 14,
-              color: Color(0xFF4A5568),
+              color: colors.textSecondary,
               height: 1.4,
+              fontWeight: FontWeight.w500,
             ),
           ),
         ],
@@ -202,22 +205,38 @@ class _IdentityStepState extends State<IdentityStep> {
     UserIdentity identity,
     bool isSelected,
   ) {
+    final colors = context.appColors;
+    final primaryColor = context.colorScheme.primary;
+    final isDark = context.isDarkMode;
+
     return Center(
       child: Container(
         width: 280,
         margin: const EdgeInsets.symmetric(horizontal: 12),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(32),
-          color: Colors.white,
-          // Border removed as per user request
+          color: colors.cardBackground,
+          border: Border.all(
+            color: isSelected && isDark ? primaryColor : colors.cardBorder,
+            width: isSelected ? 2 : 1,
+          ),
           boxShadow: [
-            BoxShadow(
-              color: isSelected
-                  ? AppTheme.forest.withValues(alpha: 0.15)
-                  : Colors.black.withValues(alpha: 0.08),
-              blurRadius: isSelected ? 25 : 15,
-              offset: const Offset(0, 12),
-            ),
+            if (isDark)
+              BoxShadow(
+                color: isSelected
+                    ? primaryColor.withValues(alpha: 0.25)
+                    : Colors.black.withValues(alpha: 0.2),
+                blurRadius: isSelected ? 30 : 15,
+                spreadRadius: isSelected ? -2 : 0,
+              )
+            else
+              BoxShadow(
+                color: isSelected
+                    ? context.colorScheme.primary.withValues(alpha: 0.15)
+                    : Colors.black.withValues(alpha: 0.08),
+                blurRadius: isSelected ? 25 : 15,
+                offset: const Offset(0, 12),
+              ),
           ],
         ),
         child: ClipRRect(
@@ -252,10 +271,11 @@ class _IdentityStepState extends State<IdentityStep> {
                           vertical: 10,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.85),
+                          color: (isDark ? Colors.black : Colors.white)
+                              .withValues(alpha: 0.7),
                           borderRadius: BorderRadius.circular(100),
                           border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.5),
+                            color: Colors.white.withValues(alpha: 0.2),
                           ),
                         ),
                         child: ClipRRect(
@@ -264,11 +284,13 @@ class _IdentityStepState extends State<IdentityStep> {
                             filter: ImageFilter.blur(sigmaX: 8, sigmaY: 8),
                             child: Text(
                               quote,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontStyle: FontStyle.italic,
                                 fontSize: 13,
-                                fontWeight: FontWeight.w500,
-                                color: Color(0xFF4A5568),
+                                fontWeight: FontWeight.w600,
+                                color: isDark
+                                    ? Colors.white
+                                    : const Color(0xFF4A5568),
                               ),
                             ),
                           ),
@@ -295,15 +317,17 @@ class _IdentityStepState extends State<IdentityStep> {
   }
 
   Widget _buildActionButtons() {
+    final colors = context.appColors;
+    final isDark = context.isDarkMode;
     return Column(
       children: [
         Text(
-          _getTag(_identities[_currentPage]),
-          style: const TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 2.0,
-            color: AppTheme.earth,
+          _getTag(_identities[_currentPage]).toUpperCase(),
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 3.0,
+            color: context.colorScheme.primary,
           ),
         ),
         const SizedBox(height: 20),
@@ -311,28 +335,37 @@ class _IdentityStepState extends State<IdentityStep> {
           constraints: const BoxConstraints(maxWidth: 320),
           child: ElevatedButton(
             onPressed: () => widget.onSelected(_identities[_currentPage]),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.forest,
-              foregroundColor: Colors.white,
-              minimumSize: const Size(double.infinity, 64),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(999),
-              ),
-              elevation: 4,
-            ),
+            style:
+                ElevatedButton.styleFrom(
+                  backgroundColor: isDark
+                      ? context.appColors.forestVibrant
+                      : context.colorScheme.primary,
+                  foregroundColor: isDark
+                      ? context.appColors.offWhite
+                      : Colors.white,
+                  minimumSize: const Size(double.infinity, 64),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  elevation: isDark ? 0 : 4,
+                ).copyWith(
+                  overlayColor: WidgetStateProperty.all(
+                    Colors.white.withValues(alpha: 0.1),
+                  ),
+                ),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  AppLocalizations.of(context)!.identityConfirm,
+                  AppLocalizations.of(context)!.identityConfirm.toUpperCase(),
                   style: const TextStyle(
                     fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1.0,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 1.5,
                   ),
                 ),
-                SizedBox(width: 12),
-                Icon(Icons.arrow_forward, size: 20, color: Colors.white),
+                const SizedBox(width: 12),
+                const Icon(Icons.arrow_forward, size: 20),
               ],
             ),
           ),
