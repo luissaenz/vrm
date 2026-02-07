@@ -393,4 +393,50 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get profileSellerImage =>
       'https://lh3.googleusercontent.com/aida-public/AB6AXuAbHlQa2OUJlKn6gBpuhTPrs-Q0_qAIgIDsINsGm2LfDF76YoL3utRhVCQZBt6pFvVeMUMvQuAg_7-LwLeCMFJnJQ4l18fMu-jUX1w15MZt7mxklAwpcg1L6vUWXRZn2xc81UNL7g2IqMrNhBTCXDe9Y18yO1iYbt8tc8jU4KDoFeLKt5_qsgWKoGerm2puw0hCjNqb0TfvxixhDpay7OjTLm-u4IRnf_IbJ-Ezo-hvh5e4YPu2lHJS9o03e05lK4IxuPyCXfoCCU4d';
+
+  @override
+  String get performanceSummary => 'PERFORMANCE SUMMARY';
+
+  @override
+  String get timeSavedTitle => 'Time Saved!';
+
+  @override
+  String timeSavedDescription(String minutes, String clips) {
+    return 'You saved $minutes min of editing by automatically joining $clips clips.';
+  }
+
+  @override
+  String get savedLabel => 'SAVED';
+
+  @override
+  String get ritmoLabel => 'RHYTHM';
+
+  @override
+  String get perfectoLabel => 'PERFECT';
+
+  @override
+  String get fillerWordsLabel => 'FILLER WORDS';
+
+  @override
+  String detectedLabel(String count) {
+    return '$count DETECTED';
+  }
+
+  @override
+  String get lowStatus => 'Low';
+
+  @override
+  String get pausesLabel => 'PAUSES';
+
+  @override
+  String get removedLabel => 'removed';
+
+  @override
+  String get previewTitle => 'Preview';
+
+  @override
+  String get editManually => 'Edit manually';
+
+  @override
+  String get exportVideo => 'Export Video';
 }

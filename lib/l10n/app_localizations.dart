@@ -805,6 +805,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'https://lh3.googleusercontent.com/aida-public/AB6AXuAbHlQa2OUJlKn6gBpuhTPrs-Q0_qAIgIDsINsGm2LfDF76YoL3utRhVCQZBt6pFvVeMUMvQuAg_7-LwLeCMFJnJQ4l18fMu-jUX1w15MZt7mxklAwpcg1L6vUWXRZn2xc81UNL7g2IqMrNhBTCXDe9Y18yO1iYbt8tc8jU4KDoFeLKt5_qsgWKoGerm2puw0hCjNqb0TfvxixhDpay7OjTLm-u4IRnf_IbJ-Ezo-hvh5e4YPu2lHJS9o03e05lK4IxuPyCXfoCCU4d'**
   String get profileSellerImage;
+
+  /// Title for the performance summary screen
+  ///
+  /// In en, this message translates to:
+  /// **'PERFORMANCE SUMMARY'**
+  String get performanceSummary;
+
+  /// Headline for saved time
+  ///
+  /// In en, this message translates to:
+  /// **'Time Saved!'**
+  String get timeSavedTitle;
+
+  /// Description of saved time and clips
+  ///
+  /// In en, this message translates to:
+  /// **'You saved {minutes} min of editing by automatically joining {clips} clips.'**
+  String timeSavedDescription(String minutes, String clips);
+
+  /// Label for saved time metric
+  ///
+  /// In en, this message translates to:
+  /// **'SAVED'**
+  String get savedLabel;
+
+  /// Label for tempo/rhythm metric
+  ///
+  /// In en, this message translates to:
+  /// **'RHYTHM'**
+  String get ritmoLabel;
+
+  /// Status label for perfect performance
+  ///
+  /// In en, this message translates to:
+  /// **'PERFECT'**
+  String get perfectoLabel;
+
+  /// Label for filler words detection
+  ///
+  /// In en, this message translates to:
+  /// **'FILLER WORDS'**
+  String get fillerWordsLabel;
+
+  /// Count of detected items
+  ///
+  /// In en, this message translates to:
+  /// **'{count} DETECTED'**
+  String detectedLabel(String count);
+
+  /// Status label for low detection
+  ///
+  /// In en, this message translates to:
+  /// **'Low'**
+  String get lowStatus;
+
+  /// Label for pauses removed
+  ///
+  /// In en, this message translates to:
+  /// **'PAUSES'**
+  String get pausesLabel;
+
+  /// Subtext for removed time/items
+  ///
+  /// In en, this message translates to:
+  /// **'removed'**
+  String get removedLabel;
+
+  /// Title for the preview section
+  ///
+  /// In en, this message translates to:
+  /// **'Preview'**
+  String get previewTitle;
+
+  /// Action to edit manually
+  ///
+  /// In en, this message translates to:
+  /// **'Edit manually'**
+  String get editManually;
+
+  /// Action to export the video
+  ///
+  /// In en, this message translates to:
+  /// **'Export Video'**
+  String get exportVideo;
 }
 
 class _AppLocalizationsDelegate

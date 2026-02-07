@@ -524,5 +524,74 @@
   "profileSellerImage": "https://lh3.googleusercontent.com/aida-public/AB6AXuAbHlQa2OUJlKn6gBpuhTPrs-Q0_qAIgIDsINsGm2LfDF76YoL3utRhVCQZBt6pFvVeMUMvQuAg_7-LwLeCMFJnJQ4l18fMu-jUX1w15MZt7mxklAwpcg1L6vUWXRZn2xc81UNL7g2IqMrNhBTCXDe9Y18yO1iYbt8tc8jU4KDoFeLKt5_qsgWKoGerm2puw0hCjNqb0TfvxixhDpay7OjTLm-u4IRnf_IbJ-Ezo-hvh5e4YPu2lHJS9o03e05lK4IxuPyCXfoCCU4d",
   "@profileSellerImage": {
     "description": "URL for the Seller profile image"
+  },
+  "performanceSummary": "RESUMEN DE RENDIMIENTO",
+  "@performanceSummary": {
+    "description": "Title for the performance summary screen"
+  },
+  "timeSavedTitle": "¡Tiempo ahorrado!",
+  "@timeSavedTitle": {
+    "description": "Headline for saved time"
+  },
+  "timeSavedDescription": "Ahorraste {minutes} min de edición uniendo {clips} clips automáticamente.",
+  "@timeSavedDescription": {
+    "description": "Description of saved time and clips",
+    "placeholders": {
+      "minutes": {
+        "type": "String"
+      },
+      "clips": {
+        "type": "String"
+      }
+    }
+  },
+  "savedLabel": "AHORRADO",
+  "@savedLabel": {
+    "description": "Label for saved time metric"
+  },
+  "ritmoLabel": "RITMO",
+  "@ritmoLabel": {
+    "description": "Label for tempo/rhythm metric"
+  },
+  "perfectoLabel": "PERFECTO",
+  "@perfectoLabel": {
+    "description": "Status label for perfect performance"
+  },
+  "fillerWordsLabel": "PALABRAS DE RELLENO",
+  "@fillerWordsLabel": {
+    "description": "Label for filler words detection"
+  },
+  "detectedLabel": "{count} DETECTADAS",
+  "@detectedLabel": {
+    "description": "Count of detected items",
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "lowStatus": "Bajo",
+  "@lowStatus": {
+    "description": "Status label for low detection"
+  },
+  "pausesLabel": "PAUSAS",
+  "@pausesLabel": {
+    "description": "Label for pauses removed"
+  },
+  "removedLabel": "eliminados",
+  "@removedLabel": {
+    "description": "Subtext for removed time/items"
+  },
+  "previewTitle": "Vista previa",
+  "@previewTitle": {
+    "description": "Title for the preview section"
+  },
+  "editManually": "Editar manualmente",
+  "@editManually": {
+    "description": "Action to edit manually"
+  },
+  "exportVideo": "Exportar Video",
+  "@exportVideo": {
+    "description": "Action to export the video"
   }
 }

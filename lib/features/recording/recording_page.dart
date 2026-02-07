@@ -8,6 +8,7 @@ import '../new_project/models/script_analysis.dart';
 import 'models/recording_state.dart';
 import 'models/voice_indicator_state.dart';
 import 'widgets/voice_indicator.dart';
+import 'recording_end_page.dart';
 
 class RecordingPage extends StatefulWidget {
   final ScriptAnalysis analysis;
@@ -189,7 +190,6 @@ class _RecordingPageState extends State<RecordingPage>
   }
 
   WidgetSpan _buildPauseIcon() {
-    final colors = context.appColors;
     return WidgetSpan(
       alignment: PlaceholderAlignment.middle,
       child: Container(
@@ -265,15 +265,18 @@ class _RecordingPageState extends State<RecordingPage>
 
             // Fase 5: 1 segundo después pasar a idle y siguiente fragmento
             Timer(const Duration(seconds: 1), () {
-              if (mounted &&
-                  _recordingState == RecordingState.commandRecorded) {
+              if (mounted) {
+                final isLastSegment =
+                    _activeFragmentIndex >= widget.analysis.segments.length - 1;
+
                 setState(() {
-                  _recordingState = RecordingState.idle;
+                  if (!isLastSegment) {
+                    _activeFragmentIndex++;
+                    _recordingState = RecordingState.idle;
+                  } else {
+                    _recordingState = RecordingState.finished;
+                  }
                   _isCommandHeard = false;
-                  // Avanzar al siguiente fragmento (cíclico para la demo)
-                  _activeFragmentIndex =
-                      (_activeFragmentIndex + 1) %
-                      widget.analysis.segments.length;
                 });
               }
             });
@@ -349,6 +352,10 @@ class _RecordingPageState extends State<RecordingPage>
     final totalFragments = widget.analysis.segments.length;
     final currentFragment = _activeFragmentIndex + 1;
     final isCountingDown = _recordingState == RecordingState.countdown;
+
+    if (_recordingState == RecordingState.finished) {
+      return const RecordingEndPage();
+    }
 
     return Scaffold(
       backgroundColor: context.colorScheme.surface,
