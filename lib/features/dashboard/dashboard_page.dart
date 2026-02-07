@@ -1,5 +1,6 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:vrm_app/l10n/app_localizations.dart';
 import 'package:vrm_app/shared/widgets/section_header.dart';
 import 'package:vrm_app/shared/widgets/stat_card.dart';
@@ -23,6 +24,7 @@ class DashboardPage extends StatefulWidget {
 class _DashboardPageState extends State<DashboardPage> {
   UserProfile _profile = UserProfile.empty();
   final _repository = OnboardingRepository();
+  DateTime _selectedDate = DateTime.now();
 
   @override
   void initState() {
@@ -276,6 +278,12 @@ class _DashboardPageState extends State<DashboardPage> {
   }
 
   Widget _buildCalendarSection(AppLocalizations l10n) {
+    // Generate 5 days starting from today
+    final today = DateTime.now();
+    final calendarDays = List.generate(5, (index) {
+      return today.add(Duration(days: index));
+    });
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
@@ -283,40 +291,39 @@ class _DashboardPageState extends State<DashboardPage> {
         children: [
           VRMSectionHeader(title: l10n.calendar, icon: Icons.calendar_month),
           const SizedBox(height: 20),
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            physics: const BouncingScrollPhysics(),
-            child: Row(
-              children: [
-                VRMCalendarDay(
-                  day: l10n.wed,
-                  date: '24',
-                  isSelected: true,
-                  onTap: () {},
+          Row(
+            children: calendarDays.map((date) {
+              final isSelected = DateUtils.isSameDay(date, _selectedDate);
+              final isToday = DateUtils.isSameDay(date, today);
+
+              // Use 'HOY'/'TODAY' for the current date
+              final locale = Localizations.localeOf(context).languageCode;
+              String dayName;
+              if (isToday) {
+                dayName = locale == 'es' ? 'HOY' : 'TODAY';
+              } else {
+                dayName = DateFormat.E(locale).format(date).toUpperCase();
+              }
+
+              return Expanded(
+                child: Padding(
+                  padding: EdgeInsets.only(
+                    right: date == calendarDays.last ? 0 : 8,
+                  ),
+                  child: VRMCalendarDay(
+                    day: dayName,
+                    date: date.day.toString(),
+                    isSelected: isSelected,
+                    isToday: isToday,
+                    onTap: () {
+                      setState(() {
+                        _selectedDate = date;
+                      });
+                    },
+                  ),
                 ),
-                const SizedBox(width: 16),
-                VRMCalendarDay(
-                  day: l10n.thu,
-                  date: '25',
-                  isSelected: false,
-                  onTap: () {},
-                ),
-                const SizedBox(width: 16),
-                VRMCalendarDay(
-                  day: l10n.fri,
-                  date: '26',
-                  isSelected: false,
-                  onTap: () {},
-                ),
-                const SizedBox(width: 16),
-                VRMCalendarDay(
-                  day: l10n.sat,
-                  date: '27',
-                  isSelected: false,
-                  onTap: () {},
-                ),
-              ],
-            ),
+              );
+            }).toList(),
           ),
         ],
       ),

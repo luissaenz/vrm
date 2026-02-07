@@ -5,6 +5,7 @@ class VRMCalendarDay extends StatelessWidget {
   final String day;
   final String date;
   final bool isSelected;
+  final bool isToday;
   final VoidCallback? onTap;
 
   const VRMCalendarDay({
@@ -12,6 +13,7 @@ class VRMCalendarDay extends StatelessWidget {
     required this.day,
     required this.date,
     this.isSelected = false,
+    this.isToday = false,
     this.onTap,
   });
 
@@ -23,12 +25,22 @@ class VRMCalendarDay extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 76,
         padding: const EdgeInsets.symmetric(vertical: 14),
         decoration: BoxDecoration(
-          color: isSelected ? primaryColor : colors.cardBackground,
+          color: isSelected
+              ? primaryColor
+              : (isToday
+                    ? primaryColor.withValues(alpha: 0.1)
+                    : colors.cardBackground),
           borderRadius: BorderRadius.circular(20),
-          border: isSelected ? null : Border.all(color: colors.cardBorder),
+          border: Border.all(
+            color: isSelected
+                ? Colors.transparent
+                : (isToday
+                      ? primaryColor.withValues(alpha: 0.3)
+                      : colors.cardBorder),
+            width: 1,
+          ),
           boxShadow: isSelected
               ? [
                   BoxShadow(
@@ -48,7 +60,9 @@ class VRMCalendarDay extends StatelessWidget {
                 fontWeight: FontWeight.bold,
                 color: isSelected
                     ? Colors.white.withValues(alpha: 0.7)
-                    : colors.textSecondary.withValues(alpha: 0.8),
+                    : (isToday
+                          ? primaryColor
+                          : colors.textSecondary.withValues(alpha: 0.8)),
                 letterSpacing: 1.0,
               ),
             ),
@@ -57,8 +71,10 @@ class VRMCalendarDay extends StatelessWidget {
               date,
               style: TextStyle(
                 fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: isSelected ? Colors.white : colors.textPrimary,
+                fontWeight: isToday ? FontWeight.w900 : FontWeight.bold,
+                color: isSelected
+                    ? Colors.white
+                    : (isToday ? primaryColor : colors.textPrimary),
               ),
             ),
             const SizedBox(height: 8),
@@ -68,7 +84,9 @@ class VRMCalendarDay extends StatelessWidget {
               decoration: BoxDecoration(
                 color: isSelected
                     ? Colors.white
-                    : (isSelected ? Colors.transparent : primaryColor),
+                    : (isToday
+                          ? primaryColor
+                          : primaryColor.withValues(alpha: 0.3)),
                 shape: BoxShape.circle,
               ),
             ),
