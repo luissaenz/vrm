@@ -42,6 +42,16 @@ class _RecordingPageState extends State<RecordingPage>
   late AnimationController _menuController;
   late Animation<Offset> _menuAnimation;
 
+  // Menu Features State
+  bool _isGridActive = true;
+  bool _isStreetModeActive = false;
+  bool _isGhostActive = false;
+  bool _isLightActive = false;
+  bool _isMirrorActive = false;
+  bool _isVoiceControlActive = true;
+  bool _isFocusLocked = false;
+  bool _isMonitorActive = false;
+
   @override
   void initState() {
     super.initState();
@@ -74,10 +84,15 @@ class _RecordingPageState extends State<RecordingPage>
         );
 
     _activeFragmentIndex = widget.currentFragmentIndex;
+    _menuPageController = PageController();
   }
+
+  late PageController _menuPageController;
+  int _currentMenuPage = 0;
 
   @override
   void dispose() {
+    _menuPageController.dispose();
     _countdownTimer?.cancel();
     _pulseController.dispose();
     _countdownController.dispose();
@@ -311,35 +326,34 @@ class _RecordingPageState extends State<RecordingPage>
   }
 
   Widget _buildGridOverlay() {
+    if (!_isGridActive) return const SizedBox.shrink();
     return Positioned.fill(
       child: IgnorePointer(
         child: Opacity(
-          opacity: 0.2,
-          child: GridView.count(
-            crossAxisCount: 3,
-            children: List.generate(9, (index) {
-              final showRight = (index % 3) != 2;
-              final showBottom = index < 6;
-
-              return Container(
-                decoration: BoxDecoration(
-                  border: Border(
-                    right: showRight
-                        ? BorderSide(
-                            color: Colors.white.withValues(alpha: 0.3),
-                            width: 1,
-                          )
-                        : BorderSide.none,
-                    bottom: showBottom
-                        ? BorderSide(
-                            color: Colors.white.withValues(alpha: 0.3),
-                            width: 1,
-                          )
-                        : BorderSide.none,
-                  ),
-                ),
-              );
-            }),
+          opacity: 0.3,
+          child: Stack(
+            children: [
+              // Vertical lines
+              Row(
+                children: [
+                  const Spacer(),
+                  Container(width: 1, color: Colors.white),
+                  const Spacer(),
+                  Container(width: 1, color: Colors.white),
+                  const Spacer(),
+                ],
+              ),
+              // Horizontal lines
+              Column(
+                children: [
+                  const Spacer(),
+                  Container(height: 1, color: Colors.white),
+                  const Spacer(),
+                  Container(height: 1, color: Colors.white),
+                  const Spacer(),
+                ],
+              ),
+            ],
           ),
         ),
       ),
@@ -496,9 +510,12 @@ class _RecordingPageState extends State<RecordingPage>
               // Grid button
               _buildSideButton(
                 icon: Icons.grid_view,
-                label: 'GRID',
+                label: 'GRILLA',
+                isActive: _isGridActive,
                 onTap: () {
-                  // TODO: Toggle grid
+                  setState(() {
+                    _isGridActive = !_isGridActive;
+                  });
                 },
                 isEnabled: !_isRecordingActive,
               ),
@@ -530,7 +547,9 @@ class _RecordingPageState extends State<RecordingPage>
     required String label,
     required VoidCallback onTap,
     bool isEnabled = true,
+    bool isActive = false,
   }) {
+    final primaryColor = context.colorScheme.primary;
     return Column(
       children: [
         ClipRRect(
@@ -544,24 +563,42 @@ class _RecordingPageState extends State<RecordingPage>
                 child: AnimatedOpacity(
                   duration: const Duration(milliseconds: 300),
                   opacity: isEnabled ? 1.0 : 0.4,
-                  child: Container(
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
                     width: 48,
                     height: 48,
                     decoration: BoxDecoration(
-                      color: context.isDarkMode
-                          ? context.appColors.cardBackground.withValues(
-                              alpha: 0.8,
-                            )
-                          : Colors.black.withValues(alpha: 0.4),
+                      color: isActive
+                          ? primaryColor.withValues(alpha: 0.15)
+                          : (context.isDarkMode
+                                ? context.appColors.cardBackground.withValues(
+                                    alpha: 0.8,
+                                  )
+                                : Colors.black.withValues(alpha: 0.4)),
                       shape: BoxShape.circle,
                       border: Border.all(
-                        color: context.isDarkMode
-                            ? context.appColors.cardBorder
-                            : Colors.white.withValues(alpha: 0.1),
+                        color: isActive
+                            ? primaryColor
+                            : (context.isDarkMode
+                                  ? context.appColors.cardBorder
+                                  : Colors.white.withValues(alpha: 0.1)),
                         width: 1,
                       ),
+                      boxShadow: isActive
+                          ? [
+                              BoxShadow(
+                                color: primaryColor.withValues(alpha: 0.3),
+                                blurRadius: 15,
+                                spreadRadius: 2,
+                              ),
+                            ]
+                          : [],
                     ),
-                    child: Icon(icon, color: Colors.white, size: 24),
+                    child: Icon(
+                      icon,
+                      color: isActive ? primaryColor : Colors.white,
+                      size: 24,
+                    ),
                   ),
                 ),
               ),
@@ -572,7 +609,9 @@ class _RecordingPageState extends State<RecordingPage>
         Text(
           label,
           style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.5),
+            color: isActive
+                ? primaryColor.withValues(alpha: 0.9)
+                : Colors.white.withValues(alpha: 0.5),
             fontSize: 9,
             fontWeight: FontWeight.bold,
             letterSpacing: 1.5,
@@ -642,7 +681,7 @@ class _RecordingPageState extends State<RecordingPage>
               child: SlideTransition(
                 position: _menuAnimation,
                 child: Container(
-                  height: MediaQuery.of(context).size.height * 0.48,
+                  height: MediaQuery.of(context).size.height * 0.44,
                   decoration: const BoxDecoration(
                     color: Colors.black,
                     borderRadius: BorderRadius.vertical(
@@ -660,161 +699,264 @@ class _RecordingPageState extends State<RecordingPage>
                       ),
                     ],
                   ),
-                  child: Column(
-                    children: [
-                      // Top handle
-                      const SizedBox(height: 16),
-                      Container(
-                        width: 48,
-                        height: 4,
-                        decoration: BoxDecoration(
-                          color: Colors.white.withValues(alpha: 0.2),
-                          borderRadius: BorderRadius.circular(2),
+                  child: GestureDetector(
+                    onVerticalDragUpdate: (details) {
+                      if (details.primaryDelta! > 10) {
+                        _closeMenu();
+                      }
+                    },
+                    child: Column(
+                      children: [
+                        // Top handle area
+                        Container(
+                          width: double.infinity,
+                          color: Colors.transparent,
+                          padding: const EdgeInsets.only(top: 16, bottom: 8),
+                          child: Center(
+                            child: Container(
+                              width: 48,
+                              height: 4,
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.2),
+                                borderRadius: BorderRadius.circular(2),
+                              ),
+                            ),
+                          ),
                         ),
-                      ),
 
-                      const SizedBox(height: 24),
-
-                      // Header with "Cerrar" and status
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 40),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            GestureDetector(
-                              onTap: _closeMenu,
-                              child: Row(
-                                children: [
-                                  Icon(
-                                    Icons.expand_more,
-                                    color: Colors.white.withValues(alpha: 0.6),
-                                    size: 24,
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    'CERRAR',
-                                    style: TextStyle(
+                        // Header with "Cerrar" and status
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 40,
+                            vertical: 8,
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              GestureDetector(
+                                onTap: _closeMenu,
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.expand_more,
                                       color: Colors.white.withValues(
                                         alpha: 0.6,
                                       ),
+                                      size: 24,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      'CERRAR',
+                                      style: TextStyle(
+                                        color: Colors.white.withValues(
+                                          alpha: 0.6,
+                                        ),
+                                        fontSize: 9,
+                                        fontWeight: FontWeight.bold,
+                                        letterSpacing: 2,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Row(
+                                children: [
+                                  Text(
+                                    '64.2 GB',
+                                    style: TextStyle(
+                                      color: Colors.white.withValues(
+                                        alpha: 0.4,
+                                      ),
                                       fontSize: 9,
                                       fontWeight: FontWeight.bold,
-                                      letterSpacing: 2,
                                     ),
                                   ),
-                                ],
-                              ),
-                            ),
-                            Row(
-                              children: [
-                                Text(
-                                  '64.2 GB',
-                                  style: TextStyle(
+                                  const SizedBox(width: 12),
+                                  Icon(
+                                    Icons.battery_5_bar,
+                                    size: 18,
                                     color: Colors.white.withValues(alpha: 0.4),
-                                    fontSize: 9,
-                                    fontWeight: FontWeight.bold,
                                   ),
-                                ),
-                                const SizedBox(width: 12),
-                                Icon(
-                                  Icons.battery_5_bar,
-                                  size: 18,
-                                  color: Colors.white.withValues(alpha: 0.4),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      const SizedBox(height: 48),
-
-                      // Grid of options
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 40),
-                          child: GridView.count(
-                            crossAxisCount: 3,
-                            mainAxisSpacing: 48,
-                            crossAxisSpacing: 24,
-                            physics: const NeverScrollableScrollPhysics(),
-                            children: [
-                              _buildMenuFeature(
-                                icon: Icons.grid_view,
-                                label: 'GRILLA',
-                                isActive: true,
-                              ),
-                              _buildMenuFeature(
-                                icon: Icons.directions_run,
-                                label: 'CALLE',
-                                isActive: false,
-                              ),
-                              _buildMenuFeature(
-                                icon: Icons.mic,
-                                label: 'VOZ',
-                                isActive: true,
-                              ),
-                              _buildMenuFeature(
-                                icon: Icons.auto_fix_high,
-                                label: 'FILTROS',
-                                isActive: false,
-                              ),
-                              _buildMenuFeature(
-                                icon: Icons.lightbulb,
-                                label: 'LUCES',
-                                isActive: false,
-                              ),
-                              _buildMenuFeature(
-                                icon: Icons.headphones,
-                                label: 'AUDÍFONOS',
-                                isActive: false,
+                                ],
                               ),
                             ],
                           ),
                         ),
-                      ),
 
-                      // Pagination dots
-                      Padding(
-                        padding: const EdgeInsets.only(bottom: 48),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Container(
-                              width: 6,
-                              height: 6,
-                              decoration: const BoxDecoration(
-                                color: Colors.white,
-                                shape: BoxShape.circle,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.white,
-                                    blurRadius: 10,
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            ...List.generate(
-                              3,
-                              (index) => Padding(
+                        const SizedBox(height: 16),
+
+                        // Grid of options with PageView
+                        Expanded(
+                          child: PageView(
+                            controller: _menuPageController,
+                            onPageChanged: (index) {
+                              setState(() {
+                                _currentMenuPage = index;
+                              });
+                            },
+                            children: [
+                              // Page 1 (6 items)
+                              Padding(
                                 padding: const EdgeInsets.symmetric(
-                                  horizontal: 5,
+                                  horizontal: 40,
+                                ),
+                                child: GridView.count(
+                                  crossAxisCount: 3,
+                                  mainAxisSpacing: 24,
+                                  crossAxisSpacing: 24,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  children: [
+                                    _buildMenuFeature(
+                                      icon: Icons.grid_view,
+                                      label: 'GRILLA',
+                                      isActive: _isGridActive,
+                                      onTap: () => setState(
+                                        () => _isGridActive = !_isGridActive,
+                                      ),
+                                    ),
+                                    _buildMenuFeature(
+                                      icon: Icons.directions_run,
+                                      label: 'CALLE',
+                                      isActive: _isStreetModeActive,
+                                      onTap: () => setState(
+                                        () => _isStreetModeActive =
+                                            !_isStreetModeActive,
+                                      ),
+                                    ),
+                                    _buildMenuFeature(
+                                      icon: Icons.copy,
+                                      label: 'FANTASMA',
+                                      isActive: _isGhostActive,
+                                      onTap: () => setState(
+                                        () => _isGhostActive = !_isGhostActive,
+                                      ),
+                                    ),
+                                    _buildMenuFeature(
+                                      icon: Icons.flashlight_on,
+                                      label: 'LUZ',
+                                      isActive: _isLightActive,
+                                      onTap: () => setState(
+                                        () => _isLightActive = !_isLightActive,
+                                      ),
+                                    ),
+                                    _buildMenuFeature(
+                                      icon: Icons.flip,
+                                      label: 'ESPEJO',
+                                      isActive: _isMirrorActive,
+                                      onTap: () => setState(
+                                        () =>
+                                            _isMirrorActive = !_isMirrorActive,
+                                      ),
+                                    ),
+                                    _buildMenuFeature(
+                                      icon: Icons.mic,
+                                      label: 'VOZ',
+                                      isActive: _isVoiceControlActive,
+                                      onTap: () => setState(
+                                        () => _isVoiceControlActive =
+                                            !_isVoiceControlActive,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              // Page 2 (Remaining items)
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 40,
+                                ),
+                                child: GridView.count(
+                                  crossAxisCount: 3,
+                                  mainAxisSpacing: 24,
+                                  crossAxisSpacing: 24,
+                                  physics: const NeverScrollableScrollPhysics(),
+                                  children: [
+                                    _buildMenuFeature(
+                                      icon: Icons.filter_center_focus,
+                                      label: 'ENFOQUE',
+                                      isActive: _isFocusLocked,
+                                      onTap: () => setState(
+                                        () => _isFocusLocked = !_isFocusLocked,
+                                      ),
+                                    ),
+                                    _buildMenuFeature(
+                                      icon: Icons.headphones,
+                                      label: 'MONITOR',
+                                      isActive: _isMonitorActive,
+                                      onTap: () => setState(
+                                        () => _isMonitorActive =
+                                            !_isMonitorActive,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        // Pagination dots
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 32),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              GestureDetector(
+                                onTap: () => _menuPageController.animateToPage(
+                                  0,
+                                  duration: const Duration(milliseconds: 400),
+                                  curve: Curves.easeOutCubic,
                                 ),
                                 child: Container(
                                   width: 6,
                                   height: 6,
                                   decoration: BoxDecoration(
-                                    color: Colors.white.withValues(alpha: 0.2),
+                                    color: _currentMenuPage == 0
+                                        ? Colors.white
+                                        : Colors.white.withValues(alpha: 0.2),
                                     shape: BoxShape.circle,
+                                    boxShadow: _currentMenuPage == 0
+                                        ? [
+                                            const BoxShadow(
+                                              color: Colors.white,
+                                              blurRadius: 10,
+                                            ),
+                                          ]
+                                        : null,
                                   ),
                                 ),
                               ),
-                            ),
-                          ],
+                              const SizedBox(width: 10),
+                              GestureDetector(
+                                onTap: () => _menuPageController.animateToPage(
+                                  1,
+                                  duration: const Duration(milliseconds: 400),
+                                  curve: Curves.easeOutCubic,
+                                ),
+                                child: Container(
+                                  width: 6,
+                                  height: 6,
+                                  decoration: BoxDecoration(
+                                    color: _currentMenuPage == 1
+                                        ? Colors.white
+                                        : Colors.white.withValues(alpha: 0.2),
+                                    shape: BoxShape.circle,
+                                    boxShadow: _currentMenuPage == 1
+                                        ? [
+                                            const BoxShadow(
+                                              color: Colors.white,
+                                              blurRadius: 10,
+                                            ),
+                                          ]
+                                        : null,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
@@ -829,53 +971,57 @@ class _RecordingPageState extends State<RecordingPage>
     required IconData icon,
     required String label,
     required bool isActive,
+    required VoidCallback onTap,
   }) {
     final colors = context.appColors;
     final primaryColor = context.colorScheme.primary;
-    return Column(
-      children: [
-        Container(
-          width: 64,
-          height: 64,
-          decoration: BoxDecoration(
-            color: isActive
-                ? colors.cardBackground
-                : Colors.white.withValues(alpha: 0.05),
-            shape: BoxShape.circle,
-            border: Border.all(
-              color: isActive ? primaryColor : colors.cardBorder,
-              width: 1.5,
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        children: [
+          Container(
+            width: 64,
+            height: 64,
+            decoration: BoxDecoration(
+              color: isActive
+                  ? colors.cardBackground
+                  : Colors.white.withValues(alpha: 0.05),
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: isActive ? primaryColor : colors.cardBorder,
+                width: 1.5,
+              ),
+              boxShadow: isActive
+                  ? [
+                      BoxShadow(
+                        color: primaryColor.withValues(alpha: 0.25),
+                        blurRadius: 20,
+                      ),
+                    ]
+                  : [],
             ),
-            boxShadow: isActive
-                ? [
-                    BoxShadow(
-                      color: primaryColor.withValues(alpha: 0.25),
-                      blurRadius: 20,
-                    ),
-                  ]
-                : [],
+            child: Icon(
+              icon,
+              color: isActive
+                  ? primaryColor
+                  : Colors.white.withValues(alpha: 0.9),
+              size: 32,
+            ),
           ),
-          child: Icon(
-            icon,
-            color: isActive
-                ? primaryColor
-                : Colors.white.withValues(alpha: 0.9),
-            size: 32,
+          const SizedBox(height: 8),
+          Text(
+            label,
+            style: TextStyle(
+              color: isActive
+                  ? Colors.white.withValues(alpha: 0.8)
+                  : Colors.white.withValues(alpha: 0.4),
+              fontSize: 9,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 1.5,
+            ),
           ),
-        ),
-        const SizedBox(height: 12),
-        Text(
-          label,
-          style: TextStyle(
-            color: isActive
-                ? Colors.white.withValues(alpha: 0.8)
-                : Colors.white.withValues(alpha: 0.4),
-            fontSize: 9,
-            fontWeight: FontWeight.bold,
-            letterSpacing: 1.5,
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
