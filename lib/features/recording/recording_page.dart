@@ -10,6 +10,7 @@ import 'models/voice_indicator_state.dart';
 import 'widgets/voice_indicator.dart';
 import 'widgets/telepronter.dart';
 import 'recording_end_page.dart';
+import 'services/voice_command_service.dart';
 
 class RecordingPage extends StatefulWidget {
   final ScriptAnalysis analysis;
@@ -37,7 +38,6 @@ class _RecordingPageState extends State<RecordingPage>
   final int _currentWordIndex = 0;
   int _countdownValue = 3;
   Timer? _countdownTimer;
-  bool _isCommandHeard = false;
 
   late AnimationController _menuController;
   late Animation<Offset> _menuAnimation;
@@ -51,6 +51,12 @@ class _RecordingPageState extends State<RecordingPage>
   bool _isVoiceControlActive = true;
   bool _isFocusLocked = false;
   bool _isMonitorActive = false;
+
+  final VoiceCommandService _voiceService = VoiceCommandService();
+  VoiceIndicatorState _voiceState = VoiceIndicatorState.passive;
+  String? _detectedCommand;
+  StreamSubscription? _voiceStateSub;
+  StreamSubscription? _voiceCommandSub;
 
   @override
   void initState() {
@@ -85,6 +91,7 @@ class _RecordingPageState extends State<RecordingPage>
 
     _activeFragmentIndex = widget.currentFragmentIndex;
     _menuPageController = PageController();
+    _initVoiceCommands();
   }
 
   late PageController _menuPageController;
@@ -92,12 +99,61 @@ class _RecordingPageState extends State<RecordingPage>
 
   @override
   void dispose() {
+    _voiceStateSub?.cancel();
+    _voiceCommandSub?.cancel();
+    _voiceService.stopService();
     _menuPageController.dispose();
     _countdownTimer?.cancel();
     _pulseController.dispose();
     _countdownController.dispose();
     _menuController.dispose();
     super.dispose();
+  }
+
+  void _initVoiceCommands() {
+    _voiceService.init().then((_) {
+      _voiceStateSub = _voiceService.stateStream.listen((state) {
+        if (mounted) setState(() => _voiceState = state);
+      });
+
+      _voiceCommandSub = _voiceService.commandStream.listen((command) {
+        if (mounted) {
+          setState(() => _detectedCommand = command.toUpperCase());
+          _handleVoiceCommand(command);
+        }
+      });
+
+      if (_isVoiceControlActive) {
+        _voiceService.startService();
+      }
+    });
+  }
+
+  void _handleVoiceCommand(String command) {
+    final cmd = command.toLowerCase().trim();
+    print('Handling Voice Command: $cmd');
+
+    // Mapeo básico inicial
+    if (cmd.contains('grabar') || cmd.contains('record')) {
+      if (_recordingState == RecordingState.idle) {
+        _startCountdown();
+      }
+    } else if (cmd.contains('volver') ||
+        cmd.contains('atrás') ||
+        cmd.contains('back')) {
+      Navigator.of(context).pop();
+    } else if (cmd.contains('siguiente') || cmd.contains('next')) {
+      // Siguiente fragmento
+      if (_activeFragmentIndex < widget.analysis.segments.length - 1) {
+        setState(() {
+          _activeFragmentIndex++;
+        });
+      }
+    } else if (cmd.contains('regrabar') || cmd.contains('repeat')) {
+      if (_recordingState == RecordingState.idle) {
+        _startCountdown();
+      }
+    }
   }
 
   bool get _isRecordingActive =>
@@ -109,6 +165,8 @@ class _RecordingPageState extends State<RecordingPage>
       _recordingState = RecordingState.countdown;
       _countdownValue = 3;
     });
+
+    _voiceService.stopService();
 
     // Start first ring animation
     _countdownController.forward(from: 0.0);
@@ -133,44 +191,7 @@ class _RecordingPageState extends State<RecordingPage>
     });
     _countdownController.stop();
 
-    // Fase 3: Transición automática a comando grabado tras 5 segundos
-    Timer(const Duration(seconds: 5), () {
-      if (mounted && _recordingState == RecordingState.recording) {
-        setState(() {
-          _recordingState = RecordingState.commandRecorded;
-          _isCommandHeard = false;
-        });
-
-        // Fase 4: A los 2 segundos pasar a 'heard'
-        Timer(const Duration(seconds: 2), () {
-          if (mounted && _recordingState == RecordingState.commandRecorded) {
-            setState(() {
-              _isCommandHeard = true;
-            });
-
-            // Fase 5: 1 segundo después pasar a idle y siguiente fragmento
-            Timer(const Duration(seconds: 1), () {
-              if (mounted) {
-                final isLastSegment =
-                    _activeFragmentIndex >= widget.analysis.segments.length - 1;
-
-                setState(() {
-                  if (!isLastSegment) {
-                    _activeFragmentIndex++;
-                    _recordingState = RecordingState.idle;
-                  } else {
-                    _recordingState = RecordingState.finished;
-                  }
-                  _isCommandHeard = false;
-                });
-              }
-            });
-          }
-        });
-      }
-    });
-
-    // TODO: Trigger actual audio recording
+    // TODO: Trigger actual audio/video recording here
   }
 
   void _stopRecording() {
@@ -529,8 +550,9 @@ class _RecordingPageState extends State<RecordingPage>
                 label: 'MENÚ',
                 onTap: () {
                   setState(() {
-                    _recordingState = RecordingState.menu;
+                    _recordingState = RecordingState.idle;
                   });
+                  _voiceService.startService();
                   _menuController.forward();
                 },
                 isEnabled: !_isRecordingActive,
@@ -622,21 +644,10 @@ class _RecordingPageState extends State<RecordingPage>
   }
 
   Widget _buildVoiceIndicator() {
-    VoiceIndicatorState indicatorState;
-
-    if (_recordingState == RecordingState.recording) {
-      indicatorState = VoiceIndicatorState.disabled;
-    } else if (_recordingState == RecordingState.commandRecorded) {
-      indicatorState = _isCommandHeard
-          ? VoiceIndicatorState.heard
-          : VoiceIndicatorState.listening;
-    } else {
-      indicatorState = VoiceIndicatorState.listening;
-    }
-
     return VRMVoiceIndicator(
-      state: indicatorState,
+      state: _voiceState,
       pulseAnimation: _pulseAnimation,
+      detectedCommand: _detectedCommand,
     );
   }
 
@@ -852,10 +863,17 @@ class _RecordingPageState extends State<RecordingPage>
                                       icon: Icons.mic,
                                       label: 'VOZ',
                                       isActive: _isVoiceControlActive,
-                                      onTap: () => setState(
-                                        () => _isVoiceControlActive =
-                                            !_isVoiceControlActive,
-                                      ),
+                                      onTap: () {
+                                        setState(() {
+                                          _isVoiceControlActive =
+                                              !_isVoiceControlActive;
+                                        });
+                                        if (_isVoiceControlActive) {
+                                          _voiceService.startService();
+                                        } else {
+                                          _voiceService.stopService();
+                                        }
+                                      },
                                     ),
                                   ],
                                 ),

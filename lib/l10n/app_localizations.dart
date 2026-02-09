@@ -889,6 +889,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Export Video'**
   String get exportVideo;
+
+  /// No description provided for @voiceStatusPassive.
+  ///
+  /// In en, this message translates to:
+  /// **'LUMIS LISTENING...'**
+  String get voiceStatusPassive;
+
+  /// No description provided for @voiceStatusActive.
+  ///
+  /// In en, this message translates to:
+  /// **'WHAT\'S THE PLAN?'**
+  String get voiceStatusActive;
 }
 
 class _AppLocalizationsDelegate

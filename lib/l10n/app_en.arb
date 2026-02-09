@@ -593,5 +593,7 @@
   "exportVideo": "Export Video",
   "@exportVideo": {
     "description": "Action to export the video"
-  }
+  },
+  "voiceStatusPassive": "LUMIS LISTENING...",
+  "voiceStatusActive": "WHAT'S THE PLAN?"
 }

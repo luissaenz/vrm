@@ -593,5 +593,13 @@
   "exportVideo": "Exportar Video",
   "@exportVideo": {
     "description": "Action to export the video"
+  },
+  "voiceStatusPassive": "LUMIS ESCUCHANDO...",
+  "@voiceStatusPassive": {
+    "description": "Status when voice assistant is passively listening"
+  },
+  "voiceStatusActive": "¿QUÉ HACEMOS?",
+  "@voiceStatusActive": {
+    "description": "Status when voice assistant is actively prompting"
   }
 }

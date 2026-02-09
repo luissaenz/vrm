@@ -439,4 +439,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get exportVideo => 'Export Video';
+
+  @override
+  String get voiceStatusPassive => 'LUMIS LISTENING...';
+
+  @override
+  String get voiceStatusActive => 'WHAT\'S THE PLAN?';
 }

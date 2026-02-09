@@ -442,4 +442,10 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get exportVideo => 'Exportar Video';
+
+  @override
+  String get voiceStatusPassive => 'LUMIS ESCUCHANDO...';
+
+  @override
+  String get voiceStatusActive => '¿QUÉ HACEMOS?';
 }

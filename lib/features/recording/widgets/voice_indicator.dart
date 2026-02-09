@@ -1,31 +1,43 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import '../models/voice_indicator_state.dart';
+import '../../../l10n/app_localizations.dart';
 
 class VRMVoiceIndicator extends StatelessWidget {
   final VoiceIndicatorState state;
   final Animation<double> pulseAnimation;
+  final String? detectedCommand;
 
   const VRMVoiceIndicator({
     super.key,
     required this.state,
     required this.pulseAnimation,
+    this.detectedCommand,
   });
 
-  // Re-using the colors from the previous implementation
   static const Color _forestAccent = Color(0xFF2DD4BF);
   static const Color _dotColor = Color(0xFF1FA88A);
 
   @override
   Widget build(BuildContext context) {
     if (state == VoiceIndicatorState.heard) {
-      return _buildCommandDetected();
+      return _buildCommandDetected(context);
     }
-    return _buildListening();
+    return _buildListening(context);
   }
 
-  Widget _buildListening() {
+  Widget _buildListening(BuildContext context) {
     final bool isDisabled = state == VoiceIndicatorState.disabled;
+    final l10n = AppLocalizations.of(context)!;
+
+    String statusText = '';
+    if (isDisabled) {
+      statusText = l10n.voiceControlDisabled.toUpperCase();
+    } else if (state == VoiceIndicatorState.passive) {
+      statusText = l10n.voiceStatusPassive;
+    } else if (state == VoiceIndicatorState.active) {
+      statusText = l10n.voiceStatusActive;
+    }
 
     return Opacity(
       opacity: isDisabled ? 0.4 : 1.0,
@@ -45,17 +57,23 @@ class VRMVoiceIndicator extends StatelessWidget {
                       width: 6 * pulseAnimation.value,
                       height: 6 * pulseAnimation.value,
                       decoration: BoxDecoration(
-                        color: _dotColor.withValues(
-                          alpha: 1.0 - (pulseAnimation.value - 1.0),
-                        ),
+                        color:
+                            (state == VoiceIndicatorState.active
+                                    ? Colors.white
+                                    : _dotColor)
+                                .withValues(
+                                  alpha: 1.0 - (pulseAnimation.value - 1.0),
+                                ),
                         shape: BoxShape.circle,
                       ),
                     ),
                     Container(
                       width: 6,
                       height: 6,
-                      decoration: const BoxDecoration(
-                        color: _dotColor,
+                      decoration: BoxDecoration(
+                        color: state == VoiceIndicatorState.active
+                            ? Colors.white
+                            : _dotColor,
                         shape: BoxShape.circle,
                       ),
                     ),
@@ -69,7 +87,7 @@ class VRMVoiceIndicator extends StatelessWidget {
             animation: pulseAnimation,
             builder: (context, child) {
               return Text(
-                'AGENTE ESCUCHANDO...',
+                statusText,
                 style: TextStyle(
                   color: Colors.white.withValues(
                     alpha: 1.0 - ((pulseAnimation.value - 1.0) * 0.75),
@@ -86,7 +104,7 @@ class VRMVoiceIndicator extends StatelessWidget {
     );
   }
 
-  Widget _buildCommandDetected() {
+  Widget _buildCommandDetected(BuildContext context) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(999),
       child: BackdropFilter(
@@ -111,7 +129,6 @@ class VRMVoiceIndicator extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Custom Square Check Icon
               Container(
                 width: 22,
                 height: 22,
@@ -126,9 +143,9 @@ class VRMVoiceIndicator extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 12),
-              const Text(
-                'COMANDO DETECTADO: SIGUIENTE',
-                style: TextStyle(
+              Text(
+                detectedCommand ?? 'COMANDO DETECTADO',
+                style: const TextStyle(
                   color: _forestAccent,
                   fontSize: 13,
                   fontWeight: FontWeight.bold,
