@@ -520,9 +520,10 @@ class _RecordingPageState extends State<RecordingPage>
       child: Column(
         children: [
           // Voice indicator
-          _buildVoiceIndicator(),
-
-          const SizedBox(height: 32),
+          if (!_isRecordingActive) ...[
+            _buildVoiceIndicator(),
+            const SizedBox(height: 32),
+          ],
 
           // Control buttons
           Row(
@@ -645,7 +646,7 @@ class _RecordingPageState extends State<RecordingPage>
 
   Widget _buildVoiceIndicator() {
     return VRMVoiceIndicator(
-      state: _voiceState,
+      state: _isRecordingActive ? VoiceIndicatorState.disabled : _voiceState,
       pulseAnimation: _pulseAnimation,
       detectedCommand: _detectedCommand,
     );

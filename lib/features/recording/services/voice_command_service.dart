@@ -58,18 +58,30 @@ class VoiceCommandService {
     await _speech.stop();
   }
 
-  Future<void> _startListening() async {
-    if (!_isInitialized || _speech.isListening) return;
+  bool _isSpeechLoading = false;
 
-    await _speech.listen(
-      onResult: _onSpeechResult,
-      localeId: _currentLocaleId,
-      cancelOnError: false,
-      partialResults: true,
-      listenMode: _currentState == VoiceIndicatorState.passive
-          ? ListenMode.dictation
-          : ListenMode.confirmation,
-    );
+  Future<void> _startListening() async {
+    if (!_isInitialized || _speech.isListening || _isSpeechLoading) return;
+
+    _isSpeechLoading = true;
+    try {
+      await _speech.listen(
+        onResult: _onSpeechResult,
+        localeId: _currentLocaleId,
+        cancelOnError: false,
+        partialResults: true,
+        listenMode: _currentState == VoiceIndicatorState.passive
+            ? ListenMode.dictation
+            : ListenMode.confirmation,
+      );
+    } catch (e) {
+      print('Voice Error durante listen: $e');
+      // Si falla, volvemos a un estado seguro
+      _currentState = VoiceIndicatorState.passive;
+      _stateController.add(_currentState);
+    } finally {
+      _isSpeechLoading = false;
+    }
   }
 
   void _onSpeechResult(SpeechRecognitionResult result) {
