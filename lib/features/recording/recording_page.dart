@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:ui';
 import 'dart:async';
 import 'dart:math';
+import 'package:camera/camera.dart';
 import '../../core/theme.dart';
 import '../new_project/models/script_analysis.dart';
 
@@ -58,6 +59,10 @@ class _RecordingPageState extends State<RecordingPage>
   StreamSubscription? _voiceStateSub;
   StreamSubscription? _voiceCommandSub;
 
+  CameraController? _cameraController;
+  Future<void>? _initializeControllerFuture;
+  bool _isCameraInitialized = false;
+
   @override
   void initState() {
     super.initState();
@@ -92,6 +97,7 @@ class _RecordingPageState extends State<RecordingPage>
     _activeFragmentIndex = widget.currentFragmentIndex;
     _menuPageController = PageController();
     _initVoiceCommands();
+    _initializeCamera();
   }
 
   late PageController _menuPageController;
@@ -102,12 +108,47 @@ class _RecordingPageState extends State<RecordingPage>
     _voiceStateSub?.cancel();
     _voiceCommandSub?.cancel();
     _voiceService.stopService();
+    _cameraController?.dispose();
     _menuPageController.dispose();
     _countdownTimer?.cancel();
     _pulseController.dispose();
     _countdownController.dispose();
     _menuController.dispose();
     super.dispose();
+  }
+
+  Future<void> _initializeCamera() async {
+    try {
+      final cameras = await availableCameras();
+      if (cameras.isEmpty) return;
+
+      // Buscar cámara frontal (móvil) o la primera disponible (PC)
+      CameraDescription? selectedCamera;
+      try {
+        selectedCamera = cameras.firstWhere(
+          (camera) => camera.lensDirection == CameraLensDirection.front,
+        );
+      } catch (_) {
+        selectedCamera = cameras.first;
+      }
+
+      _cameraController = CameraController(
+        selectedCamera,
+        ResolutionPreset.medium,
+        enableAudio: true,
+      );
+
+      _initializeControllerFuture = _cameraController!.initialize();
+      await _initializeControllerFuture;
+
+      if (mounted) {
+        setState(() {
+          _isCameraInitialized = true;
+        });
+      }
+    } catch (e) {
+      print('Error al inicializar cámara: $e');
+    }
   }
 
   void _initVoiceCommands() {
@@ -131,7 +172,7 @@ class _RecordingPageState extends State<RecordingPage>
 
   void _handleVoiceCommand(String command) {
     final cmd = command.toLowerCase().trim();
-    print('Handling Voice Command: $cmd');
+    print('[Lumis Voice] Ejecutando comando: $cmd');
 
     // Mapeo básico inicial
     if (cmd.contains('grabar') || cmd.contains('record')) {
@@ -314,34 +355,55 @@ class _RecordingPageState extends State<RecordingPage>
 
   Widget _buildBackground() {
     return Positioned.fill(
-      child: Stack(
-        children: [
-          // Background image
-          Image.network(
-            'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&h=1200&fit=crop',
-            fit: BoxFit.cover,
-            width: double.infinity,
-            height: double.infinity,
-            errorBuilder: (context, error, stackTrace) {
-              return Container(color: context.colorScheme.surface);
-            },
-          ),
-          // Gradient overlay
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Colors.black.withValues(alpha: 0.4),
-                  Colors.transparent,
-                  Colors.black.withValues(alpha: 0.6),
-                ],
-                stops: const [0.0, 0.5, 1.0],
+      child: Container(
+        color: Colors.black,
+        child: Stack(
+          children: [
+            if (_isCameraInitialized && _cameraController != null)
+              Positioned.fill(
+                child: FittedBox(
+                  fit: BoxFit.cover,
+                  child: SizedBox(
+                    width: _cameraController!.value.previewSize?.height ?? 1080,
+                    height: _cameraController!.value.previewSize?.width ?? 1920,
+                    child: Transform(
+                      alignment: Alignment.center,
+                      transform: _isMirrorActive
+                          ? Matrix4.rotationY(pi)
+                          : Matrix4.identity(),
+                      child: CameraPreview(_cameraController!),
+                    ),
+                  ),
+                ),
+              )
+            else
+              // Fallback image while loading
+              Opacity(
+                opacity: 0.5,
+                child: Image.network(
+                  'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=800&h=1200&fit=crop',
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                  height: double.infinity,
+                ),
+              ),
+            // Gradient overlay
+            Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.black.withValues(alpha: 0.4),
+                    Colors.transparent,
+                    Colors.black.withValues(alpha: 0.6),
+                  ],
+                  stops: const [0.0, 0.5, 1.0],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

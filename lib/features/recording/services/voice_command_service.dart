@@ -3,6 +3,9 @@ import 'package:speech_to_text/speech_to_text.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import '../models/voice_indicator_state.dart';
 
+/// Lumis Voice: Utility for handling voice triggers and command dispatching.
+/// It uses a wake word ("Lumis") to enter active mode and then
+/// listens for specific commands.
 class VoiceCommandService {
   static final VoiceCommandService _instance = VoiceCommandService._internal();
   factory VoiceCommandService() => _instance;
@@ -30,13 +33,13 @@ class VoiceCommandService {
     if (_isInitialized) return true;
     _isInitialized = await _speech.initialize(
       onStatus: _handleStatus,
-      onError: (error) => print('Voice Error: $error'),
+      onError: (error) => print('[Lumis Voice] Error: $error'),
     );
     return _isInitialized;
   }
 
   void _handleStatus(String status) {
-    print('Voice Status: $status');
+    print('[Lumis Voice] Status: $status');
     if (status == 'done' || status == 'notListening') {
       if (_currentState != VoiceIndicatorState.disabled) {
         _startListening();
@@ -75,7 +78,7 @@ class VoiceCommandService {
             : ListenMode.confirmation,
       );
     } catch (e) {
-      print('Voice Error durante listen: $e');
+      print('[Lumis Voice] Error durante listen: $e');
       // Si falla, volvemos a un estado seguro
       _currentState = VoiceIndicatorState.passive;
       _stateController.add(_currentState);
@@ -89,7 +92,7 @@ class VoiceCommandService {
     if (result.confidence < 0.5 && !result.finalResult) return;
 
     String text = result.recognizedWords.toLowerCase().trim();
-    print('Recognized: "$text" (State: $_currentState)');
+    print('[Lumis Voice] Recognized: "$text" (State: $_currentState)');
 
     if (_currentState == VoiceIndicatorState.passive) {
       if (text.contains(_wakeWord)) {
