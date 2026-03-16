@@ -23,13 +23,11 @@ class _WelcomeStepState extends State<WelcomeStep> {
               child: Column(
                 children: [
                   _buildHeader(context),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 16),
                   _buildHeadline(context),
-                  const SizedBox(height: 32),
-                  const Spacer(),
-                  _buildCoachContainer(context),
-                  const Spacer(),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 16),
+                  Expanded(child: _buildCoachContainer(context)),
+                  const SizedBox(height: 24),
                   _buildActionFooter(context),
                 ],
               ),

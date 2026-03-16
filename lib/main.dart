@@ -5,8 +5,17 @@ import 'package:vrm_app/core/theme.dart';
 import 'package:vrm_app/features/dashboard/dashboard_page.dart';
 import 'package:vrm_app/features/onboarding/pages/onboarding_flow.dart';
 
+import 'package:flutter/services.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Forzar siempre vertical
+  await SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
+
   runApp(const VRMApp(startWithOnboarding: true));
 }
 

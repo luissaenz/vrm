@@ -7,12 +7,14 @@ class Telepronter extends StatelessWidget {
   final ScriptAnalysis analysis;
   final int activeFragmentIndex;
   final int currentWordIndex;
+  final double fontSize;
 
   const Telepronter({
     super.key,
     required this.analysis,
     required this.activeFragmentIndex,
     this.currentWordIndex = 0,
+    this.fontSize = 24.0,
   });
 
   @override
@@ -41,8 +43,8 @@ class Telepronter extends StatelessWidget {
               textAlign: TextAlign.center,
               text: TextSpan(
                 children: _buildTextSpans(context),
-                style: const TextStyle(
-                  fontSize: 20,
+                style: TextStyle(
+                  fontSize: fontSize,
                   fontWeight: FontWeight.w500,
                   height: 1.625,
                   letterSpacing: -0.5,
@@ -142,7 +144,6 @@ class Telepronter extends StatelessWidget {
           TextSpan(
             text: chunk,
             style: TextStyle(
-              fontSize: 20,
               fontWeight: isBold ? FontWeight.w900 : FontWeight.w500,
               height: 1.625,
               color: textColor,

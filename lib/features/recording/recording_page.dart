@@ -52,8 +52,12 @@ class _RecordingPageState extends State<RecordingPage>
   bool _isVoiceControlActive = true;
   bool _isFocusLocked = false;
   bool _isMonitorActive = false;
+  double _teleprompterFontSize = 24.0;
+  double _readingSpeed = 150.0;
+  double _screenBrightness = 0.8;
 
   final VoiceCommandService _voiceService = VoiceCommandService();
+
   VoiceIndicatorState _voiceState = VoiceIndicatorState.passive;
   String? _detectedCommand;
   StreamSubscription? _voiceStateSub;
@@ -134,8 +138,9 @@ class _RecordingPageState extends State<RecordingPage>
 
       _cameraController = CameraController(
         selectedCamera,
-        ResolutionPreset.medium,
+        ResolutionPreset.high,
         enableAudio: true,
+        imageFormatGroup: ImageFormatGroup.jpeg,
       );
 
       _initializeControllerFuture = _cameraController!.initialize();
@@ -174,7 +179,6 @@ class _RecordingPageState extends State<RecordingPage>
     final cmd = command.toLowerCase().trim();
     print('[Lumis Voice] Ejecutando comando: $cmd');
 
-    // Mapeo básico inicial
     if (cmd.contains('grabar') || cmd.contains('record')) {
       if (_recordingState == RecordingState.idle) {
         _startCountdown();
@@ -182,14 +186,58 @@ class _RecordingPageState extends State<RecordingPage>
     } else if (cmd.contains('volver') ||
         cmd.contains('atrás') ||
         cmd.contains('back')) {
-      Navigator.of(context).pop();
+      if (_recordingState == RecordingState.teleprompterSettings) {
+        setState(() => _recordingState = RecordingState.menu);
+      } else {
+        Navigator.of(context).pop();
+      }
     } else if (cmd.contains('siguiente') || cmd.contains('next')) {
-      // Siguiente fragmento
       if (_activeFragmentIndex < widget.analysis.segments.length - 1) {
         setState(() {
           _activeFragmentIndex++;
         });
       }
+    } else if (cmd.contains('grilla') || cmd.contains('cuadrícula')) {
+      setState(() => _isGridActive = !_isGridActive);
+    } else if (cmd.contains('menú') || cmd.contains('configurar')) {
+      if (_recordingState == RecordingState.idle) {
+        _voiceService.stopService();
+        _menuController.forward();
+      }
+    } else if (cmd.contains('calle') || cmd.contains('ruido')) {
+      setState(() => _isStreetModeActive = !_isStreetModeActive);
+    } else if (cmd.contains('fantasma') || cmd.contains('ghost')) {
+      setState(() => _isGhostActive = !_isGhostActive);
+    } else if (cmd.contains('luz') || cmd.contains('flash')) {
+      setState(() => _isLightActive = !_isLightActive);
+    } else if (cmd.contains('espejo') || cmd.contains('mirror')) {
+      setState(() => _isMirrorActive = !_isMirrorActive);
+    } else if (cmd.contains('enfoque') || cmd.contains('foco')) {
+      setState(() => _isFocusLocked = !_isFocusLocked);
+    } else if (cmd.contains('monitor') || cmd.contains('audio')) {
+      setState(() => _isMonitorActive = !_isMonitorActive);
+    } else if (cmd.contains('teleprompter') ||
+        cmd.contains('ajustes') ||
+        cmd.contains('texto')) {
+      setState(() => _recordingState = RecordingState.teleprompterSettings);
+    } else if (cmd.contains('más grande') || cmd.contains('subir texto')) {
+      setState(
+        () => _teleprompterFontSize = min(30.0, _teleprompterFontSize + 1.0),
+      );
+    } else if (cmd.contains('más pequeño') ||
+        cmd.contains('bajar texto') ||
+        cmd.contains('más chico')) {
+      setState(
+        () => _teleprompterFontSize = max(20.0, _teleprompterFontSize - 1.0),
+      );
+    } else if (cmd.contains('más rápido') || cmd.contains('subir velocidad')) {
+      setState(() => _readingSpeed = min(300, _readingSpeed + 20));
+    } else if (cmd.contains('más lento') || cmd.contains('bajar velocidad')) {
+      setState(() => _readingSpeed = max(50, _readingSpeed - 20));
+    } else if (cmd.contains('más brillo') || cmd.contains('subir luz')) {
+      setState(() => _screenBrightness = min(1.0, _screenBrightness + 0.1));
+    } else if (cmd.contains('menos brillo') || cmd.contains('bajar luz')) {
+      setState(() => _screenBrightness = max(0.1, _screenBrightness - 0.1));
     } else if (cmd.contains('regrabar') || cmd.contains('repeat')) {
       if (_recordingState == RecordingState.idle) {
         _startCountdown();
@@ -329,6 +377,7 @@ class _RecordingPageState extends State<RecordingPage>
                     analysis: widget.analysis,
                     activeFragmentIndex: _activeFragmentIndex,
                     currentWordIndex: _currentWordIndex,
+                    fontSize: _teleprompterFontSize,
                   ),
 
                   // Spacer
@@ -348,6 +397,21 @@ class _RecordingPageState extends State<RecordingPage>
 
           // Menu overlay (z-50)
           _buildMenuOverlay(),
+
+          // Teleprompter Settings overlay (z-60)
+          _buildTeleprompterSettingsOverlay(),
+
+          // Screen brightness overlay
+          if (_screenBrightness < 1.0)
+            Positioned.fill(
+              child: IgnorePointer(
+                child: Container(
+                  color: Colors.black.withValues(
+                    alpha: 1.0 - _screenBrightness,
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
     );
@@ -361,19 +425,8 @@ class _RecordingPageState extends State<RecordingPage>
           children: [
             if (_isCameraInitialized && _cameraController != null)
               Positioned.fill(
-                child: FittedBox(
-                  fit: BoxFit.cover,
-                  child: SizedBox(
-                    width: _cameraController!.value.previewSize?.height ?? 1080,
-                    height: _cameraController!.value.previewSize?.width ?? 1920,
-                    child: Transform(
-                      alignment: Alignment.center,
-                      transform: _isMirrorActive
-                          ? Matrix4.rotationY(pi)
-                          : Matrix4.identity(),
-                      child: CameraPreview(_cameraController!),
-                    ),
-                  ),
+                child: RepaintBoundary(
+                  child: Center(child: CameraPreview(_cameraController!)),
                 ),
               )
             else
@@ -457,70 +510,55 @@ class _RecordingPageState extends State<RecordingPage>
           ),
 
           // Fragment counter
-          ClipRRect(
-            borderRadius: BorderRadius.circular(999),
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: _recordingState == RecordingState.recording
-                      ? const Color(0xFFFF3B30).withValues(alpha: 0.9)
-                      : (context.isDarkMode
-                            ? context.appColors.cardBackground.withValues(
-                                alpha: 0.85,
-                              )
-                            : Colors.black.withValues(alpha: 0.4)),
-                  borderRadius: BorderRadius.circular(999),
-                  border: Border.all(
-                    color: _recordingState == RecordingState.recording
-                        ? Colors.white.withValues(alpha: 0.2)
-                        : (context.isDarkMode
-                              ? context.appColors.cardBorder
-                              : Colors.white.withValues(alpha: 0.1)),
+          AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+            decoration: BoxDecoration(
+              color: _recordingState == RecordingState.recording
+                  ? const Color(0xFFFF3B30).withValues(alpha: 0.9)
+                  : Colors.black.withValues(alpha: 0.7),
+              borderRadius: BorderRadius.circular(999),
+              border: Border.all(
+                color: _recordingState == RecordingState.recording
+                    ? Colors.white.withValues(alpha: 0.2)
+                    : Colors.white.withValues(alpha: 0.1),
+              ),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (_recordingState == RecordingState.recording) ...[
+                  AnimatedBuilder(
+                    animation: _pulseAnimation,
+                    builder: (context, child) {
+                      return Container(
+                        width: 6,
+                        height: 6,
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(
+                            alpha:
+                                0.5 +
+                                (0.5 * (1.4 - _pulseAnimation.value) / 0.4),
+                          ),
+                          shape: BoxShape.circle,
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(width: 8),
+                ],
+                Text(
+                  _recordingState == RecordingState.recording
+                      ? 'GRABANDO FRAGMENTO $current / $total'
+                      : 'FRAGMENTO $current / $total',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 4.0,
                   ),
                 ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (_recordingState == RecordingState.recording) ...[
-                      AnimatedBuilder(
-                        animation: _pulseAnimation,
-                        builder: (context, child) {
-                          return Container(
-                            width: 6,
-                            height: 6,
-                            decoration: BoxDecoration(
-                              color: Colors.white.withValues(
-                                alpha:
-                                    0.5 +
-                                    (0.5 * (1.4 - _pulseAnimation.value) / 0.4),
-                              ),
-                              shape: BoxShape.circle,
-                            ),
-                          );
-                        },
-                      ),
-                      const SizedBox(width: 8),
-                    ],
-                    Text(
-                      _recordingState == RecordingState.recording
-                          ? 'GRABANDO FRAGMENTO $current / $total'
-                          : 'FRAGMENTO $current / $total',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 10,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 4.0,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+              ],
             ),
           ),
 
@@ -542,34 +580,22 @@ class _RecordingPageState extends State<RecordingPage>
     required VoidCallback onTap,
     bool isEnabled = true,
   }) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(999),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: isEnabled ? onTap : null,
-            child: AnimatedOpacity(
-              duration: const Duration(milliseconds: 300),
-              opacity: isEnabled ? 1.0 : 0.3,
-              child: Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: context.isDarkMode
-                      ? context.appColors.cardBackground.withValues(alpha: 0.3)
-                      : Colors.black.withValues(alpha: 0.4),
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: context.isDarkMode
-                        ? context.appColors.cardBorder
-                        : Colors.white.withValues(alpha: 0.1),
-                  ),
-                ),
-                child: Icon(icon, color: Colors.white, size: 24),
-              ),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: isEnabled ? onTap : null,
+        child: AnimatedOpacity(
+          duration: const Duration(milliseconds: 300),
+          opacity: isEnabled ? 1.0 : 0.3,
+          child: Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: Colors.black.withValues(alpha: 0.7),
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
             ),
+            child: Icon(icon, color: Colors.white, size: 24),
           ),
         ),
       ),
@@ -612,10 +638,7 @@ class _RecordingPageState extends State<RecordingPage>
                 icon: Icons.menu,
                 label: 'MENÚ',
                 onTap: () {
-                  setState(() {
-                    _recordingState = RecordingState.idle;
-                  });
-                  _voiceService.startService();
+                  _voiceService.stopService();
                   _menuController.forward();
                 },
                 isEnabled: !_isRecordingActive,
@@ -637,54 +660,42 @@ class _RecordingPageState extends State<RecordingPage>
     final primaryColor = context.colorScheme.primary;
     return Column(
       children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(999),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: isEnabled ? onTap : null,
-                child: AnimatedOpacity(
-                  duration: const Duration(milliseconds: 300),
-                  opacity: isEnabled ? 1.0 : 0.4,
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 300),
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: isActive
-                          ? primaryColor.withValues(alpha: 0.15)
-                          : (context.isDarkMode
-                                ? context.appColors.cardBackground.withValues(
-                                    alpha: 0.8,
-                                  )
-                                : Colors.black.withValues(alpha: 0.4)),
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: isActive
-                            ? primaryColor
-                            : (context.isDarkMode
-                                  ? context.appColors.cardBorder
-                                  : Colors.white.withValues(alpha: 0.1)),
-                        width: 1,
-                      ),
-                      boxShadow: isActive
-                          ? [
-                              BoxShadow(
-                                color: primaryColor.withValues(alpha: 0.3),
-                                blurRadius: 15,
-                                spreadRadius: 2,
-                              ),
-                            ]
-                          : [],
-                    ),
-                    child: Icon(
-                      icon,
-                      color: isActive ? primaryColor : Colors.white,
-                      size: 24,
-                    ),
+        Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: isEnabled ? onTap : null,
+            child: AnimatedOpacity(
+              duration: const Duration(milliseconds: 300),
+              opacity: isEnabled ? 1.0 : 0.4,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: isActive
+                      ? primaryColor.withValues(alpha: 0.15)
+                      : Colors.black.withValues(alpha: 0.7),
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: isActive
+                        ? primaryColor
+                        : Colors.white.withValues(alpha: 0.1),
+                    width: 1,
                   ),
+                  boxShadow: isActive
+                      ? [
+                          BoxShadow(
+                            color: primaryColor.withValues(alpha: 0.3),
+                            blurRadius: 15,
+                            spreadRadius: 2,
+                          ),
+                        ]
+                      : [],
+                ),
+                child: Icon(
+                  icon,
+                  color: isActive ? primaryColor : Colors.white,
+                  size: 24,
                 ),
               ),
             ),
@@ -717,6 +728,9 @@ class _RecordingPageState extends State<RecordingPage>
   void _closeMenu() {
     _menuController.reverse().then((_) {
       if (mounted) {
+        if (_isVoiceControlActive) {
+          _voiceService.startService();
+        }
         setState(() {
           _recordingState = RecordingState.idle;
         });
@@ -889,6 +903,19 @@ class _RecordingPageState extends State<RecordingPage>
                                       ),
                                     ),
                                     _buildMenuFeature(
+                                      icon: Icons.text_snippet,
+                                      label: 'TELEPRONTER',
+                                      isActive:
+                                          _recordingState ==
+                                          RecordingState.teleprompterSettings,
+                                      onTap: () {
+                                        setState(() {
+                                          _recordingState = RecordingState
+                                              .teleprompterSettings;
+                                        });
+                                      },
+                                    ),
+                                    _buildMenuFeature(
                                       icon: Icons.directions_run,
                                       label: 'CALLE',
                                       isActive: _isStreetModeActive,
@@ -922,22 +949,6 @@ class _RecordingPageState extends State<RecordingPage>
                                             _isMirrorActive = !_isMirrorActive,
                                       ),
                                     ),
-                                    _buildMenuFeature(
-                                      icon: Icons.mic,
-                                      label: 'VOZ',
-                                      isActive: _isVoiceControlActive,
-                                      onTap: () {
-                                        setState(() {
-                                          _isVoiceControlActive =
-                                              !_isVoiceControlActive;
-                                        });
-                                        if (_isVoiceControlActive) {
-                                          _voiceService.startService();
-                                        } else {
-                                          _voiceService.stopService();
-                                        }
-                                      },
-                                    ),
                                   ],
                                 ),
                               ),
@@ -968,6 +979,22 @@ class _RecordingPageState extends State<RecordingPage>
                                         () => _isMonitorActive =
                                             !_isMonitorActive,
                                       ),
+                                    ),
+                                    _buildMenuFeature(
+                                      icon: Icons.mic,
+                                      label: 'VOZ',
+                                      isActive: _isVoiceControlActive,
+                                      onTap: () {
+                                        setState(() {
+                                          _isVoiceControlActive =
+                                              !_isVoiceControlActive;
+                                        });
+                                        if (_isVoiceControlActive) {
+                                          _voiceService.startService();
+                                        } else {
+                                          _voiceService.stopService();
+                                        }
+                                      },
                                     ),
                                   ],
                                 ),
@@ -1045,6 +1072,206 @@ class _RecordingPageState extends State<RecordingPage>
           ],
         );
       },
+    );
+  }
+
+  Widget _buildTeleprompterSettingsOverlay() {
+    if (_recordingState != RecordingState.teleprompterSettings) {
+      return const SizedBox.shrink();
+    }
+
+    return Stack(
+      children: [
+        // Backdrop
+        Positioned.fill(
+          child: GestureDetector(
+            onTap: () => setState(() => _recordingState = RecordingState.menu),
+            child: Container(color: Colors.black.withValues(alpha: 0.4)),
+          ),
+        ),
+
+        // Bottom Sheet
+        Positioned(
+          bottom: 0,
+          left: 0,
+          right: 0,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+            decoration: const BoxDecoration(
+              color: Colors.black,
+              borderRadius: BorderRadius.vertical(top: Radius.circular(48)),
+              border: Border(top: BorderSide(color: Colors.white10, width: 1)),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black,
+                  blurRadius: 60,
+                  spreadRadius: 20,
+                  offset: Offset(0, -20),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Handle
+                Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 24),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+
+                // Title
+                const Text(
+                  'AJUSTES DE TELEPROMPTER',
+                  style: TextStyle(
+                    color: Colors.white70,
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 4.0,
+                  ),
+                ),
+                const SizedBox(height: 48),
+
+                // Text Size Slider
+                _buildSettingsSlider(
+                  icon: Icons.format_size,
+                  label: 'TAMAÑO DEL TEXTO',
+                  value: _teleprompterFontSize,
+                  min: 20,
+                  max: 30,
+                  unit: 'PT',
+                  onChanged: (val) =>
+                      setState(() => _teleprompterFontSize = val),
+                ),
+                const SizedBox(height: 36),
+
+                // Reading Speed Slider
+                _buildSettingsSlider(
+                  icon: Icons.speed,
+                  label: 'VELOCIDAD DE LECTURA',
+                  value: _readingSpeed,
+                  min: 50,
+                  max: 300,
+                  unit: 'PPM',
+                  onChanged: (val) => setState(() => _readingSpeed = val),
+                ),
+                const SizedBox(height: 36),
+
+                // Brightness Slider
+                _buildSettingsSlider(
+                  icon: Icons.light_mode,
+                  label: 'BRILLO DE PANTALLA',
+                  value: _screenBrightness * 100,
+                  min: 0,
+                  max: 100,
+                  unit: '%',
+                  onChanged: (val) =>
+                      setState(() => _screenBrightness = val / 100),
+                ),
+                const SizedBox(height: 48),
+
+                // Accept Button
+                GestureDetector(
+                  onTap: () {
+                    _menuController.reverse();
+                    setState(() {
+                      _recordingState = RecordingState.idle;
+                    });
+                  },
+
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: 20),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF2D4B44),
+                      borderRadius: BorderRadius.circular(32),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF2D4B44).withValues(alpha: 0.3),
+                          blurRadius: 20,
+                          offset: const Offset(0, 10),
+                        ),
+                      ],
+                    ),
+                    child: const Center(
+                      child: Text(
+                        'ACEPTAR',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 3.5,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSettingsSlider({
+    required IconData icon,
+    required String label,
+    required double value,
+    required double min,
+    required double max,
+    required String unit,
+    required ValueChanged<double> onChanged,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(icon, color: Colors.white70, size: 20),
+            const SizedBox(width: 12),
+            Text(
+              label,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 11,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 2.0,
+              ),
+            ),
+            const Spacer(),
+            Text(
+              '${value.round()}$unit',
+              style: const TextStyle(
+                color: Color(0xFF2DD4BF),
+                fontSize: 11,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1.0,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        SliderTheme(
+          data: SliderTheme.of(context).copyWith(
+            trackHeight: 10,
+            activeTrackColor: const Color(0xFF2D4B44),
+            inactiveTrackColor: Colors.white.withValues(alpha: 0.1),
+            thumbColor: Colors.white,
+            thumbShape: const RoundSliderThumbShape(
+              enabledThumbRadius: 14,
+              elevation: 4,
+            ),
+            overlayShape: const RoundSliderOverlayShape(overlayRadius: 24),
+          ),
+          child: Slider(value: value, min: min, max: max, onChanged: onChanged),
+        ),
+      ],
     );
   }
 

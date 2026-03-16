@@ -34,15 +34,25 @@ class VoiceCommandService {
     _isInitialized = await _speech.initialize(
       onStatus: _handleStatus,
       onError: (error) => print('[Lumis Voice] Error: $error'),
+      options: [
+        SpeechConfigOption('android', 'no_sound', true),
+        SpeechConfigOption('ios', 'no_sound', true),
+      ],
     );
     return _isInitialized;
   }
 
   void _handleStatus(String status) {
     print('[Lumis Voice] Status: $status');
+    // Si la sesión termina naturalmente, reiniciamos después de un breve delay
+    // para no saturar el sistema y evitar bucles de pitidos.
     if (status == 'done' || status == 'notListening') {
       if (_currentState != VoiceIndicatorState.disabled) {
-        _startListening();
+        Future.delayed(const Duration(milliseconds: 500), () {
+          if (_currentState != VoiceIndicatorState.disabled) {
+            _startListening();
+          }
+        });
       }
     }
   }
@@ -96,12 +106,21 @@ class VoiceCommandService {
 
     if (_currentState == VoiceIndicatorState.passive) {
       if (text.contains(_wakeWord)) {
-        _enterActiveMode();
+        // Si contiene el wake word E información adicional, podría ser un comando directo
+        final wordsAfterWake = text.split(_wakeWord).last.trim();
+        if (wordsAfterWake.isNotEmpty && wordsAfterWake.length > 2) {
+          _enterActiveMode();
+          _handleCommand(wordsAfterWake);
+        } else {
+          _enterActiveMode();
+        }
       }
-    } else if (_currentState == VoiceIndicatorState.active &&
-        result.finalResult) {
-      if (text.isNotEmpty && !text.contains(_wakeWord)) {
-        _handleCommand(text);
+    } else if (_currentState == VoiceIndicatorState.active) {
+      // En modo activo, aceptamos tanto resultados parciales claros como finales
+      if (result.finalResult || result.confidence > 0.7) {
+        if (text.isNotEmpty && !text.contains(_wakeWord)) {
+          _handleCommand(text);
+        }
       }
     }
   }

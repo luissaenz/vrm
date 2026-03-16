@@ -4,5 +4,6 @@ enum RecordingState {
   recording,
   commandRecorded,
   menu,
+  teleprompterSettings,
   finished,
 }

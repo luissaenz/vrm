@@ -135,6 +135,7 @@ class _FragmentOrganizationPageState extends State<FragmentOrganizationPage> {
               title: l10n.newProjectTitle,
               onBack: () => Navigator.pop(context),
               icon: Icons.arrow_back_ios_new_rounded,
+              iconOnRight: false,
             ),
             Expanded(
               child: SingleChildScrollView(
@@ -174,7 +175,7 @@ class _FragmentOrganizationPageState extends State<FragmentOrganizationPage> {
         ),
       ),
       bottomSheet: Container(
-        padding: const EdgeInsets.fromLTRB(20, 16, 20, 40),
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 20),
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.bottomCenter,
