@@ -1,0 +1,2316 @@
+commit 77bb845021a456411e1cd3de090db7584f547ab6
+Author: Luis Saenz <luis.saenz@tropipay.com>
+Date:   Sat Feb 7 19:20:34 2026 -0300
+
+    patch Calendar
+
+diff --git a/lib/features/dashboard/dashboard_page.dart b/lib/features/dashboard/dashboard_page.dart
+index 9c0926b..34cf7b1 100644
+--- a/lib/features/dashboard/dashboard_page.dart
++++ b/lib/features/dashboard/dashboard_page.dart
+@@ -1,5 +1,6 @@
+ import 'dart:ui';
+ import 'package:flutter/material.dart';
++import 'package:intl/intl.dart';
+ import 'package:vrm_app/l10n/app_localizations.dart';
+ import 'package:vrm_app/shared/widgets/section_header.dart';
+ import 'package:vrm_app/shared/widgets/stat_card.dart';
+@@ -23,6 +24,7 @@ class DashboardPage extends StatefulWidget {
+ class _DashboardPageState extends State<DashboardPage> {
+   UserProfile _profile = UserProfile.empty();
+   final _repository = OnboardingRepository();
++  DateTime _selectedDate = DateTime.now();
+ 
+   @override
+   void initState() {
+@@ -276,6 +278,12 @@ class _DashboardPageState extends State<DashboardPage> {
+   }
+ 
+   Widget _buildCalendarSection(AppLocalizations l10n) {
++    // Generate 5 days starting from today
++    final today = DateTime.now();
++    final calendarDays = List.generate(5, (index) {
++      return today.add(Duration(days: index));
++    });
++
+     return Padding(
+       padding: const EdgeInsets.symmetric(horizontal: 20),
+       child: Column(
+@@ -283,40 +291,39 @@ class _DashboardPageState extends State<DashboardPage> {
+         children: [
+           VRMSectionHeader(title: l10n.calendar, icon: Icons.calendar_month),
+           const SizedBox(height: 20),
+-          SingleChildScrollView(
+-            scrollDirection: Axis.horizontal,
+-            physics: const BouncingScrollPhysics(),
+-            child: Row(
+-              children: [
+-                VRMCalendarDay(
+-                  day: l10n.wed,
+-                  date: '24',
+-                  isSelected: true,
+-                  onTap: () {},
+-                ),
+-                const SizedBox(width: 16),
+-                VRMCalendarDay(
+-                  day: l10n.thu,
+-                  date: '25',
+-                  isSelected: false,
+-                  onTap: () {},
+-                ),
+-                const SizedBox(width: 16),
+-                VRMCalendarDay(
+-                  day: l10n.fri,
+-                  date: '26',
+-                  isSelected: false,
+-                  onTap: () {},
+-                ),
+-                const SizedBox(width: 16),
+-                VRMCalendarDay(
+-                  day: l10n.sat,
+-                  date: '27',
+-                  isSelected: false,
+-                  onTap: () {},
++          Row(
++            children: calendarDays.map((date) {
++              final isSelected = DateUtils.isSameDay(date, _selectedDate);
++              final isToday = DateUtils.isSameDay(date, today);
++
++              // Use 'HOY'/'TODAY' for the current date
++              final locale = Localizations.localeOf(context).languageCode;
++              String dayName;
++              if (isToday) {
++                dayName = locale == 'es' ? 'HOY' : 'TODAY';
++              } else {
++                dayName = DateFormat.E(locale).format(date).toUpperCase();
++              }
++
++              return Expanded(
++                child: Padding(
++                  padding: EdgeInsets.only(
++                    right: date == calendarDays.last ? 0 : 8,
++                  ),
++                  child: VRMCalendarDay(
++                    day: dayName,
++                    date: date.day.toString(),
++                    isSelected: isSelected,
++                    isToday: isToday,
++                    onTap: () {
++                      setState(() {
++                        _selectedDate = date;
++                      });
++                    },
++                  ),
+                 ),
+-              ],
+-            ),
++              );
++            }).toList(),
+           ),
+         ],
+       ),
+
+commit e5667bc6359e0e0022910b3a9342a8a829c97669
+Author: Luis Saenz <luis.saenz@tropipay.com>
+Date:   Sat Feb 7 15:59:28 2026 -0300
+
+    update styles
+
+diff --git a/lib/features/dashboard/dashboard_page.dart b/lib/features/dashboard/dashboard_page.dart
+index c960c8f..9c0926b 100644
+--- a/lib/features/dashboard/dashboard_page.dart
++++ b/lib/features/dashboard/dashboard_page.dart
+@@ -67,7 +67,7 @@ class _DashboardPageState extends State<DashboardPage> {
+                     VRMActionCard(
+                       title: l10n.newProject,
+                       subtitle: l10n.voiceControlActive,
+-                      icon: Icons.keyboard_voice,
++                      icon: Icons.mic,
+                       onTap: () {
+                         Navigator.push(
+                           context,
+@@ -86,13 +86,6 @@ class _DashboardPageState extends State<DashboardPage> {
+                       onTap: () {
+                         // TODO: Implement InfluencerProfilePage
+                         debugPrint('InfluencerProfilePage not yet implemented');
+-                        // Navigator.push(
+-                        //   context,
+-                        //   MaterialPageRoute(
+-                        //     builder: (context) =>
+-                        //         const InfluencerProfilePage(),
+-                        //   ),
+-                        // );
+                       },
+                     ),
+                   ],
+@@ -259,22 +252,25 @@ class _DashboardPageState extends State<DashboardPage> {
+   Widget _buildStatsSection(AppLocalizations l10n) {
+     return Padding(
+       padding: const EdgeInsets.symmetric(horizontal: 20),
+-      child: Row(
+-        children: [
+-          VRMStatCard(
+-            value: '5',
+-            label: l10n.streakLabel,
+-            icon: Icons.local_fire_department,
+-            color: const Color(0xFFF97316), // Orange 500
+-          ),
+-          const SizedBox(width: 12),
+-          VRMStatCard(
+-            value: '42',
+-            label: l10n.fragments,
+-            icon: Icons.mic,
+-            color: const Color(0xFF10B981), // Emerald 500
+-          ),
+-        ],
++      child: IntrinsicHeight(
++        child: Row(
++          crossAxisAlignment: CrossAxisAlignment.stretch,
++          children: [
++            VRMStatCard(
++              value: '5',
++              label: l10n.streakLabel,
++              icon: Icons.local_fire_department,
++              color: const Color(0xFFF97316), // Orange 500
++            ),
++            const SizedBox(width: 12),
++            VRMStatCard(
++              value: '42',
++              label: l10n.fragments,
++              icon: Icons.mic,
++              color: const Color(0xFF10B981), // Emerald 500
++            ),
++          ],
++        ),
+       ),
+     );
+   }
+@@ -328,6 +324,23 @@ class _DashboardPageState extends State<DashboardPage> {
+   }
+ 
+   Widget _buildBottomNav(BuildContext context, AppLocalizations l10n) {
++    return Container(
++      decoration: BoxDecoration(
++        gradient: LinearGradient(
++          begin: Alignment.bottomCenter,
++          end: Alignment.topCenter,
++          colors: [
++            context.colorScheme.surface,
++            context.colorScheme.surface.withValues(alpha: 0.0),
++          ],
++          stops: const [0.6, 1.0],
++        ),
++      ),
++      child: _buildActualNavBar(context, l10n),
++    );
++  }
++
++  Widget _buildActualNavBar(BuildContext context, AppLocalizations l10n) {
+     return ClipRRect(
+       child: BackdropFilter(
+         filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+
+commit e99d0480f513fdfc61d269e17e919d97877ba327
+Author: Luis Saenz <luis.saenz@tropipay.com>
+Date:   Sat Feb 7 14:06:07 2026 -0300
+
+    Material 3 + Theme Extensions implementation
+
+diff --git a/lib/features/dashboard/dashboard_page.dart b/lib/features/dashboard/dashboard_page.dart
+index 4c186b2..c960c8f 100644
+--- a/lib/features/dashboard/dashboard_page.dart
++++ b/lib/features/dashboard/dashboard_page.dart
+@@ -46,7 +46,7 @@ class _DashboardPageState extends State<DashboardPage> {
+   Widget build(BuildContext context) {
+     final l10n = AppLocalizations.of(context)!;
+     return Scaffold(
+-      backgroundColor: AppTheme.offWhite,
++      backgroundColor: context.colorScheme.surface,
+       extendBody: true,
+       bottomNavigationBar: _buildBottomNav(context, l10n),
+       body: SafeArea(
+@@ -121,7 +121,10 @@ class _DashboardPageState extends State<DashboardPage> {
+                 height: 44,
+                 decoration: BoxDecoration(
+                   shape: BoxShape.circle,
+-                  border: Border.all(color: Colors.white, width: 2),
++                  border: Border.all(
++                    color: context.appColors.cardBorder,
++                    width: 2,
++                  ),
+                   boxShadow: [
+                     BoxShadow(
+                       color: Colors.black.withValues(alpha: 0.05),
+@@ -146,16 +149,16 @@ class _DashboardPageState extends State<DashboardPage> {
+                     style: TextStyle(
+                       fontSize: 11,
+                       fontWeight: FontWeight.w600,
+-                      color: AppTheme.textMuted,
++                      color: context.appColors.textSecondary,
+                       letterSpacing: 0.5,
+                     ),
+                   ),
+                   Text(
+                     _getProfileLabel(),
+-                    style: const TextStyle(
++                    style: TextStyle(
+                       fontSize: 16,
+                       fontWeight: FontWeight.bold,
+-                      color: AppTheme.textMain,
++                      color: context.appColors.textPrimary,
+                     ),
+                   ),
+                 ],
+@@ -166,18 +169,19 @@ class _DashboardPageState extends State<DashboardPage> {
+             width: 40,
+             height: 40,
+             decoration: BoxDecoration(
+-              color: Colors.white,
++              color: context.appColors.cardBackground,
+               shape: BoxShape.circle,
+-              border: Border.all(color: AppTheme.earthBorder),
+-              boxShadow: [
+-                BoxShadow(
+-                  color: Colors.black.withValues(alpha: 0.02),
+-                  blurRadius: 4,
+-                  offset: const Offset(0, 2),
+-                ),
+-              ],
++              border: Border.all(
++                color: context.appColors.cardBorder.withValues(alpha: 0.5),
++              ),
++            ),
++            child: Icon(
++              Icons.settings,
++              size: 20,
++              color: context.isDarkMode
++                  ? Colors.white
++                  : context.colorScheme.primary,
+             ),
+-            child: const Icon(Icons.settings, size: 20, color: AppTheme.forest),
+           ),
+         ],
+       ),
+@@ -192,20 +196,20 @@ class _DashboardPageState extends State<DashboardPage> {
+         children: [
+           Text(
+             _getMainTitle(),
+-            style: const TextStyle(
++            style: TextStyle(
+               fontSize: 32,
+               fontWeight: FontWeight.w800,
+-              color: AppTheme.textMain,
++              color: context.appColors.textPrimary,
+               letterSpacing: -1,
+             ),
+           ),
+           const SizedBox(height: 6),
+           Text(
+             _getMainSubtitle(),
+-            style: const TextStyle(
++            style: TextStyle(
+               fontSize: 14,
+               fontWeight: FontWeight.w500,
+-              color: AppTheme.textMuted,
++              color: context.appColors.textSecondary,
+             ),
+           ),
+         ],
+@@ -254,21 +258,21 @@ class _DashboardPageState extends State<DashboardPage> {
+ 
+   Widget _buildStatsSection(AppLocalizations l10n) {
+     return Padding(
+-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
++      padding: const EdgeInsets.symmetric(horizontal: 20),
+       child: Row(
+         children: [
+           VRMStatCard(
+-            value: l10n.days('5'),
++            value: '5',
+             label: l10n.streakLabel,
+             icon: Icons.local_fire_department,
+-            color: const Color(0xFFEA580C), // Orange 600
++            color: const Color(0xFFF97316), // Orange 500
+           ),
+-          const SizedBox(width: 16),
++          const SizedBox(width: 12),
+           VRMStatCard(
+             value: '42',
+             label: l10n.fragments,
+             icon: Icons.mic,
+-            color: AppTheme.forest,
++            color: const Color(0xFF10B981), // Emerald 500
+           ),
+         ],
+       ),
+@@ -324,15 +328,19 @@ class _DashboardPageState extends State<DashboardPage> {
+   }
+ 
+   Widget _buildBottomNav(BuildContext context, AppLocalizations l10n) {
+-    return ClipRect(
++    return ClipRRect(
+       child: BackdropFilter(
+-        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
++        filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15),
+         child: Container(
+           padding: const EdgeInsets.fromLTRB(20, 16, 20, 40),
+           decoration: BoxDecoration(
+-            color: Colors.white.withValues(alpha: 0.8),
++            color: context.isDarkMode
++                ? context.colorScheme.surface.withValues(alpha: 0.95)
++                : Colors.white.withValues(alpha: 0.95),
+             border: Border(
+-              top: BorderSide(color: AppTheme.earthBorder, width: 1),
++              top: BorderSide(
++                color: context.appColors.cardBorder.withValues(alpha: 0.2),
++              ),
+             ),
+           ),
+           child: Row(
+@@ -397,7 +405,9 @@ class _DashboardPageState extends State<DashboardPage> {
+           Icon(
+             icon,
+             size: 24,
+-            color: isActive ? AppTheme.forest : AppTheme.textMuted,
++            color: isActive
++                ? context.colorScheme.primary
++                : context.appColors.textSecondary,
+           ),
+           const SizedBox(height: 6),
+           Text(
+@@ -406,7 +416,9 @@ class _DashboardPageState extends State<DashboardPage> {
+               fontSize: 10,
+               fontWeight: FontWeight.bold,
+               letterSpacing: 1.0,
+-              color: isActive ? AppTheme.forest : AppTheme.textMuted,
++              color: isActive
++                  ? context.colorScheme.primary
++                  : context.appColors.textSecondary,
+             ),
+           ),
+         ],
+@@ -421,6 +433,8 @@ class _RecentProjectsSection extends StatelessWidget {
+   @override
+   Widget build(BuildContext context) {
+     final l10n = AppLocalizations.of(context)!;
++    final isDark = context.isDarkMode;
++
+     return Padding(
+       padding: const EdgeInsets.only(top: 32),
+       child: Column(
+@@ -447,8 +461,12 @@ class _RecentProjectsSection extends StatelessWidget {
+                   badgeText: l10n.draft,
+                   progressLabel: l10n.progressLabel,
+                   icon: Icons.smartphone_rounded,
+-                  badgeBg: const Color(0xFFFFF7ED),
+-                  badgeTextCol: const Color(0xFFC2410C), // Orange 700
++                  badgeBg: isDark
++                      ? Colors.orange.withValues(alpha: 0.1)
++                      : const Color(0xFFFFF7ED),
++                  badgeTextCol: isDark
++                      ? const Color(0xFFF97316)
++                      : const Color(0xFFC2410C),
+                 ),
+                 const SizedBox(height: 4),
+                 VRMProjectCard(
+@@ -459,8 +477,12 @@ class _RecentProjectsSection extends StatelessWidget {
+                   badgeText: l10n.ready,
+                   progressLabel: l10n.progressLabel,
+                   icon: Icons.flight_rounded,
+-                  badgeBg: const Color(0xFFECFDF5),
+-                  badgeTextCol: const Color(0xFF047857), // Emerald 700
++                  badgeBg: isDark
++                      ? const Color(0xFF10B981).withValues(alpha: 0.1)
++                      : const Color(0xFFECFDF5),
++                  badgeTextCol: isDark
++                      ? const Color(0xFF10B981)
++                      : const Color(0xFF047857),
+                 ),
+               ],
+             ),
+
+commit 54320bc30ae5b53f0728b756e736ab2abf717c85
+Author: Luis Saenz <luis.saenz@tropipay.com>
+Date:   Sat Feb 7 01:10:30 2026 -0300
+
+    UPDATE ESTADOS
+
+diff --git a/lib/features/dashboard/dashboard_page.dart b/lib/features/dashboard/dashboard_page.dart
+index e774c62..4c186b2 100644
+--- a/lib/features/dashboard/dashboard_page.dart
++++ b/lib/features/dashboard/dashboard_page.dart
+@@ -50,65 +50,58 @@ class _DashboardPageState extends State<DashboardPage> {
+       extendBody: true,
+       bottomNavigationBar: _buildBottomNav(context, l10n),
+       body: SafeArea(
+-        child: Center(
+-          child: ConstrainedBox(
+-            constraints: const BoxConstraints(maxWidth: 450),
+-            child: SingleChildScrollView(
+-              padding: const EdgeInsets.only(bottom: 120),
+-              physics: const BouncingScrollPhysics(),
+-              child: Column(
+-                crossAxisAlignment: CrossAxisAlignment.start,
+-                children: [
+-                  _buildTopBar(l10n),
+-                  _buildMainGreeting(l10n),
+-                  _buildStatsSection(l10n),
+-                  const SizedBox(height: 20),
+-                  Padding(
+-                    padding: const EdgeInsets.symmetric(horizontal: 24),
+-                    child: Column(
+-                      children: [
+-                        VRMActionCard(
+-                          title: l10n.newProject,
+-                          subtitle: l10n.voiceControlActive,
+-                          icon: Icons.keyboard_voice,
+-                          onTap: () {
+-                            Navigator.push(
+-                              context,
+-                              MaterialPageRoute(
+-                                builder: (context) => const NewProjectPage(),
+-                              ),
+-                            );
+-                          },
+-                        ),
+-                        const SizedBox(height: 12),
+-                        VRMActionCard(
+-                          title: 'Perfil Influencer',
+-                          subtitle: 'Configura tu identidad real',
+-                          icon: Icons.person_search_rounded,
+-                          actionIcon: Icons.arrow_forward_rounded,
+-                          onTap: () {
+-                            // TODO: Implement InfluencerProfilePage
+-                            debugPrint(
+-                              'InfluencerProfilePage not yet implemented',
+-                            );
+-                            // Navigator.push(
+-                            //   context,
+-                            //   MaterialPageRoute(
+-                            //     builder: (context) =>
+-                            //         const InfluencerProfilePage(),
+-                            //   ),
+-                            // );
+-                          },
+-                        ),
+-                      ],
++        child: SingleChildScrollView(
++          padding: const EdgeInsets.only(bottom: 120),
++          physics: const BouncingScrollPhysics(),
++          child: Column(
++            crossAxisAlignment: CrossAxisAlignment.start,
++            children: [
++              _buildTopBar(l10n),
++              _buildMainGreeting(l10n),
++              _buildStatsSection(l10n),
++              const SizedBox(height: 20),
++              Padding(
++                padding: const EdgeInsets.symmetric(horizontal: 20),
++                child: Column(
++                  children: [
++                    VRMActionCard(
++                      title: l10n.newProject,
++                      subtitle: l10n.voiceControlActive,
++                      icon: Icons.keyboard_voice,
++                      onTap: () {
++                        Navigator.push(
++                          context,
++                          MaterialPageRoute(
++                            builder: (context) => const NewProjectPage(),
++                          ),
++                        );
++                      },
+                     ),
+-                  ),
+-                  const _RecentProjectsSection(),
+-                  const SizedBox(height: 40),
+-                  _buildCalendarSection(l10n),
+-                ],
++                    const SizedBox(height: 12),
++                    VRMActionCard(
++                      title: 'Perfil Influencer',
++                      subtitle: 'Configura tu identidad real',
++                      icon: Icons.person_search_rounded,
++                      actionIcon: Icons.arrow_forward_rounded,
++                      onTap: () {
++                        // TODO: Implement InfluencerProfilePage
++                        debugPrint('InfluencerProfilePage not yet implemented');
++                        // Navigator.push(
++                        //   context,
++                        //   MaterialPageRoute(
++                        //     builder: (context) =>
++                        //         const InfluencerProfilePage(),
++                        //   ),
++                        // );
++                      },
++                    ),
++                  ],
++                ),
+               ),
+-            ),
++              const _RecentProjectsSection(),
++              const SizedBox(height: 40),
++              _buildCalendarSection(l10n),
++            ],
+           ),
+         ),
+       ),
+@@ -117,7 +110,7 @@ class _DashboardPageState extends State<DashboardPage> {
+ 
+   Widget _buildTopBar(AppLocalizations l10n) {
+     return Container(
+-      padding: const EdgeInsets.fromLTRB(24, 24, 24, 8),
++      padding: const EdgeInsets.fromLTRB(20, 24, 20, 8),
+       child: Row(
+         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+         children: [
+@@ -193,7 +186,7 @@ class _DashboardPageState extends State<DashboardPage> {
+ 
+   Widget _buildMainGreeting(AppLocalizations l10n) {
+     return Padding(
+-      padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
++      padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
+       child: Column(
+         crossAxisAlignment: CrossAxisAlignment.start,
+         children: [
+@@ -261,7 +254,7 @@ class _DashboardPageState extends State<DashboardPage> {
+ 
+   Widget _buildStatsSection(AppLocalizations l10n) {
+     return Padding(
+-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
++      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+       child: Row(
+         children: [
+           VRMStatCard(
+@@ -284,7 +277,7 @@ class _DashboardPageState extends State<DashboardPage> {
+ 
+   Widget _buildCalendarSection(AppLocalizations l10n) {
+     return Padding(
+-      padding: const EdgeInsets.symmetric(horizontal: 24),
++      padding: const EdgeInsets.symmetric(horizontal: 20),
+       child: Column(
+         crossAxisAlignment: CrossAxisAlignment.start,
+         children: [
+@@ -335,7 +328,7 @@ class _DashboardPageState extends State<DashboardPage> {
+       child: BackdropFilter(
+         filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+         child: Container(
+-          padding: const EdgeInsets.fromLTRB(24, 16, 24, 40),
++          padding: const EdgeInsets.fromLTRB(20, 16, 20, 40),
+           decoration: BoxDecoration(
+             color: Colors.white.withValues(alpha: 0.8),
+             border: Border(
+@@ -434,7 +427,7 @@ class _RecentProjectsSection extends StatelessWidget {
+         crossAxisAlignment: CrossAxisAlignment.start,
+         children: [
+           Padding(
+-            padding: const EdgeInsets.symmetric(horizontal: 24),
++            padding: const EdgeInsets.symmetric(horizontal: 20),
+             child: VRMSectionHeader(
+               title: l10n.recentProjects,
+               actionLabel: l10n.viewAll,
+@@ -443,7 +436,7 @@ class _RecentProjectsSection extends StatelessWidget {
+           ),
+           const SizedBox(height: 16),
+           Padding(
+-            padding: const EdgeInsets.symmetric(horizontal: 24),
++            padding: const EdgeInsets.symmetric(horizontal: 20),
+             child: Column(
+               children: [
+                 VRMProjectCard(
+
+commit 1ab6e6d9808382f1e5b939e83d1d561765331914
+Author: Luis Saenz <luis.saenz@tropipay.com>
+Date:   Thu Feb 5 16:34:07 2026 -0300
+
+    script studio
+
+diff --git a/lib/features/dashboard/dashboard_page.dart b/lib/features/dashboard/dashboard_page.dart
+index eef0653..e774c62 100644
+--- a/lib/features/dashboard/dashboard_page.dart
++++ b/lib/features/dashboard/dashboard_page.dart
+@@ -7,7 +7,8 @@ import 'package:vrm_app/shared/widgets/action_card.dart';
+ import 'package:vrm_app/shared/widgets/project_card.dart';
+ import 'package:vrm_app/shared/widgets/calendar_day.dart';
+ import 'package:vrm_app/features/new_project/new_project_page.dart';
+-import 'package:vrm_app/features/influencer_profile/influencer_profile_page.dart';
++// TODO: Implement InfluencerProfilePage
++// import 'package:vrm_app/features/influencer_profile/influencer_profile_page.dart';
+ import 'package:vrm_app/features/onboarding/data/onboarding_repository.dart';
+ import 'package:vrm_app/features/onboarding/data/user_profile.dart';
+ import '../../core/theme.dart';
+@@ -86,13 +87,17 @@ class _DashboardPageState extends State<DashboardPage> {
+                           icon: Icons.person_search_rounded,
+                           actionIcon: Icons.arrow_forward_rounded,
+                           onTap: () {
+-                            Navigator.push(
+-                              context,
+-                              MaterialPageRoute(
+-                                builder: (context) =>
+-                                    const InfluencerProfilePage(),
+-                              ),
++                            // TODO: Implement InfluencerProfilePage
++                            debugPrint(
++                              'InfluencerProfilePage not yet implemented',
+                             );
++                            // Navigator.push(
++                            //   context,
++                            //   MaterialPageRoute(
++                            //     builder: (context) =>
++                            //         const InfluencerProfilePage(),
++                            //   ),
++                            // );
+                           },
+                         ),
+                       ],
+@@ -367,12 +372,14 @@ class _DashboardPageState extends State<DashboardPage> {
+                 l10n.profile,
+                 false,
+                 () {
+-                  Navigator.push(
+-                    context,
+-                    MaterialPageRoute(
+-                      builder: (context) => const InfluencerProfilePage(),
+-                    ),
+-                  );
++                  // TODO: Implement InfluencerProfilePage
++                  debugPrint('InfluencerProfilePage not yet implemented');
++                  // Navigator.push(
++                  //   context,
++                  //   MaterialPageRoute(
++                  //     builder: (context) => const InfluencerProfilePage(),
++                  //   ),
++                  // );
+                 },
+               ),
+             ],
+
+commit d170c5612e265863ebfba8621458f6d304dc4914
+Author: Luis Saenz <luis.saenz@tropipay.com>
+Date:   Fri Jan 30 15:44:38 2026 -0300
+
+    BK: implement api
+
+diff --git a/lib/features/dashboard/dashboard_page.dart b/lib/features/dashboard/dashboard_page.dart
+index b3657a3..eef0653 100644
+--- a/lib/features/dashboard/dashboard_page.dart
++++ b/lib/features/dashboard/dashboard_page.dart
+@@ -63,7 +63,7 @@ class _DashboardPageState extends State<DashboardPage> {
+                   _buildStatsSection(l10n),
+                   const SizedBox(height: 20),
+                   Padding(
+-                    padding: const EdgeInsets.symmetric(horizontal: 20),
++                    padding: const EdgeInsets.symmetric(horizontal: 24),
+                     child: Column(
+                       children: [
+                         VRMActionCard(
+@@ -112,7 +112,7 @@ class _DashboardPageState extends State<DashboardPage> {
+ 
+   Widget _buildTopBar(AppLocalizations l10n) {
+     return Container(
+-      padding: const EdgeInsets.fromLTRB(20, 24, 20, 8),
++      padding: const EdgeInsets.fromLTRB(24, 24, 24, 8),
+       child: Row(
+         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+         children: [
+@@ -188,7 +188,7 @@ class _DashboardPageState extends State<DashboardPage> {
+ 
+   Widget _buildMainGreeting(AppLocalizations l10n) {
+     return Padding(
+-      padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
++      padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+       child: Column(
+         crossAxisAlignment: CrossAxisAlignment.start,
+         children: [
+@@ -256,7 +256,7 @@ class _DashboardPageState extends State<DashboardPage> {
+ 
+   Widget _buildStatsSection(AppLocalizations l10n) {
+     return Padding(
+-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
++      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+       child: Row(
+         children: [
+           VRMStatCard(
+@@ -279,7 +279,7 @@ class _DashboardPageState extends State<DashboardPage> {
+ 
+   Widget _buildCalendarSection(AppLocalizations l10n) {
+     return Padding(
+-      padding: const EdgeInsets.symmetric(horizontal: 20),
++      padding: const EdgeInsets.symmetric(horizontal: 24),
+       child: Column(
+         crossAxisAlignment: CrossAxisAlignment.start,
+         children: [
+@@ -330,7 +330,7 @@ class _DashboardPageState extends State<DashboardPage> {
+       child: BackdropFilter(
+         filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+         child: Container(
+-          padding: const EdgeInsets.fromLTRB(20, 16, 20, 40),
++          padding: const EdgeInsets.fromLTRB(24, 16, 24, 40),
+           decoration: BoxDecoration(
+             color: Colors.white.withValues(alpha: 0.8),
+             border: Border(
+@@ -427,7 +427,7 @@ class _RecentProjectsSection extends StatelessWidget {
+         crossAxisAlignment: CrossAxisAlignment.start,
+         children: [
+           Padding(
+-            padding: const EdgeInsets.symmetric(horizontal: 20),
++            padding: const EdgeInsets.symmetric(horizontal: 24),
+             child: VRMSectionHeader(
+               title: l10n.recentProjects,
+               actionLabel: l10n.viewAll,
+@@ -436,7 +436,7 @@ class _RecentProjectsSection extends StatelessWidget {
+           ),
+           const SizedBox(height: 16),
+           Padding(
+-            padding: const EdgeInsets.symmetric(horizontal: 20),
++            padding: const EdgeInsets.symmetric(horizontal: 24),
+             child: Column(
+               children: [
+                 VRMProjectCard(
+
+commit 049e05f9f8c33661aee2abab245b4d3eb61ddb10
+Author: Luis Saenz <luis.saenz@tropipay.com>
+Date:   Thu Jan 29 20:42:45 2026 -0300
+
+    onboarding
+
+diff --git a/lib/features/dashboard/dashboard_page.dart b/lib/features/dashboard/dashboard_page.dart
+index 32bd6f3..b3657a3 100644
+--- a/lib/features/dashboard/dashboard_page.dart
++++ b/lib/features/dashboard/dashboard_page.dart
+@@ -8,11 +8,39 @@ import 'package:vrm_app/shared/widgets/project_card.dart';
+ import 'package:vrm_app/shared/widgets/calendar_day.dart';
+ import 'package:vrm_app/features/new_project/new_project_page.dart';
+ import 'package:vrm_app/features/influencer_profile/influencer_profile_page.dart';
++import 'package:vrm_app/features/onboarding/data/onboarding_repository.dart';
++import 'package:vrm_app/features/onboarding/data/user_profile.dart';
+ import '../../core/theme.dart';
+ 
+-class DashboardPage extends StatelessWidget {
++class DashboardPage extends StatefulWidget {
+   const DashboardPage({super.key});
+ 
++  @override
++  State<DashboardPage> createState() => _DashboardPageState();
++}
++
++class _DashboardPageState extends State<DashboardPage> {
++  UserProfile _profile = UserProfile.empty();
++  final _repository = OnboardingRepository();
++
++  @override
++  void initState() {
++    super.initState();
++    _loadProfile();
++  }
++
++  void _loadProfile() async {
++    final profile = await _repository.getUserProfile();
++    if (mounted) {
++      if (!profile.onboardingCompleted ||
++          profile.identity == UserIdentity.none) {
++        Navigator.of(context).pushReplacementNamed('/onboarding');
++      } else {
++        setState(() => _profile = profile);
++      }
++    }
++  }
++
+   @override
+   Widget build(BuildContext context) {
+     final l10n = AppLocalizations.of(context)!;
+@@ -35,7 +63,7 @@ class DashboardPage extends StatelessWidget {
+                   _buildStatsSection(l10n),
+                   const SizedBox(height: 20),
+                   Padding(
+-                    padding: const EdgeInsets.symmetric(horizontal: 24),
++                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                     child: Column(
+                       children: [
+                         VRMActionCard(
+@@ -84,7 +112,7 @@ class DashboardPage extends StatelessWidget {
+ 
+   Widget _buildTopBar(AppLocalizations l10n) {
+     return Container(
+-      padding: const EdgeInsets.fromLTRB(24, 24, 24, 8),
++      padding: const EdgeInsets.fromLTRB(20, 24, 20, 8),
+       child: Row(
+         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+         children: [
+@@ -120,16 +148,16 @@ class DashboardPage extends StatelessWidget {
+                     style: TextStyle(
+                       fontSize: 11,
+                       fontWeight: FontWeight.w600,
+-                      color: const Color(0xFF64748B), // Slate 500
++                      color: AppTheme.textMuted,
+                       letterSpacing: 0.5,
+                     ),
+                   ),
+                   Text(
+-                    l10n.creator,
++                    _getProfileLabel(),
+                     style: const TextStyle(
+                       fontSize: 16,
+                       fontWeight: FontWeight.bold,
+-                      color: Color(0xFF0F172A),
++                      color: AppTheme.textMain,
+                     ),
+                   ),
+                 ],
+@@ -160,26 +188,26 @@ class DashboardPage extends StatelessWidget {
+ 
+   Widget _buildMainGreeting(AppLocalizations l10n) {
+     return Padding(
+-      padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
++      padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
+       child: Column(
+         crossAxisAlignment: CrossAxisAlignment.start,
+         children: [
+           Text(
+-            l10n.readyToCreate,
++            _getMainTitle(),
+             style: const TextStyle(
+               fontSize: 32,
+               fontWeight: FontWeight.w800,
+-              color: Color(0xFF0F172A),
++              color: AppTheme.textMain,
+               letterSpacing: -1,
+             ),
+           ),
+           const SizedBox(height: 6),
+           Text(
+-            l10n.captureIdeas,
+-            style: TextStyle(
++            _getMainSubtitle(),
++            style: const TextStyle(
+               fontSize: 14,
+               fontWeight: FontWeight.w500,
+-              color: const Color(0xFF64748B), // Slate 500
++              color: AppTheme.textMuted,
+             ),
+           ),
+         ],
+@@ -187,9 +215,48 @@ class DashboardPage extends StatelessWidget {
+     );
+   }
+ 
++  String _getProfileLabel() {
++    switch (_profile.identity) {
++      case UserIdentity.leader:
++        return 'Líder Ejecutivo';
++      case UserIdentity.influencer:
++        return 'Creador Flow';
++      case UserIdentity.seller:
++        return 'Vendedor Pro';
++      default:
++        return 'Creador';
++    }
++  }
++
++  String _getMainTitle() {
++    switch (_profile.identity) {
++      case UserIdentity.leader:
++        return 'Modo Eficiencia';
++      case UserIdentity.influencer:
++        return 'Modo Flow';
++      case UserIdentity.seller:
++        return 'Modo Persuasión';
++      default:
++        return '¿Listo para crear?';
++    }
++  }
++
++  String _getMainSubtitle() {
++    switch (_profile.identity) {
++      case UserIdentity.leader:
++        return 'Tu tiempo es dinero. Máxima precisión.';
++      case UserIdentity.influencer:
++        return 'Encuentra tu voz. Conecta con tu audiencia.';
++      case UserIdentity.seller:
++        return 'Convierte espectadores en clientes.';
++      default:
++        return 'Captura tus ideas y dales vida hoy.';
++    }
++  }
++
+   Widget _buildStatsSection(AppLocalizations l10n) {
+     return Padding(
+-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
++      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+       child: Row(
+         children: [
+           VRMStatCard(
+@@ -212,7 +279,7 @@ class DashboardPage extends StatelessWidget {
+ 
+   Widget _buildCalendarSection(AppLocalizations l10n) {
+     return Padding(
+-      padding: const EdgeInsets.symmetric(horizontal: 24),
++      padding: const EdgeInsets.symmetric(horizontal: 20),
+       child: Column(
+         crossAxisAlignment: CrossAxisAlignment.start,
+         children: [
+@@ -263,7 +330,7 @@ class DashboardPage extends StatelessWidget {
+       child: BackdropFilter(
+         filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+         child: Container(
+-          padding: const EdgeInsets.fromLTRB(32, 16, 32, 40),
++          padding: const EdgeInsets.fromLTRB(20, 16, 20, 40),
+           decoration: BoxDecoration(
+             color: Colors.white.withValues(alpha: 0.8),
+             border: Border(
+@@ -330,9 +397,7 @@ class DashboardPage extends StatelessWidget {
+           Icon(
+             icon,
+             size: 24,
+-            color: isActive
+-                ? AppTheme.forest
+-                : const Color(0xFF94A3B8), // Slate 400
++            color: isActive ? AppTheme.forest : AppTheme.textMuted,
+           ),
+           const SizedBox(height: 6),
+           Text(
+@@ -341,9 +406,7 @@ class DashboardPage extends StatelessWidget {
+               fontSize: 10,
+               fontWeight: FontWeight.bold,
+               letterSpacing: 1.0,
+-              color: isActive
+-                  ? AppTheme.forest
+-                  : const Color(0xFF94A3B8), // Slate 400
++              color: isActive ? AppTheme.forest : AppTheme.textMuted,
+             ),
+           ),
+         ],
+@@ -364,7 +427,7 @@ class _RecentProjectsSection extends StatelessWidget {
+         crossAxisAlignment: CrossAxisAlignment.start,
+         children: [
+           Padding(
+-            padding: const EdgeInsets.symmetric(horizontal: 24),
++            padding: const EdgeInsets.symmetric(horizontal: 20),
+             child: VRMSectionHeader(
+               title: l10n.recentProjects,
+               actionLabel: l10n.viewAll,
+@@ -373,7 +436,7 @@ class _RecentProjectsSection extends StatelessWidget {
+           ),
+           const SizedBox(height: 16),
+           Padding(
+-            padding: const EdgeInsets.symmetric(horizontal: 24),
++            padding: const EdgeInsets.symmetric(horizontal: 20),
+             child: Column(
+               children: [
+                 VRMProjectCard(
+
+commit fb4932b8b9f797f1c363683af9ce2c866261d33a
+Author: Luis Saenz <luis.saenz@tropipay.com>
+Date:   Sun Jan 25 22:57:53 2026 -0300
+
+    add SM Profile
+
+diff --git a/lib/features/dashboard/dashboard_page.dart b/lib/features/dashboard/dashboard_page.dart
+index 1ba98d6..32bd6f3 100644
+--- a/lib/features/dashboard/dashboard_page.dart
++++ b/lib/features/dashboard/dashboard_page.dart
+@@ -7,6 +7,7 @@ import 'package:vrm_app/shared/widgets/action_card.dart';
+ import 'package:vrm_app/shared/widgets/project_card.dart';
+ import 'package:vrm_app/shared/widgets/calendar_day.dart';
+ import 'package:vrm_app/features/new_project/new_project_page.dart';
++import 'package:vrm_app/features/influencer_profile/influencer_profile_page.dart';
+ import '../../core/theme.dart';
+ 
+ class DashboardPage extends StatelessWidget {
+@@ -18,7 +19,7 @@ class DashboardPage extends StatelessWidget {
+     return Scaffold(
+       backgroundColor: AppTheme.offWhite,
+       extendBody: true,
+-      bottomNavigationBar: _buildBottomNav(l10n),
++      bottomNavigationBar: _buildBottomNav(context, l10n),
+       body: SafeArea(
+         child: Center(
+           child: ConstrainedBox(
+@@ -35,18 +36,38 @@ class DashboardPage extends StatelessWidget {
+                   const SizedBox(height: 20),
+                   Padding(
+                     padding: const EdgeInsets.symmetric(horizontal: 24),
+-                    child: VRMActionCard(
+-                      title: l10n.newProject,
+-                      subtitle: l10n.voiceControlActive,
+-                      icon: Icons.mic,
+-                      onTap: () {
+-                        Navigator.push(
+-                          context,
+-                          MaterialPageRoute(
+-                            builder: (context) => const NewProjectPage(),
+-                          ),
+-                        );
+-                      },
++                    child: Column(
++                      children: [
++                        VRMActionCard(
++                          title: l10n.newProject,
++                          subtitle: l10n.voiceControlActive,
++                          icon: Icons.keyboard_voice,
++                          onTap: () {
++                            Navigator.push(
++                              context,
++                              MaterialPageRoute(
++                                builder: (context) => const NewProjectPage(),
++                              ),
++                            );
++                          },
++                        ),
++                        const SizedBox(height: 12),
++                        VRMActionCard(
++                          title: 'Perfil Influencer',
++                          subtitle: 'Configura tu identidad real',
++                          icon: Icons.person_search_rounded,
++                          actionIcon: Icons.arrow_forward_rounded,
++                          onTap: () {
++                            Navigator.push(
++                              context,
++                              MaterialPageRoute(
++                                builder: (context) =>
++                                    const InfluencerProfilePage(),
++                              ),
++                            );
++                          },
++                        ),
++                      ],
+                     ),
+                   ),
+                   const _RecentProjectsSection(),
+@@ -237,7 +258,7 @@ class DashboardPage extends StatelessWidget {
+     );
+   }
+ 
+-  Widget _buildBottomNav(AppLocalizations l10n) {
++  Widget _buildBottomNav(BuildContext context, AppLocalizations l10n) {
+     return ClipRect(
+       child: BackdropFilter(
+         filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+@@ -252,10 +273,41 @@ class DashboardPage extends StatelessWidget {
+           child: Row(
+             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+             children: [
+-              _buildNavItem(Icons.grid_view_rounded, l10n.panel, true),
+-              _buildNavItem(Icons.video_library_rounded, l10n.videos, false),
+-              _buildNavItem(Icons.mic_none_rounded, l10n.script, false),
+-              _buildNavItem(Icons.person_rounded, l10n.profile, false),
++              _buildNavItem(
++                context,
++                Icons.grid_view_rounded,
++                l10n.panel,
++                true,
++                () {},
++              ),
++              _buildNavItem(
++                context,
++                Icons.video_library_rounded,
++                l10n.videos,
++                false,
++                () {},
++              ),
++              _buildNavItem(
++                context,
++                Icons.mic_none_rounded,
++                l10n.script,
++                false,
++                () {},
++              ),
++              _buildNavItem(
++                context,
++                Icons.person_rounded,
++                l10n.profile,
++                false,
++                () {
++                  Navigator.push(
++                    context,
++                    MaterialPageRoute(
++                      builder: (context) => const InfluencerProfilePage(),
++                    ),
++                  );
++                },
++              ),
+             ],
+           ),
+         ),
+@@ -263,30 +315,39 @@ class DashboardPage extends StatelessWidget {
+     );
+   }
+ 
+-  Widget _buildNavItem(IconData icon, String label, bool isActive) {
+-    return Column(
+-      mainAxisSize: MainAxisSize.min,
+-      children: [
+-        Icon(
+-          icon,
+-          size: 24,
+-          color: isActive
+-              ? AppTheme.forest
+-              : const Color(0xFF94A3B8), // Slate 400
+-        ),
+-        const SizedBox(height: 6),
+-        Text(
+-          label.toUpperCase(),
+-          style: TextStyle(
+-            fontSize: 10,
+-            fontWeight: FontWeight.bold,
+-            letterSpacing: 1.0,
++  Widget _buildNavItem(
++    BuildContext context,
++    IconData icon,
++    String label,
++    bool isActive,
++    VoidCallback onTap,
++  ) {
++    return GestureDetector(
++      onTap: onTap,
++      child: Column(
++        mainAxisSize: MainAxisSize.min,
++        children: [
++          Icon(
++            icon,
++            size: 24,
+             color: isActive
+                 ? AppTheme.forest
+                 : const Color(0xFF94A3B8), // Slate 400
+           ),
+-        ),
+-      ],
++          const SizedBox(height: 6),
++          Text(
++            label.toUpperCase(),
++            style: TextStyle(
++              fontSize: 10,
++              fontWeight: FontWeight.bold,
++              letterSpacing: 1.0,
++              color: isActive
++                  ? AppTheme.forest
++                  : const Color(0xFF94A3B8), // Slate 400
++            ),
++          ),
++        ],
++      ),
+     );
+   }
+ }
+
+commit 8cd9d5ae4b3425621e0a2b2a5d4120bcb007c1c5
+Author: Luis Saenz <luis.saenz@tropipay.com>
+Date:   Sat Jan 24 19:14:32 2026 -0300
+
+    0 errors
+
+diff --git a/lib/features/dashboard/dashboard_page.dart b/lib/features/dashboard/dashboard_page.dart
+index 9b55ba8..1ba98d6 100644
+--- a/lib/features/dashboard/dashboard_page.dart
++++ b/lib/features/dashboard/dashboard_page.dart
+@@ -1,3 +1,4 @@
++import 'dart:ui';
+ import 'package:flutter/material.dart';
+ import 'package:vrm_app/l10n/app_localizations.dart';
+ import 'package:vrm_app/shared/widgets/section_header.dart';
+@@ -15,41 +16,41 @@ class DashboardPage extends StatelessWidget {
+   Widget build(BuildContext context) {
+     final l10n = AppLocalizations.of(context)!;
+     return Scaffold(
++      backgroundColor: AppTheme.offWhite,
++      extendBody: true,
+       bottomNavigationBar: _buildBottomNav(l10n),
+       body: SafeArea(
+         child: Center(
+           child: ConstrainedBox(
+             constraints: const BoxConstraints(maxWidth: 450),
+             child: SingleChildScrollView(
+-              padding: const EdgeInsets.symmetric(
+-                horizontal: 28.0,
+-                vertical: 20.0,
+-              ),
++              padding: const EdgeInsets.only(bottom: 120),
++              physics: const BouncingScrollPhysics(),
+               child: Column(
+                 crossAxisAlignment: CrossAxisAlignment.start,
+                 children: [
+                   _buildTopBar(l10n),
+-                  const SizedBox(height: 28),
+                   _buildMainGreeting(l10n),
+-                  const SizedBox(height: 28),
+                   _buildStatsSection(l10n),
+                   const SizedBox(height: 20),
+-                  VRMActionCard(
+-                    title: l10n.newProject,
+-                    subtitle: l10n.voiceControlActive,
+-                    icon: Icons.mic,
+-                    onTap: () {
+-                      Navigator.push(
+-                        context,
+-                        MaterialPageRoute(
+-                          builder: (context) => const NewProjectPage(),
+-                        ),
+-                      );
+-                    },
++                  Padding(
++                    padding: const EdgeInsets.symmetric(horizontal: 24),
++                    child: VRMActionCard(
++                      title: l10n.newProject,
++                      subtitle: l10n.voiceControlActive,
++                      icon: Icons.mic,
++                      onTap: () {
++                        Navigator.push(
++                          context,
++                          MaterialPageRoute(
++                            builder: (context) => const NewProjectPage(),
++                          ),
++                        );
++                      },
++                    ),
+                   ),
+-                  const SizedBox(height: 36),
+                   const _RecentProjectsSection(),
+-                  const SizedBox(height: 36),
++                  const SizedBox(height: 40),
+                   _buildCalendarSection(l10n),
+                 ],
+               ),
+@@ -61,101 +62,127 @@ class DashboardPage extends StatelessWidget {
+   }
+ 
+   Widget _buildTopBar(AppLocalizations l10n) {
+-    return Row(
+-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+-      children: [
+-        Row(
+-          children: [
+-            const CircleAvatar(
+-              radius: 18,
+-              backgroundImage: NetworkImage(
+-                'https://i.pravatar.cc/150?u=vrm_user_alex',
+-              ),
+-            ),
+-            const SizedBox(width: 8),
+-            Column(
+-              crossAxisAlignment: CrossAxisAlignment.start,
+-              children: [
+-                Text(
+-                  l10n.goodMorning,
+-                  style: const TextStyle(
+-                    fontSize: 8.5,
+-                    fontWeight: FontWeight.bold,
+-                    color: AppTheme.textMuted,
+-                    letterSpacing: 0.8,
+-                    inherit: true,
++    return Container(
++      padding: const EdgeInsets.fromLTRB(24, 24, 24, 8),
++      child: Row(
++        mainAxisAlignment: MainAxisAlignment.spaceBetween,
++        children: [
++          Row(
++            children: [
++              Container(
++                width: 44,
++                height: 44,
++                decoration: BoxDecoration(
++                  shape: BoxShape.circle,
++                  border: Border.all(color: Colors.white, width: 2),
++                  boxShadow: [
++                    BoxShadow(
++                      color: Colors.black.withValues(alpha: 0.05),
++                      blurRadius: 4,
++                      offset: const Offset(0, 2),
++                    ),
++                  ],
++                  image: const DecorationImage(
++                    image: NetworkImage(
++                      'https://i.pravatar.cc/150?u=vrm_user_alex',
++                    ),
++                    fit: BoxFit.cover,
+                   ),
+                 ),
+-                Text(
+-                  l10n.creator,
+-                  style: const TextStyle(
+-                    fontSize: 13,
+-                    fontWeight: FontWeight.bold,
+-                    color: AppTheme.textMain,
+-                    inherit: true,
++              ),
++              const SizedBox(width: 12),
++              Column(
++                crossAxisAlignment: CrossAxisAlignment.start,
++                children: [
++                  Text(
++                    l10n.goodMorning,
++                    style: TextStyle(
++                      fontSize: 11,
++                      fontWeight: FontWeight.w600,
++                      color: const Color(0xFF64748B), // Slate 500
++                      letterSpacing: 0.5,
++                    ),
++                  ),
++                  Text(
++                    l10n.creator,
++                    style: const TextStyle(
++                      fontSize: 16,
++                      fontWeight: FontWeight.bold,
++                      color: Color(0xFF0F172A),
++                    ),
+                   ),
++                ],
++              ),
++            ],
++          ),
++          Container(
++            width: 40,
++            height: 40,
++            decoration: BoxDecoration(
++              color: Colors.white,
++              shape: BoxShape.circle,
++              border: Border.all(color: AppTheme.earthBorder),
++              boxShadow: [
++                BoxShadow(
++                  color: Colors.black.withValues(alpha: 0.02),
++                  blurRadius: 4,
++                  offset: const Offset(0, 2),
+                 ),
+               ],
+             ),
+-          ],
+-        ),
+-        Container(
+-          padding: const EdgeInsets.all(7),
+-          decoration: BoxDecoration(
+-            color: Colors.white,
+-            shape: BoxShape.circle,
+-            border: Border.all(color: AppTheme.border),
++            child: const Icon(Icons.settings, size: 20, color: AppTheme.forest),
+           ),
+-          child: const Icon(Icons.settings, size: 16, color: AppTheme.textMain),
+-        ),
+-      ],
++        ],
++      ),
+     );
+   }
+ 
+   Widget _buildMainGreeting(AppLocalizations l10n) {
+-    return Column(
+-      crossAxisAlignment: CrossAxisAlignment.start,
+-      children: [
+-        Text(
+-          l10n.readyToCreate,
+-          style: const TextStyle(
+-            fontSize: 26,
+-            fontWeight: FontWeight.w800,
+-            color: AppTheme.textMain,
+-            letterSpacing: -0.8,
+-            inherit: true,
++    return Padding(
++      padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
++      child: Column(
++        crossAxisAlignment: CrossAxisAlignment.start,
++        children: [
++          Text(
++            l10n.readyToCreate,
++            style: const TextStyle(
++              fontSize: 32,
++              fontWeight: FontWeight.w800,
++              color: Color(0xFF0F172A),
++              letterSpacing: -1,
++            ),
+           ),
+-        ),
+-        const SizedBox(height: 1),
+-        Text(
+-          l10n.captureIdeas,
+-          style: const TextStyle(
+-            fontSize: 12.5,
+-            color: AppTheme.textMuted,
+-            inherit: true,
++          const SizedBox(height: 6),
++          Text(
++            l10n.captureIdeas,
++            style: TextStyle(
++              fontSize: 14,
++              fontWeight: FontWeight.w500,
++              color: const Color(0xFF64748B), // Slate 500
++            ),
+           ),
+-        ),
+-      ],
++        ],
++      ),
+     );
+   }
+ 
+   Widget _buildStatsSection(AppLocalizations l10n) {
+-    return IntrinsicHeight(
++    return Padding(
++      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+       child: Row(
+-        crossAxisAlignment: CrossAxisAlignment.stretch,
+         children: [
+           VRMStatCard(
+             value: l10n.days('5'),
+             label: l10n.streakLabel,
+             icon: Icons.local_fire_department,
+-            color: AppTheme.accentOrange,
++            color: const Color(0xFFEA580C), // Orange 600
+           ),
+           const SizedBox(width: 16),
+           VRMStatCard(
+             value: '42',
+             label: l10n.fragments,
+             icon: Icons.mic,
+-            color: AppTheme.accentTeal,
++            color: AppTheme.forest,
+           ),
+         ],
+       ),
+@@ -163,62 +190,76 @@ class DashboardPage extends StatelessWidget {
+   }
+ 
+   Widget _buildCalendarSection(AppLocalizations l10n) {
+-    return Column(
+-      crossAxisAlignment: CrossAxisAlignment.start,
+-      children: [
+-        VRMSectionHeader(title: l10n.calendar, icon: Icons.calendar_month),
+-        const SizedBox(height: 16),
+-        Row(
+-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+-          children: [
+-            VRMCalendarDay(
+-              day: l10n.wed,
+-              date: '24',
+-              isSelected: true,
+-              onTap: () {},
+-            ),
+-            VRMCalendarDay(
+-              day: l10n.thu,
+-              date: '25',
+-              isSelected: false,
+-              onTap: () {},
+-            ),
+-            VRMCalendarDay(
+-              day: l10n.fri,
+-              date: '26',
+-              isSelected: false,
+-              onTap: () {},
+-            ),
+-            VRMCalendarDay(
+-              day: l10n.sat,
+-              date: '27',
+-              isSelected: false,
+-              onTap: () {},
++    return Padding(
++      padding: const EdgeInsets.symmetric(horizontal: 24),
++      child: Column(
++        crossAxisAlignment: CrossAxisAlignment.start,
++        children: [
++          VRMSectionHeader(title: l10n.calendar, icon: Icons.calendar_month),
++          const SizedBox(height: 20),
++          SingleChildScrollView(
++            scrollDirection: Axis.horizontal,
++            physics: const BouncingScrollPhysics(),
++            child: Row(
++              children: [
++                VRMCalendarDay(
++                  day: l10n.wed,
++                  date: '24',
++                  isSelected: true,
++                  onTap: () {},
++                ),
++                const SizedBox(width: 16),
++                VRMCalendarDay(
++                  day: l10n.thu,
++                  date: '25',
++                  isSelected: false,
++                  onTap: () {},
++                ),
++                const SizedBox(width: 16),
++                VRMCalendarDay(
++                  day: l10n.fri,
++                  date: '26',
++                  isSelected: false,
++                  onTap: () {},
++                ),
++                const SizedBox(width: 16),
++                VRMCalendarDay(
++                  day: l10n.sat,
++                  date: '27',
++                  isSelected: false,
++                  onTap: () {},
++                ),
++              ],
+             ),
+-          ],
+-        ),
+-      ],
++          ),
++        ],
++      ),
+     );
+   }
+ 
+   Widget _buildBottomNav(AppLocalizations l10n) {
+-    return Container(
+-      padding: const EdgeInsets.symmetric(vertical: 12),
+-      decoration: BoxDecoration(
+-        color: Colors.white,
+-        border: Border(
+-          top: BorderSide(color: AppTheme.border.withOpacity(0.5)),
++    return ClipRect(
++      child: BackdropFilter(
++        filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
++        child: Container(
++          padding: const EdgeInsets.fromLTRB(32, 16, 32, 40),
++          decoration: BoxDecoration(
++            color: Colors.white.withValues(alpha: 0.8),
++            border: Border(
++              top: BorderSide(color: AppTheme.earthBorder, width: 1),
++            ),
++          ),
++          child: Row(
++            mainAxisAlignment: MainAxisAlignment.spaceBetween,
++            children: [
++              _buildNavItem(Icons.grid_view_rounded, l10n.panel, true),
++              _buildNavItem(Icons.video_library_rounded, l10n.videos, false),
++              _buildNavItem(Icons.mic_none_rounded, l10n.script, false),
++              _buildNavItem(Icons.person_rounded, l10n.profile, false),
++            ],
++          ),
+         ),
+       ),
+-      child: Row(
+-        mainAxisAlignment: MainAxisAlignment.spaceAround,
+-        children: [
+-          _buildNavItem(Icons.grid_view_sharp, l10n.panel, true),
+-          _buildNavItem(Icons.play_circle_outline, l10n.videos, false),
+-          _buildNavItem(Icons.mic_none_outlined, l10n.script, false),
+-          _buildNavItem(Icons.person_outline, l10n.profile, false),
+-        ],
+-      ),
+     );
+   }
+ 
+@@ -228,21 +269,21 @@ class DashboardPage extends StatelessWidget {
+       children: [
+         Icon(
+           icon,
+-          size: 20,
++          size: 24,
+           color: isActive
+-              ? AppTheme.primaryGreen
+-              : AppTheme.textMuted.withOpacity(0.4),
++              ? AppTheme.forest
++              : const Color(0xFF94A3B8), // Slate 400
+         ),
+-        const SizedBox(height: 4),
++        const SizedBox(height: 6),
+         Text(
+-          label,
++          label.toUpperCase(),
+           style: TextStyle(
+-            fontSize: 9,
++            fontSize: 10,
+             fontWeight: FontWeight.bold,
++            letterSpacing: 1.0,
+             color: isActive
+-                ? AppTheme.primaryGreen
+-                : AppTheme.textMuted.withOpacity(0.4),
+-            inherit: true,
++                ? AppTheme.forest
++                : const Color(0xFF94A3B8), // Slate 400
+           ),
+         ),
+       ],
+@@ -256,40 +297,52 @@ class _RecentProjectsSection extends StatelessWidget {
+   @override
+   Widget build(BuildContext context) {
+     final l10n = AppLocalizations.of(context)!;
+-    return Column(
+-      crossAxisAlignment: CrossAxisAlignment.start,
+-      children: [
+-        VRMSectionHeader(
+-          title: l10n.recentProjects,
+-          actionLabel: l10n.viewAll,
+-          onActionPressed: () {
+-            // TODO: Ver todos los proyectos
+-          },
+-        ),
+-        const SizedBox(height: 16),
+-        VRMProjectCard(
+-          title: 'Reseña Tech: iPhone 15',
+-          time: l10n.editedHoursAgo('2'),
+-          progress: 0.3,
+-          statusText: l10n.fragmentCount('3', '10'),
+-          badgeText: l10n.draft,
+-          progressLabel: l10n.progressLabel,
+-          icon: Icons.smartphone,
+-          badgeBg: const Color(0xFFFFF7ED),
+-          badgeTextCol: AppTheme.accentOrange,
+-        ),
+-        VRMProjectCard(
+-          title: 'Vlog Japón: Día 1',
+-          time: l10n.editedYesterday,
+-          progress: 1.0,
+-          statusText: l10n.fragmentCount('12', '12'),
+-          badgeText: l10n.ready,
+-          progressLabel: l10n.progressLabel,
+-          icon: Icons.airplanemode_active,
+-          badgeBg: const Color(0xFFECFDF5),
+-          badgeTextCol: AppTheme.primaryGreen,
+-        ),
+-      ],
++    return Padding(
++      padding: const EdgeInsets.only(top: 32),
++      child: Column(
++        crossAxisAlignment: CrossAxisAlignment.start,
++        children: [
++          Padding(
++            padding: const EdgeInsets.symmetric(horizontal: 24),
++            child: VRMSectionHeader(
++              title: l10n.recentProjects,
++              actionLabel: l10n.viewAll,
++              onActionPressed: () {},
++            ),
++          ),
++          const SizedBox(height: 16),
++          Padding(
++            padding: const EdgeInsets.symmetric(horizontal: 24),
++            child: Column(
++              children: [
++                VRMProjectCard(
++                  title: 'Reseña Tech: iPhone 15',
++                  time: l10n.editedHoursAgo('2'),
++                  progress: 0.3,
++                  statusText: l10n.fragmentCount('3', '10'),
++                  badgeText: l10n.draft,
++                  progressLabel: l10n.progressLabel,
++                  icon: Icons.smartphone_rounded,
++                  badgeBg: const Color(0xFFFFF7ED),
++                  badgeTextCol: const Color(0xFFC2410C), // Orange 700
++                ),
++                const SizedBox(height: 4),
++                VRMProjectCard(
++                  title: 'Vlog Japón: Día 1',
++                  time: l10n.editedYesterday,
++                  progress: 1.0,
++                  statusText: l10n.fragmentCount('12', '12'),
++                  badgeText: l10n.ready,
++                  progressLabel: l10n.progressLabel,
++                  icon: Icons.flight_rounded,
++                  badgeBg: const Color(0xFFECFDF5),
++                  badgeTextCol: const Color(0xFF047857), // Emerald 700
++                ),
++              ],
++            ),
++          ),
++        ],
++      ),
+     );
+   }
+ }
+
+commit 87b432cb809fa70e698f46ea3e3db4fb17077738
+Author: Luis Saenz <luis.saenz@tropipay.com>
+Date:   Sat Jan 24 15:05:47 2026 -0300
+
+    add NewProyect
+
+diff --git a/lib/features/dashboard/dashboard_page.dart b/lib/features/dashboard/dashboard_page.dart
+index fc60a6d..9b55ba8 100644
+--- a/lib/features/dashboard/dashboard_page.dart
++++ b/lib/features/dashboard/dashboard_page.dart
+@@ -5,6 +5,7 @@ import 'package:vrm_app/shared/widgets/stat_card.dart';
+ import 'package:vrm_app/shared/widgets/action_card.dart';
+ import 'package:vrm_app/shared/widgets/project_card.dart';
+ import 'package:vrm_app/shared/widgets/calendar_day.dart';
++import 'package:vrm_app/features/new_project/new_project_page.dart';
+ import '../../core/theme.dart';
+ 
+ class DashboardPage extends StatelessWidget {
+@@ -38,7 +39,12 @@ class DashboardPage extends StatelessWidget {
+                     subtitle: l10n.voiceControlActive,
+                     icon: Icons.mic,
+                     onTap: () {
+-                      // TODO: Navegar a grabación
++                      Navigator.push(
++                        context,
++                        MaterialPageRoute(
++                          builder: (context) => const NewProjectPage(),
++                        ),
++                      );
+                     },
+                   ),
+                   const SizedBox(height: 36),
+
+commit 8a2e9ae9d2ba3523935e9a0684ace5f7c11836cb
+Author: Luis Saenz <luis.saenz@tropipay.com>
+Date:   Sat Jan 24 14:21:12 2026 -0300
+
+    apply
+
+diff --git a/lib/features/dashboard/dashboard_page.dart b/lib/features/dashboard/dashboard_page.dart
+index 5a5631b..fc60a6d 100644
+--- a/lib/features/dashboard/dashboard_page.dart
++++ b/lib/features/dashboard/dashboard_page.dart
+@@ -1,4 +1,5 @@
+ import 'package:flutter/material.dart';
++import 'package:vrm_app/l10n/app_localizations.dart';
+ import 'package:vrm_app/shared/widgets/section_header.dart';
+ import 'package:vrm_app/shared/widgets/stat_card.dart';
+ import 'package:vrm_app/shared/widgets/action_card.dart';
+@@ -11,8 +12,9 @@ class DashboardPage extends StatelessWidget {
+ 
+   @override
+   Widget build(BuildContext context) {
++    final l10n = AppLocalizations.of(context)!;
+     return Scaffold(
+-      bottomNavigationBar: _buildBottomNav(),
++      bottomNavigationBar: _buildBottomNav(l10n),
+       body: SafeArea(
+         child: Center(
+           child: ConstrainedBox(
+@@ -25,15 +27,15 @@ class DashboardPage extends StatelessWidget {
+               child: Column(
+                 crossAxisAlignment: CrossAxisAlignment.start,
+                 children: [
+-                  _buildTopBar(),
++                  _buildTopBar(l10n),
+                   const SizedBox(height: 28),
+-                  _buildMainGreeting(),
++                  _buildMainGreeting(l10n),
+                   const SizedBox(height: 28),
+-                  _buildStatsSection(),
++                  _buildStatsSection(l10n),
+                   const SizedBox(height: 20),
+                   VRMActionCard(
+-                    title: 'Nuevo Proyecto',
+-                    subtitle: 'Control por voz activado',
++                    title: l10n.newProject,
++                    subtitle: l10n.voiceControlActive,
+                     icon: Icons.mic,
+                     onTap: () {
+                       // TODO: Navegar a grabación
+@@ -42,7 +44,7 @@ class DashboardPage extends StatelessWidget {
+                   const SizedBox(height: 36),
+                   const _RecentProjectsSection(),
+                   const SizedBox(height: 36),
+-                  _buildCalendarSection(),
++                  _buildCalendarSection(l10n),
+                 ],
+               ),
+             ),
+@@ -52,7 +54,7 @@ class DashboardPage extends StatelessWidget {
+     );
+   }
+ 
+-  Widget _buildTopBar() {
++  Widget _buildTopBar(AppLocalizations l10n) {
+     return Row(
+       mainAxisAlignment: MainAxisAlignment.spaceBetween,
+       children: [
+@@ -65,12 +67,12 @@ class DashboardPage extends StatelessWidget {
+               ),
+             ),
+             const SizedBox(width: 8),
+-            const Column(
++            Column(
+               crossAxisAlignment: CrossAxisAlignment.start,
+               children: [
+                 Text(
+-                  'BUENOS DÍAS,',
+-                  style: TextStyle(
++                  l10n.goodMorning,
++                  style: const TextStyle(
+                     fontSize: 8.5,
+                     fontWeight: FontWeight.bold,
+                     color: AppTheme.textMuted,
+@@ -79,8 +81,8 @@ class DashboardPage extends StatelessWidget {
+                   ),
+                 ),
+                 Text(
+-                  'Alex Rivera',
+-                  style: TextStyle(
++                  l10n.creator,
++                  style: const TextStyle(
+                     fontSize: 13,
+                     fontWeight: FontWeight.bold,
+                     color: AppTheme.textMain,
+@@ -104,13 +106,13 @@ class DashboardPage extends StatelessWidget {
+     );
+   }
+ 
+-  Widget _buildMainGreeting() {
+-    return const Column(
++  Widget _buildMainGreeting(AppLocalizations l10n) {
++    return Column(
+       crossAxisAlignment: CrossAxisAlignment.start,
+       children: [
+         Text(
+-          '¿Listo para crear?',
+-          style: TextStyle(
++          l10n.readyToCreate,
++          style: const TextStyle(
+             fontSize: 26,
+             fontWeight: FontWeight.w800,
+             color: AppTheme.textMain,
+@@ -118,10 +120,10 @@ class DashboardPage extends StatelessWidget {
+             inherit: true,
+           ),
+         ),
+-        SizedBox(height: 1),
++        const SizedBox(height: 1),
+         Text(
+-          'Captura tus ideas, un fragmento a la vez.',
+-          style: TextStyle(
++          l10n.captureIdeas,
++          style: const TextStyle(
+             fontSize: 12.5,
+             color: AppTheme.textMuted,
+             inherit: true,
+@@ -131,21 +133,21 @@ class DashboardPage extends StatelessWidget {
+     );
+   }
+ 
+-  Widget _buildStatsSection() {
+-    return const IntrinsicHeight(
++  Widget _buildStatsSection(AppLocalizations l10n) {
++    return IntrinsicHeight(
+       child: Row(
+         crossAxisAlignment: CrossAxisAlignment.stretch,
+         children: [
+           VRMStatCard(
+-            value: '5 Días',
+-            label: 'RACHA DE\nGRABACIÓN',
++            value: l10n.days('5'),
++            label: l10n.streakLabel,
+             icon: Icons.local_fire_department,
+             color: AppTheme.accentOrange,
+           ),
+-          SizedBox(width: 16),
++          const SizedBox(width: 16),
+           VRMStatCard(
+             value: '42',
+-            label: 'FRAGMENTOS',
++            label: l10n.fragments,
+             icon: Icons.mic,
+             color: AppTheme.accentTeal,
+           ),
+@@ -154,35 +156,35 @@ class DashboardPage extends StatelessWidget {
+     );
+   }
+ 
+-  Widget _buildCalendarSection() {
++  Widget _buildCalendarSection(AppLocalizations l10n) {
+     return Column(
+       crossAxisAlignment: CrossAxisAlignment.start,
+       children: [
+-        const VRMSectionHeader(title: 'Calendario', icon: Icons.calendar_month),
++        VRMSectionHeader(title: l10n.calendar, icon: Icons.calendar_month),
+         const SizedBox(height: 16),
+         Row(
+           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+           children: [
+             VRMCalendarDay(
+-              day: 'MIE',
++              day: l10n.wed,
+               date: '24',
+               isSelected: true,
+               onTap: () {},
+             ),
+             VRMCalendarDay(
+-              day: 'JUE',
++              day: l10n.thu,
+               date: '25',
+               isSelected: false,
+               onTap: () {},
+             ),
+             VRMCalendarDay(
+-              day: 'VIE',
++              day: l10n.fri,
+               date: '26',
+               isSelected: false,
+               onTap: () {},
+             ),
+             VRMCalendarDay(
+-              day: 'SAB',
++              day: l10n.sat,
+               date: '27',
+               isSelected: false,
+               onTap: () {},
+@@ -193,7 +195,7 @@ class DashboardPage extends StatelessWidget {
+     );
+   }
+ 
+-  Widget _buildBottomNav() {
++  Widget _buildBottomNav(AppLocalizations l10n) {
+     return Container(
+       padding: const EdgeInsets.symmetric(vertical: 12),
+       decoration: BoxDecoration(
+@@ -205,10 +207,10 @@ class DashboardPage extends StatelessWidget {
+       child: Row(
+         mainAxisAlignment: MainAxisAlignment.spaceAround,
+         children: [
+-          _buildNavItem(Icons.grid_view_sharp, 'PANEL', true),
+-          _buildNavItem(Icons.play_circle_outline, 'VIDEOS', false),
+-          _buildNavItem(Icons.mic_none_outlined, 'SCRIPT', false),
+-          _buildNavItem(Icons.person_outline, 'PERFIL', false),
++          _buildNavItem(Icons.grid_view_sharp, l10n.panel, true),
++          _buildNavItem(Icons.play_circle_outline, l10n.videos, false),
++          _buildNavItem(Icons.mic_none_outlined, l10n.script, false),
++          _buildNavItem(Icons.person_outline, l10n.profile, false),
+         ],
+       ),
+     );
+@@ -247,37 +249,39 @@ class _RecentProjectsSection extends StatelessWidget {
+ 
+   @override
+   Widget build(BuildContext context) {
++    final l10n = AppLocalizations.of(context)!;
+     return Column(
+       crossAxisAlignment: CrossAxisAlignment.start,
+       children: [
+         VRMSectionHeader(
+-          title: 'Proyectos Recientes',
+-          actionLabel: 'Ver todos',
++          title: l10n.recentProjects,
++          actionLabel: l10n.viewAll,
+           onActionPressed: () {
+             // TODO: Ver todos los proyectos
+           },
+         ),
+         const SizedBox(height: 16),
+-        const VRMProjectCard(
++        VRMProjectCard(
+           title: 'Reseña Tech: iPhone 15',
+-          time: 'Editado hace 2 horas',
++          time: l10n.editedHoursAgo('2'),
+           progress: 0.3,
+-          statusText: '3/10 Fragmentos',
+-          badgeText: 'BORRADOR',
++          statusText: l10n.fragmentCount('3', '10'),
++          badgeText: l10n.draft,
++          progressLabel: l10n.progressLabel,
+           icon: Icons.smartphone,
+-          badgeBg: Color(0xFFFFF7ED), // Light orange background
+-          badgeTextCol: AppTheme.accentOrange, // Exact theme orange
++          badgeBg: const Color(0xFFFFF7ED),
++          badgeTextCol: AppTheme.accentOrange,
+         ),
+-        const VRMProjectCard(
++        VRMProjectCard(
+           title: 'Vlog Japón: Día 1',
+-          time: 'Editado ayer',
++          time: l10n.editedYesterday,
+           progress: 1.0,
+-          statusText: '12/12 Fragmentos',
+-          badgeText: 'LISTO',
++          statusText: l10n.fragmentCount('12', '12'),
++          badgeText: l10n.ready,
++          progressLabel: l10n.progressLabel,
+           icon: Icons.airplanemode_active,
+-          badgeBg: Color(0xFFECFDF5),
+-          badgeTextCol:
+-              AppTheme.primaryGreen, // Mismo verde que el botón principal
++          badgeBg: const Color(0xFFECFDF5),
++          badgeTextCol: AppTheme.primaryGreen,
+         ),
+       ],
+     );
+
+commit 5a6c07483897d70b2716effbaf86693d1d71296e
+Author: Luis Saenz <luis.saenz@tropipay.com>
+Date:   Sat Jan 24 14:06:50 2026 -0300
+
+    initialApp
+
+diff --git a/lib/features/dashboard/dashboard_page.dart b/lib/features/dashboard/dashboard_page.dart
+new file mode 100644
+index 0000000..5a5631b
+--- /dev/null
++++ b/lib/features/dashboard/dashboard_page.dart
+@@ -0,0 +1,285 @@
++import 'package:flutter/material.dart';
++import 'package:vrm_app/shared/widgets/section_header.dart';
++import 'package:vrm_app/shared/widgets/stat_card.dart';
++import 'package:vrm_app/shared/widgets/action_card.dart';
++import 'package:vrm_app/shared/widgets/project_card.dart';
++import 'package:vrm_app/shared/widgets/calendar_day.dart';
++import '../../core/theme.dart';
++
++class DashboardPage extends StatelessWidget {
++  const DashboardPage({super.key});
++
++  @override
++  Widget build(BuildContext context) {
++    return Scaffold(
++      bottomNavigationBar: _buildBottomNav(),
++      body: SafeArea(
++        child: Center(
++          child: ConstrainedBox(
++            constraints: const BoxConstraints(maxWidth: 450),
++            child: SingleChildScrollView(
++              padding: const EdgeInsets.symmetric(
++                horizontal: 28.0,
++                vertical: 20.0,
++              ),
++              child: Column(
++                crossAxisAlignment: CrossAxisAlignment.start,
++                children: [
++                  _buildTopBar(),
++                  const SizedBox(height: 28),
++                  _buildMainGreeting(),
++                  const SizedBox(height: 28),
++                  _buildStatsSection(),
++                  const SizedBox(height: 20),
++                  VRMActionCard(
++                    title: 'Nuevo Proyecto',
++                    subtitle: 'Control por voz activado',
++                    icon: Icons.mic,
++                    onTap: () {
++                      // TODO: Navegar a grabación
++                    },
++                  ),
++                  const SizedBox(height: 36),
++                  const _RecentProjectsSection(),
++                  const SizedBox(height: 36),
++                  _buildCalendarSection(),
++                ],
++              ),
++            ),
++          ),
++        ),
++      ),
++    );
++  }
++
++  Widget _buildTopBar() {
++    return Row(
++      mainAxisAlignment: MainAxisAlignment.spaceBetween,
++      children: [
++        Row(
++          children: [
++            const CircleAvatar(
++              radius: 18,
++              backgroundImage: NetworkImage(
++                'https://i.pravatar.cc/150?u=vrm_user_alex',
++              ),
++            ),
++            const SizedBox(width: 8),
++            const Column(
++              crossAxisAlignment: CrossAxisAlignment.start,
++              children: [
++                Text(
++                  'BUENOS DÍAS,',
++                  style: TextStyle(
++                    fontSize: 8.5,
++                    fontWeight: FontWeight.bold,
++                    color: AppTheme.textMuted,
++                    letterSpacing: 0.8,
++                    inherit: true,
++                  ),
++                ),
++                Text(
++                  'Alex Rivera',
++                  style: TextStyle(
++                    fontSize: 13,
++                    fontWeight: FontWeight.bold,
++                    color: AppTheme.textMain,
++                    inherit: true,
++                  ),
++                ),
++              ],
++            ),
++          ],
++        ),
++        Container(
++          padding: const EdgeInsets.all(7),
++          decoration: BoxDecoration(
++            color: Colors.white,
++            shape: BoxShape.circle,
++            border: Border.all(color: AppTheme.border),
++          ),
++          child: const Icon(Icons.settings, size: 16, color: AppTheme.textMain),
++        ),
++      ],
++    );
++  }
++
++  Widget _buildMainGreeting() {
++    return const Column(
++      crossAxisAlignment: CrossAxisAlignment.start,
++      children: [
++        Text(
++          '¿Listo para crear?',
++          style: TextStyle(
++            fontSize: 26,
++            fontWeight: FontWeight.w800,
++            color: AppTheme.textMain,
++            letterSpacing: -0.8,
++            inherit: true,
++          ),
++        ),
++        SizedBox(height: 1),
++        Text(
++          'Captura tus ideas, un fragmento a la vez.',
++          style: TextStyle(
++            fontSize: 12.5,
++            color: AppTheme.textMuted,
++            inherit: true,
++          ),
++        ),
++      ],
++    );
++  }
++
++  Widget _buildStatsSection() {
++    return const IntrinsicHeight(
++      child: Row(
++        crossAxisAlignment: CrossAxisAlignment.stretch,
++        children: [
++          VRMStatCard(
++            value: '5 Días',
++            label: 'RACHA DE\nGRABACIÓN',
++            icon: Icons.local_fire_department,
++            color: AppTheme.accentOrange,
++          ),
++          SizedBox(width: 16),
++          VRMStatCard(
++            value: '42',
++            label: 'FRAGMENTOS',
++            icon: Icons.mic,
++            color: AppTheme.accentTeal,
++          ),
++        ],
++      ),
++    );
++  }
++
++  Widget _buildCalendarSection() {
++    return Column(
++      crossAxisAlignment: CrossAxisAlignment.start,
++      children: [
++        const VRMSectionHeader(title: 'Calendario', icon: Icons.calendar_month),
++        const SizedBox(height: 16),
++        Row(
++          mainAxisAlignment: MainAxisAlignment.spaceBetween,
++          children: [
++            VRMCalendarDay(
++              day: 'MIE',
++              date: '24',
++              isSelected: true,
++              onTap: () {},
++            ),
++            VRMCalendarDay(
++              day: 'JUE',
++              date: '25',
++              isSelected: false,
++              onTap: () {},
++            ),
++            VRMCalendarDay(
++              day: 'VIE',
++              date: '26',
++              isSelected: false,
++              onTap: () {},
++            ),
++            VRMCalendarDay(
++              day: 'SAB',
++              date: '27',
++              isSelected: false,
++              onTap: () {},
++            ),
++          ],
++        ),
++      ],
++    );
++  }
++
++  Widget _buildBottomNav() {
++    return Container(
++      padding: const EdgeInsets.symmetric(vertical: 12),
++      decoration: BoxDecoration(
++        color: Colors.white,
++        border: Border(
++          top: BorderSide(color: AppTheme.border.withOpacity(0.5)),
++        ),
++      ),
++      child: Row(
++        mainAxisAlignment: MainAxisAlignment.spaceAround,
++        children: [
++          _buildNavItem(Icons.grid_view_sharp, 'PANEL', true),
++          _buildNavItem(Icons.play_circle_outline, 'VIDEOS', false),
++          _buildNavItem(Icons.mic_none_outlined, 'SCRIPT', false),
++          _buildNavItem(Icons.person_outline, 'PERFIL', false),
++        ],
++      ),
++    );
++  }
++
++  Widget _buildNavItem(IconData icon, String label, bool isActive) {
++    return Column(
++      mainAxisSize: MainAxisSize.min,
++      children: [
++        Icon(
++          icon,
++          size: 20,
++          color: isActive
++              ? AppTheme.primaryGreen
++              : AppTheme.textMuted.withOpacity(0.4),
++        ),
++        const SizedBox(height: 4),
++        Text(
++          label,
++          style: TextStyle(
++            fontSize: 9,
++            fontWeight: FontWeight.bold,
++            color: isActive
++                ? AppTheme.primaryGreen
++                : AppTheme.textMuted.withOpacity(0.4),
++            inherit: true,
++          ),
++        ),
++      ],
++    );
++  }
++}
++
++class _RecentProjectsSection extends StatelessWidget {
++  const _RecentProjectsSection();
++
++  @override
++  Widget build(BuildContext context) {
++    return Column(
++      crossAxisAlignment: CrossAxisAlignment.start,
++      children: [
++        VRMSectionHeader(
++          title: 'Proyectos Recientes',
++          actionLabel: 'Ver todos',
++          onActionPressed: () {
++            // TODO: Ver todos los proyectos
++          },
++        ),
++        const SizedBox(height: 16),
++        const VRMProjectCard(
++          title: 'Reseña Tech: iPhone 15',
++          time: 'Editado hace 2 horas',
++          progress: 0.3,
++          statusText: '3/10 Fragmentos',
++          badgeText: 'BORRADOR',
++          icon: Icons.smartphone,
++          badgeBg: Color(0xFFFFF7ED), // Light orange background
++          badgeTextCol: AppTheme.accentOrange, // Exact theme orange
++        ),
++        const VRMProjectCard(
++          title: 'Vlog Japón: Día 1',
++          time: 'Editado ayer',
++          progress: 1.0,
++          statusText: '12/12 Fragmentos',
++          badgeText: 'LISTO',
++          icon: Icons.airplanemode_active,
++          badgeBg: Color(0xFFECFDF5),
++          badgeTextCol:
++              AppTheme.primaryGreen, // Mismo verde que el botón principal
++        ),
++      ],
++    );
++  }
++}

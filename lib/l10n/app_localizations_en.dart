@@ -445,4 +445,137 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get voiceStatusActive => 'WHAT\'S THE PLAN?';
+
+  @override
+  String get accountProfile => 'Account Profile';
+
+  @override
+  String get anonymousUser => 'Anonymous User';
+
+  @override
+  String get upgradeYourAccount => 'Upgrade your account';
+
+  @override
+  String get accountInformation => 'Account Information';
+
+  @override
+  String get email => 'Email';
+
+  @override
+  String get notConfigured => 'Not configured';
+
+  @override
+  String get deviceId => 'Device ID';
+
+  @override
+  String get memberSince => 'Member Since';
+
+  @override
+  String get notifications => 'Notifications';
+
+  @override
+  String get language => 'Language';
+
+  @override
+  String get storage => 'Storage';
+
+  @override
+  String get privacyAndSecurity => 'Privacy & Security';
+
+  @override
+  String get clearAllData => 'Clear All Data';
+
+  @override
+  String get signOut => 'Sign Out';
+
+  @override
+  String get clearDataConfirmation =>
+      'Are you sure you want to clear all data? This action cannot be undone.';
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get clear => 'Clear';
+
+  @override
+  String get dataCleared => 'Data cleared successfully';
+
+  @override
+  String get signOutConfirmation => 'Are you sure you want to sign out?';
+
+  @override
+  String get signedOut => 'Signed out successfully';
+
+  @override
+  String get settings => 'Settings';
+
+  @override
+  String get appearance => 'Appearance';
+
+  @override
+  String get theme => 'Theme';
+
+  @override
+  String get selectThemeMode => 'Select theme mode';
+
+  @override
+  String get recording => 'Recording';
+
+  @override
+  String get defaultRecordingDuration => 'Default Duration';
+
+  @override
+  String get configureDefaultTime => 'Configure default time';
+
+  @override
+  String get cameraSettings => 'Camera';
+
+  @override
+  String get resolutionAndQuality => 'Resolution and quality';
+
+  @override
+  String get teleprompter => 'Teleprompter';
+
+  @override
+  String get fontSize => 'Font Size';
+
+  @override
+  String get defaultTextSize => 'Default text size';
+
+  @override
+  String get scrollSpeed => 'Scroll Speed';
+
+  @override
+  String get defaultScrollSpeed => 'Default scroll speed';
+
+  @override
+  String get dataAndStorage => 'Data & Storage';
+
+  @override
+  String get cloudSync => 'Cloud Sync';
+
+  @override
+  String get cloudSyncDisabled => 'Cloud sync disabled';
+
+  @override
+  String get manageStorage => 'Manage Storage';
+
+  @override
+  String get clearCacheAndData => 'Clear cache and data';
+
+  @override
+  String get about => 'About';
+
+  @override
+  String get appVersion => 'App Version';
+
+  @override
+  String get termsOfService => 'Terms of Service';
+
+  @override
+  String get privacyPolicy => 'Privacy Policy';
+
+  @override
+  String get helpAndSupport => 'Help & Support';
 }

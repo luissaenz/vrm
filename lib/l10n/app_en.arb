@@ -595,5 +595,181 @@
     "description": "Action to export the video"
   },
   "voiceStatusPassive": "LUMIS LISTENING...",
-  "voiceStatusActive": "WHAT'S THE PLAN?"
+  "voiceStatusActive": "WHAT'S THE PLAN?",
+  "accountProfile": "Account Profile",
+  "@accountProfile": {
+    "description": "Title for account profile page"
+  },
+  "anonymousUser": "Anonymous User",
+  "@anonymousUser": {
+    "description": "Label for user without account"
+  },
+  "upgradeYourAccount": "Upgrade your account",
+  "@upgradeYourAccount": {
+    "description": "Subtitle to encourage account upgrade"
+  },
+  "accountInformation": "Account Information",
+  "@accountInformation": {
+    "description": "Section title for account info"
+  },
+  "email": "Email",
+  "@email": {
+    "description": "Email label"
+  },
+  "notConfigured": "Not configured",
+  "@notConfigured": {
+    "description": "Label when not configured"
+  },
+  "deviceId": "Device ID",
+  "@deviceId": {
+    "description": "Device ID label"
+  },
+  "memberSince": "Member Since",
+  "@memberSince": {
+    "description": "Member since label"
+  },
+  "notifications": "Notifications",
+  "@notifications": {
+    "description": "Notifications setting"
+  },
+  "language": "Language",
+  "@language": {
+    "description": "Language setting"
+  },
+  "storage": "Storage",
+  "@storage": {
+    "description": "Storage setting"
+  },
+  "privacyAndSecurity": "Privacy & Security",
+  "@privacyAndSecurity": {
+    "description": "Privacy and security setting"
+  },
+  "clearAllData": "Clear All Data",
+  "@clearAllData": {
+    "description": "Clear all data action"
+  },
+  "signOut": "Sign Out",
+  "@signOut": {
+    "description": "Sign out action"
+  },
+  "clearDataConfirmation": "Are you sure you want to clear all data? This action cannot be undone.",
+  "@clearDataConfirmation": {
+    "description": "Confirmation message for clearing data"
+  },
+  "cancel": "Cancel",
+  "@cancel": {
+    "description": "Cancel button"
+  },
+  "clear": "Clear",
+  "@clear": {
+    "description": "Clear button"
+  },
+  "dataCleared": "Data cleared successfully",
+  "@dataCleared": {
+    "description": "Success message when data is cleared"
+  },
+  "signOutConfirmation": "Are you sure you want to sign out?",
+  "@signOutConfirmation": {
+    "description": "Confirmation message for signing out"
+  },
+  "signedOut": "Signed out successfully",
+  "@signedOut": {
+    "description": "Success message when signed out"
+  },
+  "settings": "Settings",
+  "@settings": {
+    "description": "Settings page title"
+  },
+  "appearance": "Appearance",
+  "@appearance": {
+    "description": "Appearance section"
+  },
+  "theme": "Theme",
+  "@theme": {
+    "description": "Theme setting"
+  },
+  "selectThemeMode": "Select theme mode",
+  "@selectThemeMode": {
+    "description": "Theme mode selection subtitle"
+  },
+  "recording": "Recording",
+  "@recording": {
+    "description": "Recording section"
+  },
+  "defaultRecordingDuration": "Default Duration",
+  "@defaultRecordingDuration": {
+    "description": "Default recording duration setting"
+  },
+  "configureDefaultTime": "Configure default time",
+  "@configureDefaultTime": {
+    "description": "Configure default time subtitle"
+  },
+  "cameraSettings": "Camera",
+  "@cameraSettings": {
+    "description": "Camera settings"
+  },
+  "resolutionAndQuality": "Resolution and quality",
+  "@resolutionAndQuality": {
+    "description": "Resolution and quality subtitle"
+  },
+  "teleprompter": "Teleprompter",
+  "@teleprompter": {
+    "description": "Teleprompter section"
+  },
+  "fontSize": "Font Size",
+  "@fontSize": {
+    "description": "Font size setting"
+  },
+  "defaultTextSize": "Default text size",
+  "@defaultTextSize": {
+    "description": "Default text size subtitle"
+  },
+  "scrollSpeed": "Scroll Speed",
+  "@scrollSpeed": {
+    "description": "Scroll speed setting"
+  },
+  "defaultScrollSpeed": "Default scroll speed",
+  "@defaultScrollSpeed": {
+    "description": "Default scroll speed subtitle"
+  },
+  "dataAndStorage": "Data & Storage",
+  "@dataAndStorage": {
+    "description": "Data and storage section"
+  },
+  "cloudSync": "Cloud Sync",
+  "@cloudSync": {
+    "description": "Cloud sync setting"
+  },
+  "cloudSyncDisabled": "Cloud sync disabled",
+  "@cloudSyncDisabled": {
+    "description": "Cloud sync disabled subtitle"
+  },
+  "manageStorage": "Manage Storage",
+  "@manageStorage": {
+    "description": "Manage storage action"
+  },
+  "clearCacheAndData": "Clear cache and data",
+  "@clearCacheAndData": {
+    "description": "Clear cache and data subtitle"
+  },
+  "about": "About",
+  "@about": {
+    "description": "About section"
+  },
+  "appVersion": "App Version",
+  "@appVersion": {
+    "description": "App version label"
+  },
+  "termsOfService": "Terms of Service",
+  "@termsOfService": {
+    "description": "Terms of service link"
+  },
+  "privacyPolicy": "Privacy Policy",
+  "@privacyPolicy": {
+    "description": "Privacy policy link"
+  },
+  "helpAndSupport": "Help & Support",
+  "@helpAndSupport": {
+    "description": "Help and support link"
+  }
 }

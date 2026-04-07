@@ -2,7 +2,6 @@ import 'package:flutter/foundation.dart';
 import '../plugins/i_idea_source.dart';
 import '../plugins/i_script_processor.dart';
 import '../plugins/i_post_processor.dart';
-import '../plugins/i_analytics_provider.dart';
 import '../models/input_schema.dart';
 import '../models/script_bundle.dart';
 import '../models/asset_manifest.dart';
@@ -15,16 +14,14 @@ class VRMPipeline {
   final IIdeaSource ideaSource;
   final IScriptProcessor scriptProcessor;
   final IPostProcessor postProcessor;
-  final IAnalyticsProvider analyticsProvider;
 
   VRMPipeline({
     required this.ideaSource,
     required this.scriptProcessor,
     required this.postProcessor,
-    required this.analyticsProvider,
   });
 
-  /// Ejecuta el pipeline completo: Ingesta → Script → Video → Analytics
+  /// Ejecuta el pipeline completo: Ingesta → Script → Video
   /// Es un flujo DETERMINISTA y LINEAL (no hay agentes autónomos)
   Future<PipelineResult> execute(Map<String, dynamic> initialParams) async {
     try {
@@ -77,22 +74,11 @@ class VRMPipeline {
       // AUTOMATIZACIÓN: Validar contrato de asset
       await SchemaValidator.validate('asset_manifest', processedAsset.toJson());
 
-      // Fase 4: Métricas
-      debugPrint(
-        '[Pipeline] Stage 4: Analyzing with plugin ${analyticsProvider.pluginId}',
-      );
-      final analytics = await _executeStage(
-        'analytics',
-        analyticsProvider.pluginId,
-        () => analyticsProvider.analyze(processedAsset),
-      );
-
       debugPrint('[Pipeline] Execution completed successfully');
       return PipelineResult(
         input: input,
         script: script,
         asset: processedAsset,
-        analytics: analytics,
       );
     } catch (e, stackTrace) {
       debugPrint('[Pipeline] Execution failed: $e');
@@ -168,13 +154,11 @@ class PipelineResult {
   final InputSchema input;
   final ScriptBundle script;
   final AssetManifest asset;
-  final Map<String, dynamic> analytics;
 
   PipelineResult({
     required this.input,
     required this.script,
     required this.asset,
-    required this.analytics,
   });
 
   Map<String, dynamic> toJson() {
@@ -182,7 +166,6 @@ class PipelineResult {
       'input': input.toJson(),
       'script': script.toJson(),
       'asset': asset.toJson(),
-      'analytics': analytics,
     };
   }
 }

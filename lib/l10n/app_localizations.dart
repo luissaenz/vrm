@@ -901,6 +901,270 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'WHAT\'S THE PLAN?'**
   String get voiceStatusActive;
+
+  /// Title for account profile page
+  ///
+  /// In en, this message translates to:
+  /// **'Account Profile'**
+  String get accountProfile;
+
+  /// Label for user without account
+  ///
+  /// In en, this message translates to:
+  /// **'Anonymous User'**
+  String get anonymousUser;
+
+  /// Subtitle to encourage account upgrade
+  ///
+  /// In en, this message translates to:
+  /// **'Upgrade your account'**
+  String get upgradeYourAccount;
+
+  /// Section title for account info
+  ///
+  /// In en, this message translates to:
+  /// **'Account Information'**
+  String get accountInformation;
+
+  /// Email label
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get email;
+
+  /// Label when not configured
+  ///
+  /// In en, this message translates to:
+  /// **'Not configured'**
+  String get notConfigured;
+
+  /// Device ID label
+  ///
+  /// In en, this message translates to:
+  /// **'Device ID'**
+  String get deviceId;
+
+  /// Member since label
+  ///
+  /// In en, this message translates to:
+  /// **'Member Since'**
+  String get memberSince;
+
+  /// Notifications setting
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get notifications;
+
+  /// Language setting
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get language;
+
+  /// Storage setting
+  ///
+  /// In en, this message translates to:
+  /// **'Storage'**
+  String get storage;
+
+  /// Privacy and security setting
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy & Security'**
+  String get privacyAndSecurity;
+
+  /// Clear all data action
+  ///
+  /// In en, this message translates to:
+  /// **'Clear All Data'**
+  String get clearAllData;
+
+  /// Sign out action
+  ///
+  /// In en, this message translates to:
+  /// **'Sign Out'**
+  String get signOut;
+
+  /// Confirmation message for clearing data
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to clear all data? This action cannot be undone.'**
+  String get clearDataConfirmation;
+
+  /// Cancel button
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// Clear button
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get clear;
+
+  /// Success message when data is cleared
+  ///
+  /// In en, this message translates to:
+  /// **'Data cleared successfully'**
+  String get dataCleared;
+
+  /// Confirmation message for signing out
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to sign out?'**
+  String get signOutConfirmation;
+
+  /// Success message when signed out
+  ///
+  /// In en, this message translates to:
+  /// **'Signed out successfully'**
+  String get signedOut;
+
+  /// Settings page title
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get settings;
+
+  /// Appearance section
+  ///
+  /// In en, this message translates to:
+  /// **'Appearance'**
+  String get appearance;
+
+  /// Theme setting
+  ///
+  /// In en, this message translates to:
+  /// **'Theme'**
+  String get theme;
+
+  /// Theme mode selection subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Select theme mode'**
+  String get selectThemeMode;
+
+  /// Recording section
+  ///
+  /// In en, this message translates to:
+  /// **'Recording'**
+  String get recording;
+
+  /// Default recording duration setting
+  ///
+  /// In en, this message translates to:
+  /// **'Default Duration'**
+  String get defaultRecordingDuration;
+
+  /// Configure default time subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Configure default time'**
+  String get configureDefaultTime;
+
+  /// Camera settings
+  ///
+  /// In en, this message translates to:
+  /// **'Camera'**
+  String get cameraSettings;
+
+  /// Resolution and quality subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Resolution and quality'**
+  String get resolutionAndQuality;
+
+  /// Teleprompter section
+  ///
+  /// In en, this message translates to:
+  /// **'Teleprompter'**
+  String get teleprompter;
+
+  /// Font size setting
+  ///
+  /// In en, this message translates to:
+  /// **'Font Size'**
+  String get fontSize;
+
+  /// Default text size subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Default text size'**
+  String get defaultTextSize;
+
+  /// Scroll speed setting
+  ///
+  /// In en, this message translates to:
+  /// **'Scroll Speed'**
+  String get scrollSpeed;
+
+  /// Default scroll speed subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Default scroll speed'**
+  String get defaultScrollSpeed;
+
+  /// Data and storage section
+  ///
+  /// In en, this message translates to:
+  /// **'Data & Storage'**
+  String get dataAndStorage;
+
+  /// Cloud sync setting
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud Sync'**
+  String get cloudSync;
+
+  /// Cloud sync disabled subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud sync disabled'**
+  String get cloudSyncDisabled;
+
+  /// Manage storage action
+  ///
+  /// In en, this message translates to:
+  /// **'Manage Storage'**
+  String get manageStorage;
+
+  /// Clear cache and data subtitle
+  ///
+  /// In en, this message translates to:
+  /// **'Clear cache and data'**
+  String get clearCacheAndData;
+
+  /// About section
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get about;
+
+  /// App version label
+  ///
+  /// In en, this message translates to:
+  /// **'App Version'**
+  String get appVersion;
+
+  /// Terms of service link
+  ///
+  /// In en, this message translates to:
+  /// **'Terms of Service'**
+  String get termsOfService;
+
+  /// Privacy policy link
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy Policy'**
+  String get privacyPolicy;
+
+  /// Help and support link
+  ///
+  /// In en, this message translates to:
+  /// **'Help & Support'**
+  String get helpAndSupport;
 }
 
 class _AppLocalizationsDelegate

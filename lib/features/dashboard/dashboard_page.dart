@@ -3,13 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:vrm_app/l10n/app_localizations.dart';
 import 'package:vrm_app/shared/widgets/section_header.dart';
-import 'package:vrm_app/shared/widgets/stat_card.dart';
 import 'package:vrm_app/shared/widgets/action_card.dart';
 import 'package:vrm_app/shared/widgets/project_card.dart';
 import 'package:vrm_app/shared/widgets/calendar_day.dart';
 import 'package:vrm_app/features/new_project/new_project_page.dart';
-// TODO: Implement InfluencerProfilePage
-// import 'package:vrm_app/features/influencer_profile/influencer_profile_page.dart';
+import 'package:vrm_app/features/influencer_profile/influencer_profile_page.dart';
+import 'package:vrm_app/features/account/account_profile_page.dart';
+import 'package:vrm_app/features/settings/settings_page.dart';
 import 'package:vrm_app/features/onboarding/data/onboarding_repository.dart';
 import 'package:vrm_app/features/onboarding/data/user_profile.dart';
 import '../../core/theme.dart';
@@ -60,7 +60,6 @@ class _DashboardPageState extends State<DashboardPage> {
             children: [
               _buildTopBar(l10n),
               _buildMainGreeting(l10n),
-              _buildStatsSection(l10n),
               const SizedBox(height: 20),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -86,8 +85,12 @@ class _DashboardPageState extends State<DashboardPage> {
                       icon: Icons.person_search_rounded,
                       actionIcon: Icons.arrow_forward_rounded,
                       onTap: () {
-                        // TODO: Implement InfluencerProfilePage
-                        debugPrint('InfluencerProfilePage not yet implemented');
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const InfluencerProfilePage(),
+                          ),
+                        );
                       },
                     ),
                   ],
@@ -109,73 +112,91 @@ class _DashboardPageState extends State<DashboardPage> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Row(
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                    color: context.appColors.cardBorder,
-                    width: 2,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.05),
-                      blurRadius: 4,
-                      offset: const Offset(0, 2),
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const AccountProfilePage(),
+                ),
+              );
+            },
+            child: Row(
+              children: [
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: context.appColors.cardBorder,
+                      width: 2,
                     ),
-                  ],
-                  image: const DecorationImage(
-                    image: NetworkImage(
-                      'https://i.pravatar.cc/150?u=vrm_user_alex',
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.05),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                    image: const DecorationImage(
+                      image: NetworkImage(
+                        'https://i.pravatar.cc/150?u=vrm_user_alex',
+                      ),
+                      fit: BoxFit.cover,
                     ),
-                    fit: BoxFit.cover,
                   ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    l10n.goodMorning,
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      color: context.appColors.textSecondary,
-                      letterSpacing: 0.5,
+                const SizedBox(width: 12),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.goodMorning,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: context.appColors.textSecondary,
+                        letterSpacing: 0.5,
+                      ),
                     ),
-                  ),
-                  Text(
-                    _getProfileLabel(),
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: context.appColors.textPrimary,
+                    Text(
+                      _getProfileLabel(),
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: context.appColors.textPrimary,
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ],
-          ),
-          Container(
-            width: 40,
-            height: 40,
-            decoration: BoxDecoration(
-              color: context.appColors.cardBackground,
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: context.appColors.cardBorder.withValues(alpha: 0.5),
-              ),
+                  ],
+                ),
+              ],
             ),
-            child: Icon(
-              Icons.settings,
-              size: 20,
-              color: context.isDarkMode
-                  ? Colors.white
-                  : context.colorScheme.primary,
+          ),
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const SettingsPage()),
+              );
+            },
+            child: Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: context.appColors.cardBackground,
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: context.appColors.cardBorder.withValues(alpha: 0.5),
+                ),
+              ),
+              child: Icon(
+                Icons.settings,
+                size: 20,
+                color: context.isDarkMode
+                    ? Colors.white
+                    : context.colorScheme.primary,
+              ),
             ),
           ),
         ],
@@ -249,32 +270,6 @@ class _DashboardPageState extends State<DashboardPage> {
       default:
         return 'Captura tus ideas y dales vida hoy.';
     }
-  }
-
-  Widget _buildStatsSection(AppLocalizations l10n) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: IntrinsicHeight(
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            VRMStatCard(
-              value: '5',
-              label: l10n.streakLabel,
-              icon: Icons.local_fire_department,
-              color: const Color(0xFFF97316), // Orange 500
-            ),
-            const SizedBox(width: 12),
-            VRMStatCard(
-              value: '42',
-              label: l10n.fragments,
-              icon: Icons.mic,
-              color: const Color(0xFF10B981), // Emerald 500
-            ),
-          ],
-        ),
-      ),
-    );
   }
 
   Widget _buildCalendarSection(AppLocalizations l10n) {
@@ -393,14 +388,12 @@ class _DashboardPageState extends State<DashboardPage> {
                 l10n.profile,
                 false,
                 () {
-                  // TODO: Implement InfluencerProfilePage
-                  debugPrint('InfluencerProfilePage not yet implemented');
-                  // Navigator.push(
-                  //   context,
-                  //   MaterialPageRoute(
-                  //     builder: (context) => const InfluencerProfilePage(),
-                  //   ),
-                  // );
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const InfluencerProfilePage(),
+                    ),
+                  );
                 },
               ),
             ],

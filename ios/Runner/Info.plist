@@ -5,7 +5,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>Vrm App</string>
+	<string>VRM Atomic Camera</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -49,5 +49,9 @@
 	<string>Esta aplicación requiere acceso al micrófono para escuchar los comandos de voz.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
 	<string>Esta aplicación requiere acceso al reconocimiento de voz para ejecutar comandos por voz.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Esta aplicación requiere acceso a la cámara para grabar videos.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Esta aplicación necesita acceso a la biblioteca de fotos para guardar y seleccionar videos.</string>
 </dict>
 </plist>

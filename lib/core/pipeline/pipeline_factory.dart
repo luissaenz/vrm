@@ -1,11 +1,9 @@
 import '../plugins/i_idea_source.dart';
 import '../plugins/i_script_processor.dart';
 import '../plugins/i_post_processor.dart';
-import '../plugins/i_analytics_provider.dart';
 import '../plugins/default/manual_input_plugin.dart';
 import '../plugins/default/template_script_plugin.dart';
 import '../plugins/default/stitcher_plugin.dart';
-import '../plugins/default/local_session_stats.dart';
 import '../plugins/external/backend_script_plugin.dart';
 import 'vrm_pipeline.dart';
 
@@ -18,7 +16,6 @@ class PipelineFactory {
       ideaSource: ManualInputPlugin(),
       scriptProcessor: TemplateScriptPlugin(),
       postProcessor: StitcherPlugin(),
-      analyticsProvider: LocalSessionStats(),
     );
   }
 
@@ -28,7 +25,6 @@ class PipelineFactory {
       ideaSource: ManualInputPlugin(),
       scriptProcessor: BackendScriptPlugin(),
       postProcessor: StitcherPlugin(),
-      analyticsProvider: LocalSessionStats(),
     );
   }
 
@@ -37,13 +33,11 @@ class PipelineFactory {
     required IIdeaSource ideaSource,
     required IScriptProcessor scriptProcessor,
     required IPostProcessor postProcessor,
-    required IAnalyticsProvider analyticsProvider,
   }) {
     return VRMPipeline(
       ideaSource: ideaSource,
       scriptProcessor: scriptProcessor,
       postProcessor: postProcessor,
-      analyticsProvider: analyticsProvider,
     );
   }
 
@@ -58,13 +52,11 @@ class PipelineFactory {
     final ideaSource = ManualInputPlugin();
     final scriptProcessor = _createScriptProcessor(scriptProcessorId);
     final postProcessor = StitcherPlugin();
-    final analyticsProvider = LocalSessionStats();
 
     return VRMPipeline(
       ideaSource: ideaSource,
       scriptProcessor: scriptProcessor,
       postProcessor: postProcessor,
-      analyticsProvider: analyticsProvider,
     );
   }
 

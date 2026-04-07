@@ -15,6 +15,8 @@ class AppColors extends ThemeExtension<AppColors> {
   final Color textTertiary;
   final Color forestDark;
   final Color forestVibrant;
+  final Color background;
+  final Color surface;
 
   const AppColors({
     required this.forest,
@@ -29,6 +31,8 @@ class AppColors extends ThemeExtension<AppColors> {
     required this.textTertiary,
     required this.forestDark,
     required this.forestVibrant,
+    required this.background,
+    required this.surface,
   });
 
   @override
@@ -45,6 +49,8 @@ class AppColors extends ThemeExtension<AppColors> {
     Color? textTertiary,
     Color? forestDark,
     Color? forestVibrant,
+    Color? background,
+    Color? surface,
   }) {
     return AppColors(
       forest: forest ?? this.forest,
@@ -59,6 +65,8 @@ class AppColors extends ThemeExtension<AppColors> {
       textTertiary: textTertiary ?? this.textTertiary,
       forestDark: forestDark ?? this.forestDark,
       forestVibrant: forestVibrant ?? this.forestVibrant,
+      background: background ?? this.background,
+      surface: surface ?? this.surface,
     );
   }
 
@@ -78,6 +86,8 @@ class AppColors extends ThemeExtension<AppColors> {
       textTertiary: Color.lerp(textTertiary, other.textTertiary, t)!,
       forestDark: Color.lerp(forestDark, other.forestDark, t)!,
       forestVibrant: Color.lerp(forestVibrant, other.forestVibrant, t)!,
+      background: Color.lerp(background, other.background, t)!,
+      surface: Color.lerp(surface, other.surface, t)!,
     );
   }
 }
@@ -145,6 +155,8 @@ class AppTheme {
           textTertiary: textTertiary,
           forestDark: forestDark,
           forestVibrant: forestVibrant,
+          background: offWhite,
+          surface: Colors.white,
         ),
       ],
     );
@@ -198,6 +210,8 @@ class AppTheme {
           textTertiary: Color(0xFF94A3B8), // Slate 400
           forestDark: Color(0xFF1A2B28),
           forestVibrant: emeraldAccent,
+          background: darkBg,
+          surface: cardDark,
         ),
       ],
     );

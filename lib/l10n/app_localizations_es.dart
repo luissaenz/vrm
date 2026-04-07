@@ -448,4 +448,138 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get voiceStatusActive => '¿QUÉ HACEMOS?';
+
+  @override
+  String get accountProfile => 'Perfil de Cuenta';
+
+  @override
+  String get anonymousUser => 'Usuario Anónimo';
+
+  @override
+  String get upgradeYourAccount => 'Mejora tu cuenta';
+
+  @override
+  String get accountInformation => 'Información de la Cuenta';
+
+  @override
+  String get email => 'Correo Electrónico';
+
+  @override
+  String get notConfigured => 'No configurado';
+
+  @override
+  String get deviceId => 'ID del Dispositivo';
+
+  @override
+  String get memberSince => 'Miembro Desde';
+
+  @override
+  String get notifications => 'Notificaciones';
+
+  @override
+  String get language => 'Idioma';
+
+  @override
+  String get storage => 'Almacenamiento';
+
+  @override
+  String get privacyAndSecurity => 'Privacidad y Seguridad';
+
+  @override
+  String get clearAllData => 'Borrar Todos los Datos';
+
+  @override
+  String get signOut => 'Cerrar Sesión';
+
+  @override
+  String get clearDataConfirmation =>
+      '¿Estás seguro de que quieres borrar todos los datos? Esta acción no se puede deshacer.';
+
+  @override
+  String get cancel => 'Cancelar';
+
+  @override
+  String get clear => 'Borrar';
+
+  @override
+  String get dataCleared => 'Datos borrados exitosamente';
+
+  @override
+  String get signOutConfirmation =>
+      '¿Estás seguro de que quieres cerrar sesión?';
+
+  @override
+  String get signedOut => 'Sesión cerrada exitosamente';
+
+  @override
+  String get settings => 'Configuración';
+
+  @override
+  String get appearance => 'Apariencia';
+
+  @override
+  String get theme => 'Tema';
+
+  @override
+  String get selectThemeMode => 'Seleccionar modo de tema';
+
+  @override
+  String get recording => 'Grabación';
+
+  @override
+  String get defaultRecordingDuration => 'Duración Predeterminada';
+
+  @override
+  String get configureDefaultTime => 'Configurar tiempo predeterminado';
+
+  @override
+  String get cameraSettings => 'Cámara';
+
+  @override
+  String get resolutionAndQuality => 'Resolución y calidad';
+
+  @override
+  String get teleprompter => 'Teleprompter';
+
+  @override
+  String get fontSize => 'Tamaño de Fuente';
+
+  @override
+  String get defaultTextSize => 'Tamaño de texto predeterminado';
+
+  @override
+  String get scrollSpeed => 'Velocidad de Desplazamiento';
+
+  @override
+  String get defaultScrollSpeed => 'Velocidad de desplazamiento predeterminada';
+
+  @override
+  String get dataAndStorage => 'Datos y Almacenamiento';
+
+  @override
+  String get cloudSync => 'Sincronización en la Nube';
+
+  @override
+  String get cloudSyncDisabled => 'Sincronización en la nube deshabilitada';
+
+  @override
+  String get manageStorage => 'Gestionar Almacenamiento';
+
+  @override
+  String get clearCacheAndData => 'Borrar caché y datos';
+
+  @override
+  String get about => 'Acerca de';
+
+  @override
+  String get appVersion => 'Versión de la App';
+
+  @override
+  String get termsOfService => 'Términos de Servicio';
+
+  @override
+  String get privacyPolicy => 'Política de Privacidad';
+
+  @override
+  String get helpAndSupport => 'Ayuda y Soporte';
 }
