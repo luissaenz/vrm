@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:ui';
 import 'dart:async';
 import 'dart:math';
 import 'package:camera/camera.dart';
@@ -8,19 +7,28 @@ import '../new_project/models/script_analysis.dart';
 
 import 'models/recording_state.dart';
 import 'models/voice_indicator_state.dart';
+import 'models/session_data.dart';
 import 'widgets/voice_indicator.dart';
 import 'widgets/telepronter.dart';
 import 'recording_end_page.dart';
 import 'services/voice_command_service.dart';
+import 'services/permission_service.dart';
+import 'services/camera_service.dart';
+import 'services/clip_storage_service.dart';
+import 'services/recording_manager.dart';
+import 'package:permission_handler/permission_handler.dart'
+    show openAppSettings;
 
 class RecordingPage extends StatefulWidget {
   final ScriptAnalysis analysis;
   final int currentFragmentIndex;
+  final String projectId;
 
   const RecordingPage({
     super.key,
     required this.analysis,
     this.currentFragmentIndex = 0,
+    required this.projectId,
   });
 
   @override
@@ -28,7 +36,7 @@ class RecordingPage extends StatefulWidget {
 }
 
 class _RecordingPageState extends State<RecordingPage>
-    with TickerProviderStateMixin {
+    with TickerProviderStateMixin, WidgetsBindingObserver {
   late AnimationController _pulseController;
   late Animation<double> _pulseAnimation;
   late AnimationController _countdownController;
@@ -57,15 +65,23 @@ class _RecordingPageState extends State<RecordingPage>
   double _screenBrightness = 0.8;
 
   final VoiceCommandService _voiceService = VoiceCommandService();
+  final PermissionService _permissionService = PermissionService();
 
   VoiceIndicatorState _voiceState = VoiceIndicatorState.passive;
   String? _detectedCommand;
   StreamSubscription? _voiceStateSub;
   StreamSubscription? _voiceCommandSub;
 
-  CameraController? _cameraController;
-  Future<void>? _initializeControllerFuture;
+  // Recording services (replace direct CameraController usage)
+  late CameraService _cameraService;
+  late ClipStorageService _clipStorageService;
+  RecordingManager? _recordingManager;
+  SessionData? _sessionData;
+
   bool _isCameraInitialized = false;
+  bool _isProcessingRecording = false;
+  bool _hasPermissionError = false;
+  String? _cameraInitError;
 
   @override
   void initState() {
@@ -100,8 +116,61 @@ class _RecordingPageState extends State<RecordingPage>
 
     _activeFragmentIndex = widget.currentFragmentIndex;
     _menuPageController = PageController();
+
+    // Initialize services
+    _cameraService = CameraService();
+    _clipStorageService = ClipStorageService(projectId: widget.projectId);
+
+    // Initialize SessionData eagerly in initState to prevent data loss
+    // from state rebuilds (rotation, memory pressure) before recording starts
+    _sessionData = SessionData(
+      projectId: widget.projectId,
+      startedAt: DateTime.now(),
+      lastUpdatedAt: DateTime.now(),
+    );
+
+    // Register lifecycle observer for background handling
+    WidgetsBinding.instance.addObserver(this);
+
+    // Check permissions first
+    _checkPermissionsAndInitCamera();
+
     _initVoiceCommands();
-    _initializeCamera();
+  }
+
+  /// Check permissions and initialize camera.
+  Future<void> _checkPermissionsAndInitCamera() async {
+    final granted = await _permissionService.checkPermissions();
+    if (!granted) {
+      final requested = await _permissionService.requestPermissions();
+      if (!requested) {
+        if (mounted) {
+          setState(() => _hasPermissionError = true);
+        }
+        return;
+      }
+    }
+
+    await _initCamera();
+  }
+
+  /// Initialize camera using CameraService.
+  Future<void> _initCamera() async {
+    try {
+      await _cameraService.initialize();
+      if (mounted) {
+        setState(() {
+          _isCameraInitialized = true;
+          _cameraInitError = null;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _cameraInitError = e.toString();
+        });
+      }
+    }
   }
 
   late PageController _menuPageController;
@@ -109,10 +178,14 @@ class _RecordingPageState extends State<RecordingPage>
 
   @override
   void dispose() {
+    // Remove lifecycle observer
+    WidgetsBinding.instance.removeObserver(this);
+
     _voiceStateSub?.cancel();
     _voiceCommandSub?.cancel();
     _voiceService.stopService();
-    _cameraController?.dispose();
+    _recordingManager?.dispose();
+    _cameraService.dispose();
     _menuPageController.dispose();
     _countdownTimer?.cancel();
     _pulseController.dispose();
@@ -121,38 +194,62 @@ class _RecordingPageState extends State<RecordingPage>
     super.dispose();
   }
 
-  Future<void> _initializeCamera() async {
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+
+    if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.inactive) {
+      // App going to background — stop recording and save partial clip
+      _handleBackgroundTransition();
+    }
+  }
+
+  /// Handles app going to background during recording.
+  /// Stops recording and saves whatever was captured as a partial clip.
+  Future<void> _handleBackgroundTransition() async {
+    if (_recordingManager == null || !_recordingManager!.isRecording) {
+      return;
+    }
+
+    debugPrint(
+      '[RecordingPage] App paused during recording — saving partial clip',
+    );
+
     try {
-      final cameras = await availableCameras();
-      if (cameras.isEmpty) return;
-
-      // Buscar cámara frontal (móvil) o la primera disponible (PC)
-      CameraDescription? selectedCamera;
-      try {
-        selectedCamera = cameras.firstWhere(
-          (camera) => camera.lensDirection == CameraLensDirection.front,
-        );
-      } catch (_) {
-        selectedCamera = cameras.first;
-      }
-
-      _cameraController = CameraController(
-        selectedCamera,
-        ResolutionPreset.high,
-        enableAudio: true,
-        imageFormatGroup: ImageFormatGroup.jpeg,
-      );
-
-      _initializeControllerFuture = _cameraController!.initialize();
-      await _initializeControllerFuture;
-
+      final result = await _recordingManager!.stopAndSavePartial();
       if (mounted) {
         setState(() {
-          _isCameraInitialized = true;
+          _recordingState = RecordingState.idle;
+          _isProcessingRecording = false;
         });
+
+        // Show error feedback if partial save failed
+        if (result.error != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                'Hubo un problema al guardar el clip parcial. Es posible que se haya perdido.',
+              ),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
       }
     } catch (e) {
-      print('Error al inicializar cámara: $e');
+      debugPrint('[RecordingPage] Failed to save partial clip: $e');
+      // Force cleanup
+      _isProcessingRecording = false;
+      if (_cameraService.isRecording) {
+        try {
+          await _cameraService.stopRecording();
+        } catch (_) {}
+      }
+      if (mounted) {
+        setState(() {
+          _recordingState = RecordingState.idle;
+        });
+      }
     }
   }
 
@@ -183,6 +280,12 @@ class _RecordingPageState extends State<RecordingPage>
       if (_recordingState == RecordingState.idle) {
         _startCountdown();
       }
+    } else if ((cmd.contains('stop') ||
+            cmd.contains('detener') ||
+            cmd.contains('parar')) &&
+        (_recordingState == RecordingState.recording ||
+            _recordingState == RecordingState.commandRecorded)) {
+      _stopRecording();
     } else if (cmd.contains('volver') ||
         cmd.contains('atrás') ||
         cmd.contains('back')) {
@@ -274,20 +377,119 @@ class _RecordingPageState extends State<RecordingPage>
     });
   }
 
-  void _startActualRecording() {
+  void _startActualRecording() async {
+    if (_isProcessingRecording) return;
+
+    // SessionData is already initialized in initState
+    // Initialize RecordingManager lazily on first use
+    if (_recordingManager == null) {
+      _recordingManager = RecordingManager(
+        camera: _cameraService,
+        storage: _clipStorageService,
+        sessionData: _sessionData!,
+      );
+    }
+
+    // Check storage space before starting
+    final hasSpace = await _clipStorageService.hasFreeSpace();
+    if (!hasSpace) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Almacenamiento insuficiente. Libera espacio e intenta de nuevo.',
+            ),
+            backgroundColor: Colors.orange,
+          ),
+        );
+      }
+      // Reset to idle since countdown already fired
+      setState(() {
+        _recordingState = RecordingState.idle;
+      });
+      return;
+    }
+
     setState(() {
+      _isProcessingRecording = true;
       _recordingState = RecordingState.recording;
     });
     _countdownController.stop();
 
-    // TODO: Trigger actual audio/video recording here
+    try {
+      await _recordingManager!.startRecording(_activeFragmentIndex);
+      setState(() {
+        _isProcessingRecording = _recordingManager!.isProcessing;
+      });
+    } catch (e) {
+      debugPrint('[RecordingPage] Failed to start recording: $e');
+      if (mounted) {
+        setState(() {
+          _recordingState = RecordingState.idle;
+          _isProcessingRecording = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al iniciar grabación: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
-  void _stopRecording() {
+  void _stopRecording() async {
+    if (_recordingManager == null || !_recordingManager!.isRecording) {
+      // Safety fallback: just reset state
+      setState(() {
+        _recordingState = RecordingState.idle;
+      });
+      return;
+    }
+
     setState(() {
-      _recordingState = RecordingState.idle;
+      _isProcessingRecording = true;
     });
-    // TODO: Stop camera and save recording
+
+    try {
+      await _recordingManager!.stopRecording();
+
+      if (mounted) {
+        // Calculate duration for feedback
+        final durationMs = _recordingManager?.currentRecordingDurationMs;
+
+        setState(() {
+          _recordingState = RecordingState.idle;
+          _isProcessingRecording = false;
+        });
+
+        // Show feedback
+        final durationStr = durationMs != null
+            ? '${(durationMs / 1000).toStringAsFixed(1)}s'
+            : '';
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Clip guardado — $durationStr'),
+            backgroundColor: const Color(0xFF2DD4BF),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      debugPrint('[RecordingPage] Failed to stop recording: $e');
+      if (mounted) {
+        setState(() {
+          _recordingState = RecordingState.idle;
+          _isProcessingRecording = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error al guardar el clip: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   Widget _buildCountdownOverlay() {
@@ -350,6 +552,125 @@ class _RecordingPageState extends State<RecordingPage>
 
     if (_recordingState == RecordingState.finished) {
       return const RecordingEndPage();
+    }
+
+    // Show error screen if permissions were denied
+    if (_hasPermissionError) {
+      return Scaffold(
+        backgroundColor: context.colorScheme.surface,
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(32),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.camera_alt, size: 64, color: Colors.white54),
+                const SizedBox(height: 24),
+                const Text(
+                  'Cámara no disponible',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  'VRM necesita acceso a la cámara y al micrófono. '
+                  'Actívalos en Configuración.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(fontSize: 14, color: Colors.white70),
+                ),
+                const SizedBox(height: 24),
+                FilledButton(
+                  onPressed: () async {
+                    await openAppSettings();
+                  },
+                  child: const Text('Ir a Configuración'),
+                ),
+                const SizedBox(height: 12),
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text(
+                    'Volver',
+                    style: TextStyle(color: Colors.white70),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    // Show loading screen if camera is not ready
+    if (!_isCameraInitialized && _cameraInitError == null) {
+      return const Scaffold(
+        backgroundColor: Colors.black,
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(color: Colors.white),
+              SizedBox(height: 16),
+              Text(
+                'Preparando cámara...',
+                style: TextStyle(color: Colors.white70),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    // Show camera init error
+    if (_cameraInitError != null) {
+      return Scaffold(
+        backgroundColor: Colors.black,
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(32),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(
+                  Icons.error_outline,
+                  size: 64,
+                  color: Colors.redAccent,
+                ),
+                const SizedBox(height: 24),
+                const Text(
+                  'Error de cámara',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  _cameraInitError!,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 12, color: Colors.white70),
+                ),
+                const SizedBox(height: 24),
+                FilledButton(
+                  onPressed: _initCamera,
+                  child: const Text('Reintentar'),
+                ),
+                const SizedBox(height: 12),
+                FilledButton(
+                  onPressed: () async => openAppSettings(),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: Colors.white24,
+                  ),
+                  child: const Text('Configuración'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
     }
 
     return Scaffold(
@@ -423,10 +744,12 @@ class _RecordingPageState extends State<RecordingPage>
         color: Colors.black,
         child: Stack(
           children: [
-            if (_isCameraInitialized && _cameraController != null)
+            if (_isCameraInitialized && _cameraService.controller != null)
               Positioned.fill(
                 child: RepaintBoundary(
-                  child: Center(child: CameraPreview(_cameraController!)),
+                  child: Center(
+                    child: CameraPreview(_cameraService.controller!),
+                  ),
                 ),
               )
             else
@@ -565,8 +888,17 @@ class _RecordingPageState extends State<RecordingPage>
           // Camera switch button
           _buildGlassButton(
             icon: Icons.cameraswitch,
-            onTap: () {
-              // TODO: Implement camera switch
+            onTap: () async {
+              if (_isRecordingActive || _isProcessingRecording) return;
+              try {
+                setState(() => _isCameraInitialized = false);
+                await _recordingManager?.switchCamera();
+                if (mounted) {
+                  setState(() => _isCameraInitialized = true);
+                }
+              } catch (e) {
+                debugPrint('[RecordingPage] Failed to switch camera: $e');
+              }
             },
             isEnabled: !_isRecordingActive,
           ),
@@ -1342,6 +1674,9 @@ class _RecordingPageState extends State<RecordingPage>
 
     return GestureDetector(
       onTap: () {
+        // Debounce: ignore if processing
+        if (_isProcessingRecording) return;
+
         if (_recordingState == RecordingState.idle) {
           _startCountdown();
         } else if (_recordingState == RecordingState.recording ||

@@ -1,0 +1,287 @@
+═══════════════════════════════════════════════════════════════════════════════
+  /IMPLEMENTADOR - VRM QUALITY PIPELINE (ENTRADA INTERACTIVA)
+═══════════════════════════════════════════════════════════════════════════════
+
+📋 INSTRUCCIONES PARA EJECUTAR COMO SLASH COMMAND EN CLAUDE CODE
+
+─────────────────────────────────────────────────────────────────────────────
+PASO 1: COPIAR ESTE PROMPT COMPLETO
+─────────────────────────────────────────────────────────────────────────────
+
+Haz copy-paste del contenido entre los separadores en un chat de Claude Code.
+
+─────────────────────────────────────────────────────────────────────────────
+PASO 2: REEMPLAZA ENTRE [CORCHETES] CON TUS RESPUESTAS
+─────────────────────────────────────────────────────────────────────────────
+
+Actúa como el orquestador del VRM Quality Pipeline.
+
+Tu tarea:
+1. Haz preguntas interactivas para recopilar configuración
+2. Valida las respuestas del usuario
+3. Ejecuta el skill vrm-quality-pipeline con los parámetros correctos
+
+═══════════════════════════════════════════════════════════════════════════════
+  RECOPILACIÓN DE PARÁMETROS (INTERACTIVO)
+═══════════════════════════════════════════════════════════════════════════════
+
+PREGUNTA 1: Tu Especificación Técnica
+──────────────────────────────────────
+Necesito el documento con tu especificación.
+
+Opciones:
+  A) Pega directamente el contenido aquí
+  B) Dame la ruta de un archivo (cualquier ruta)
+  C) Proporciona un resumen de qué necesitas
+
+IMPORTANTE: No importa dónde esté el archivo ni cómo se llame.
+Solo importa el contenido de la especificación.
+
+¿Cómo quieres proporcionarla?
+  • [A] Pegar contenido directo
+  • [B] Ruta de archivo (cualquiera)
+  • [C] Resumen/descripción
+
+Respuesta: [Elige A, B o C]
+
+Si escoliste A:
+  → Pega aquí tu especificación (Descripción + Diseño + Plan)
+
+Si escoliste B:
+  → Escribe la ruta: [ej: docs/mvp-Definition.md o FASE_1/Dia4-5/analisis-FINAL.md]
+
+Si escoliste C:
+  → Describe qué necesitas implementar
+
+
+PREGUNTA 2: Lenguaje de Programación
+─────────────────────────────────────
+¿En qué lenguaje debo generar el código?
+
+Opciones disponibles:
+  • 🔹 Dart (recomendado para Flutter)
+  • 🟦 Python (backend, scripts)
+  • 🟨 JavaScript (web, Node.js)
+  • 🔷 TypeScript (web avanzado)
+
+Respuesta: [ESCRIBE: Dart, Python, JavaScript o TypeScript]
+
+
+PREGUNTA 3: Tipo de Proyecto
+──────────────────────────────
+¿Qué tipo de proyecto es?
+
+Opciones disponibles:
+  • 📱 Flutter (apps móviles)
+  • 🌐 Web (aplicaciones web)
+  • ⚙️ Backend (servidores, APIs)
+  • 📦 Generic (otro)
+
+Respuesta: [ESCRIBE: Flutter, Web, Backend o Generic]
+
+
+PREGUNTA 4: Máximo de Loops de Corrección
+──────────────────────────────────────────
+¿Cuántos intentos máximos de corrección permitimos?
+
+Explicación:
+  • 1 = Si falla, no hay reintentos
+  • 2 = 1 intento de arreglo
+  • 3 = 2 intentos (RECOMENDADO)
+  • 4-5 = Más reintentos (puede tardar más)
+
+Recomendación: 3
+
+Respuesta: [ESCRIBE UN NÚMERO: 1-5]
+
+
+PREGUNTA 5: Generar Tests Automáticamente
+──────────────────────────────────────────
+¿Quieres que genere tests automáticamente?
+
+Opciones:
+  • Sí (recomendado) - Genera unit tests
+  • No - Solo código
+
+Respuesta: [ESCRIBE: Sí o No]
+
+
+PREGUNTA 6: Nivel de Estrictez
+─────────────────────────────────
+¿Cuánta validación quieres?
+
+Opciones:
+  • strict (máxima exigencia, recomendado para producción)
+  • normal (balanceado)
+  • lenient (menos exigente, más permisivo)
+
+Recomendación: strict
+
+Respuesta: [ESCRIBE: strict, normal o lenient]
+
+
+═══════════════════════════════════════════════════════════════════════════════
+  RESUMEN DE CONFIGURACIÓN
+═══════════════════════════════════════════════════════════════════════════════
+
+Voy a resumir lo que configuraste. Verifica que todo esté correcto:
+
+📄 Documento:        [RESPUESTA 1]
+🔧 Lenguaje:        [RESPUESTA 2]
+📱 Tipo Proyecto:   [RESPUESTA 3]
+🔄 Max Loops:       [RESPUESTA 4]
+✅ Generar Tests:   [RESPUESTA 5]
+🎯 Estrictez:       [RESPUESTA 6]
+
+Si todo está bien, escribe: CONFIRMAR
+Si quieres cambiar algo, escribe: CAMBIAR [número de pregunta]
+
+
+═══════════════════════════════════════════════════════════════════════════════
+  VALIDACIÓN PREVIA
+═══════════════════════════════════════════════════════════════════════════════
+
+Antes de ejecutar, validaré:
+
+✓ Documento existe: [VERIFICAR]
+✓ Es archivo Markdown válido: [VERIFICAR]
+✓ Contiene secciones requeridas: [VERIFICAR]
+✓ Proyecto está inicializado: [VERIFICAR]
+✓ Permisos de escritura: [VERIFICAR]
+✓ Dependencias instaladas: [VERIFICAR]
+
+Si todo valida → PROCEDER
+Si algo falla → REPORTAR ERROR ESPECÍFICO
+
+
+═══════════════════════════════════════════════════════════════════════════════
+  EJECUCIÓN DEL SKILL
+═══════════════════════════════════════════════════════════════════════════════
+
+Una vez confirmado todo, ejecutaré:
+
+@skill vrm-quality-pipeline
+input: [RESPUESTA 1]
+lenguaje: [RESPUESTA 2]
+proyecto_tipo: [RESPUESTA 3]
+max_loops: [RESPUESTA 4]
+generar_tests: [RESPUESTA 5]
+nivel_estrictez: [RESPUESTA 6]
+output_dir: FASE_1/Dia4-5/implementacion/
+
+
+═══════════════════════════════════════════════════════════════════════════════
+  MONITOREO DE EJECUCIÓN
+═══════════════════════════════════════════════════════════════════════════════
+
+Mientras se ejecuta el skill, voy a mostrar:
+
+┌────────────────────────────────────────────┐
+│ VRM QUALITY PIPELINE EN EJECUCIÓN          │
+├────────────────────────────────────────────┤
+│                                            │
+│ FASE 1: ANALIZADOR                         │
+│ [████████░░░░░░░░] 30%                     │
+│ Validando documento técnico...             │
+│                                            │
+│ FASE 2: IMPLEMENTADOR                      │
+│ [░░░░░░░░░░░░░░░░] 0%                      │
+│ Esperando...                               │
+│                                            │
+│ FASE 3: VALIDADOR                          │
+│ [░░░░░░░░░░░░░░░░] 0%                      │
+│ Esperando...                               │
+│                                            │
+│ FASE 4: CORRECTOR                          │
+│ [░░░░░░░░░░░░░░░░] 0%                      │
+│ Esperando...                               │
+│                                            │
+└────────────────────────────────────────────┘
+
+Tiempo estimado: 2-4 horas
+
+
+═══════════════════════════════════════════════════════════════════════════════
+  RESULTADO FINAL: REPORTE ÚNICO CONSOLIDADO
+═══════════════════════════════════════════════════════════════════════════════
+
+Al completar, genero UN ÚNICO REPORTE que contiene:
+
+✅ REPORTE_IMPLEMENTACION_[timestamp].md
+
+Contenido del Reporte:
+  1. RESUMEN EJECUTIVO
+     • Entrada: Tu especificación
+     • Salida: Código generado
+     • Status: APROBADO / RECHAZADO
+
+  2. ESPECIFICACIÓN PROCESADA
+     • Plan identificado en tu documento
+     • Componentes extraídos
+     • Arquitectura entendida
+
+  3. CÓDIGO COMPLETO
+     • Todos los componentes
+     • Listo para copiar-pegar
+     • Compilable inmediatamente
+
+  4. VALIDACIÓN
+     • Issues detectados: X
+     • Issues corregidos: X
+     • Loops usados: X/[RESPUESTA 4]
+
+  5. MÉTRICAS
+     • Líneas de código: XXX
+     • Componentes: X
+     • Coverage: 100%
+     • Quality score: 9.X/10
+
+  6. DECISIONES TÉCNICAS
+     • Por qué se eligió cada patrón
+     • Alternativas consideradas
+
+  7. PRÓXIMOS PASOS
+     • Build: flutter build apk
+     • Tests: flutter test
+     • Deploy: [tus pasos]
+
+  8. LOGS Y DEBUG
+     • Timeline de ejecución
+     • Decisiones en cada fase
+     • Errors resueltos
+
+UN ARCHIVO. TODO INCLUIDO. LISTO PARA USAR.
+
+
+═══════════════════════════════════════════════════════════════════════════════
+  CÓMO USAR ESTO EN CLAUDE CODE
+═══════════════════════════════════════════════════════════════════════════════
+
+OPCIÓN A: Como Slash Command Personalizado
+────────────────────────────────────────────
+1. Guarda este archivo en: .agent/workflows/implementador.md
+2. Recarga Claude Code
+3. Escribe: /Implementador
+4. Claude cargará este prompt automáticamente
+
+OPCIÓN B: Copiar-Pegar el Contenido
+──────────────────────────────────────
+1. Selecciona TODO desde "Paso 1" hasta aquí
+2. Copy (Ctrl+C)
+3. Abre Claude Code
+4. Paste en el chat (Ctrl+V)
+5. Claude seguirá las instrucciones
+
+
+═══════════════════════════════════════════════════════════════════════════════
+  READY TO START
+═══════════════════════════════════════════════════════════════════════════════
+
+¿Listo para comenzar?
+
+Responde la PREGUNTA 1 arriba y continuaré.
+
+📝 PREGUNTA 1: ¿Cuál es la ubicación del documento?
+(Ej: docs/mvp-Definition.md)
+
+═══════════════════════════════════════════════════════════════════════════════

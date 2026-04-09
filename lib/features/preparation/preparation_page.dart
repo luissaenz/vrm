@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter_tts/flutter_tts.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
+import 'package:uuid/uuid.dart';
 import '../../l10n/app_localizations.dart';
 import '../../core/theme.dart';
 import '../recording/recording_page.dart';
@@ -202,7 +203,10 @@ class _PreparationPageState extends State<PreparationPage> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => RecordingPage(analysis: widget.analysis),
+        builder: (context) => RecordingPage(
+          analysis: widget.analysis,
+          projectId: const Uuid().v4(),
+        ),
       ),
     );
   }

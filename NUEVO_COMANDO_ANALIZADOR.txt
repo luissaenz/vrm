@@ -1,0 +1,248 @@
+═══════════════════════════════════════════════════════════════════════════════
+  🎉 NUEVO COMANDO /ANALIZADOR - COMPLETAMENTE FUNCIONAL
+═══════════════════════════════════════════════════════════════════════════════
+
+🔍 QUÉ ES
+─────────────────────────────────────────────────────────────────────────────
+Transformación de ANALISIS.txt en un comando interactivo que:
+
+✅ Pide documento a analizar (cualquiera)
+✅ Pide sección específica (cualquiera)
+✅ Ejecuta análisis exhaustivo (10 secciones siguiendo ANALISIS.txt)
+✅ GUARDA en carpeta ORIGINAL del documento
+✅ Versionado automático: (1), (2), (3), etc.
+✅ NO sobrescribe archivos existentes
+
+
+🚀 CÓMO USAR
+─────────────────────────────────────────────────────────────────────────────
+
+En Claude Code o Antigravity IDE:
+
+  /Analizador
+
+Responde 3 preguntas:
+
+  1️⃣ ¿Documento a analizar?
+     → docs/mvp-Definition.md
+
+  2️⃣ ¿Qué sección?
+     → FASE 1
+
+  3️⃣ ¿Confirmas?
+     → SÍ
+
+Sistema genera:
+  ✓ Análisis de 10 secciones
+  ✓ Guardado automáticamente
+  ✓ En la carpeta del documento
+
+
+📊 DÓNDE SE GUARDA
+─────────────────────────────────────────────────────────────────────────────
+
+DOCUMENTO:              ANÁLISIS GUARDADO:
+─────────────────────────────────────────────────
+docs/mvp.md      →     [seccion]-analisis-claude.md
+
+FASE_1/Dia4-5/   →     FASE_1/Dia4-5/
+especificacion         claude-analisis.md
+
+any/path/doc.md  →     any/path/
+                       claude-analisis.md
+
+REGLA: Siempre en la MISMA CARPETA que el documento
+
+
+🔄 VERSIONADO AUTOMÁTICO
+─────────────────────────────────────────────────────────────────────────────
+
+Primera ejecución:
+  /Analizador
+  → [seccion]-analisis-claude.md
+
+Segunda ejecución (misma sección):
+  /Analizador
+  → docs/claude-analisis(1).md (automático)
+
+Tercera ejecución:
+  → docs/claude-analisis(2).md (automático)
+
+✓ No sobrescribe
+✓ Mantiene historial
+✓ Puedes comparar versiones
+
+Patrón: [seccion]-analisis-[agente]([N]).md
+
+
+📋 CONTENIDO (10 SECCIONES)
+─────────────────────────────────────────────────────────────────────────────
+
+1. Comprensión del Paso
+2. Supuestos y Ambigüedades
+3. Diseño Funcional
+4. Diseño Técnico
+5. Decisiones Tecnológicas
+6. Plan de Implementación
+7. Riesgos y Cuellos de Botella
+8. Métricas de Éxito
+9. Estrategia de Testing
+10. Optimización y Escalabilidad Futura
+
+TODO completo y exhaustivo, siguiendo ANALISIS.txt exactamente
+
+
+✨ CARACTERÍSTICAS
+─────────────────────────────────────────────────────────────────────────────
+
+✅ AGNÓSTICO
+   • Cualquier documento
+   • Cualquier carpeta
+   • Cualquier estructura
+
+✅ INTELIGENTE
+   • Versionado automático
+   • Guarda donde corresponde
+   • No sobrescribe
+
+✅ COMPLETO
+   • 10 secciones exhaustivas
+   • Sigue proceso exacto
+   • Nada omitido
+
+✅ ACCIONABLE
+   • Listo para implementar
+   • Identifica ambigüedades
+   • Plan claro
+
+
+📁 ARCHIVOS CREADOS
+─────────────────────────────────────────────────────────────────────────────
+
+NUEVO COMANDO:
+  ✅ .claude/commands/analizador.md
+  ✅ .claude/commands/ANALIZADOR-PROMPT.txt
+  ✅ .claude/commands/analizador-config.json
+
+DOCUMENTACIÓN:
+  ✅ docs/skills/skill-analizador.md
+  ✅ docs/skills/ANALIZADOR_SUMMARY.txt
+
+ACTUALIZADO:
+  ✅ .claude/commands/README.md
+
+
+🎯 EJEMPLO PRÁCTICO
+─────────────────────────────────────────────────────────────────────────────
+
+Tienes: docs/mvp-Definition.md
+
+Quieres analizar: FASE 1 - Core de Grabación
+
+Ejecutas:
+  /Analizador
+
+Responde:
+  Documento: docs/mvp-Definition.md
+  Sección: FASE 1 - Core de Grabación
+  Confirma: SÍ
+
+Obtenes:
+  ✅ [seccion]-analisis-claude.md
+
+Contiene:
+  ✓ Comprensión completa del paso
+  ✓ 8 ambigüedades detectadas
+  ✓ Diseño funcional detallado
+  ✓ Arquitectura técnica propuesta
+  ✓ Plan de 15 tareas
+  ✓ 5 riesgos identificados
+  ✓ Métricas de éxito
+  ✓ Estrategia de testing
+
+TODO LISTO PARA IMPLEMENTAR
+
+
+📖 PRÓXIMOS PASOS
+─────────────────────────────────────────────────────────────────────────────
+
+1. Escribe en Claude Code:
+   /Analizador
+
+2. Proporciona:
+   • Documento a analizar
+   • Sección a analizar
+
+3. Confirma
+
+4. Obtén archivo en carpeta original
+
+5. Usa análisis como entrada para:
+   /Implementador → Genera código
+
+
+🔗 RELACIÓN CON OTROS COMANDOS
+─────────────────────────────────────────────────────────────────────────────
+
+FLUJO RECOMENDADO:
+
+  /Analizador           → Análisis (10-15 min)
+       ↓                   [genera: [agente]-analisis.md]
+  [Revisar análisis]
+       ↓
+  /Implementador v2.0   → Implementación (2-4h)
+       ↓                   [genera: REPORTE_IMPLEMENTACION_*.md]
+  [Código listo]
+       ↓
+  [Compilar e integrar]
+
+
+✅ VALIDACIONES AUTOMÁTICAS
+─────────────────────────────────────────────────────────────────────────────
+
+El comando verifica:
+  ✓ Documento existe
+  ✓ Es accesible
+  ✓ Permisos de lectura
+  ✓ Permisos de escritura en carpeta
+  ✓ Sección existe
+  ✓ Espacio en disco
+
+Si algo falla → Error específico reportado
+
+
+🎁 VENTAJAS vs MANUAL
+─────────────────────────────────────────────────────────────────────────────
+
+MANUAL (antes):
+  ❌ Seguir ANALISIS.txt paso a paso
+  ❌ 30-45 minutos de trabajo
+  ❌ Propenso a errores
+  ❌ Difícil de organizar
+
+AUTOMÁTICO (ahora):
+  ✅ /Analizador ejecuta todo
+  ✅ 10-15 minutos
+  ✅ Exhaustivo y completo
+  ✅ Organizado automáticamente
+  ✅ Versionado
+  ✅ Guardado en lugar correcto
+
+
+═══════════════════════════════════════════════════════════════════════════════
+
+RESUMEN:
+
+/Analizador = ANALISIS.txt en comando interactivo
+
+3 preguntas → Análisis exhaustivo → Archivo en carpeta original
+
+🟢 PRODUCTION READY - USO INMEDIATO
+
+═══════════════════════════════════════════════════════════════════════════════
+
+¿Listo para usar?
+
+  /Analizador
+
+¡Disfruta! 🚀

@@ -1,0 +1,287 @@
+{
+  "skill": {
+    "id": "vrm-quality-pipeline",
+    "name": "VRM Quality Pipeline",
+    "version": "1.0.0",
+    "description": "Skill autónomo para ejecutar ciclo completo de análisis, implementación y validación",
+    "type": "orchestration",
+    "target_agents": [
+      "Claude Code",
+      "Antigravity IDE",
+      "OpenAI Assistants",
+      "Other AI Agents"
+    ],
+    "compatible_platforms": [
+      "VS Code",
+      "Antigravity IDE",
+      "Claude Code Web",
+      "Claude Code Desktop"
+    ]
+  },
+  "pipeline": {
+    "name": "vrm-quality-pipeline",
+    "stages": [
+      {
+        "id": "analyzer",
+        "name": "Fase 1: Analizador",
+        "description": "Valida completitud del documento técnico",
+        "input": {
+          "type": "markdown",
+          "required_file": "*.md",
+          "required_sections": [
+            "Diseño Funcional",
+            "Diseño Técnico",
+            "Decisiones Tecnológicas",
+            "Plan de Implementación",
+            "Riesgos y Cuellos de Botella",
+            "Estrategia de Testing"
+          ]
+        },
+        "output": {
+          "type": "json",
+          "structure": {
+            "status": "valid|invalid",
+            "ambigüedades": [
+              {
+                "sección": "string",
+                "descripción": "string",
+                "severidad": "alta|media|baja"
+              }
+            ],
+            "puede_continuar": "boolean"
+          }
+        },
+        "criteria": {
+          "pass": [
+            "Todas las secciones presentes",
+            "Sin contradicciones técnicas",
+            "Plan es accionable",
+            "Arquitectura es clara"
+          ],
+          "fail": [
+            "Falta sección crítica",
+            "Contradicciones detectadas",
+            "Ambigüedades no resueltas"
+          ]
+        }
+      },
+      {
+        "id": "implementador",
+        "name": "Fase 2: Implementador",
+        "description": "Genera código completo y estructurado",
+        "input": {
+          "type": "json",
+          "required_from_previous_stage": true,
+          "documento_técnico": "documento_técnico.md"
+        },
+        "output": {
+          "type": "code",
+          "structure": {
+            "componentes": [
+              {
+                "nombre": "string",
+                "archivos": ["string"],
+                "responsabilidad": "string"
+              }
+            ],
+            "estructura_carpetas": "tree",
+            "codigo_completo": "string"
+          }
+        },
+        "constraints": {
+          "no_redesign": true,
+          "no_extra_features": true,
+          "follow_spec_exactly": true,
+          "code_quality": "production-ready"
+        },
+        "validation": {
+          "compilable": true,
+          "error_handling": true,
+          "input_validation": true,
+          "comments_on_complex_logic": true
+        }
+      },
+      {
+        "id": "validador",
+        "name": "Fase 3: Validador",
+        "description": "Code review contra especificación",
+        "input": {
+          "code": "output_from_implementador",
+          "spec": "documento_técnico_original.md"
+        },
+        "output": {
+          "type": "json",
+          "structure": {
+            "decision": "aprobado|rechazado",
+            "issues": [
+              {
+                "id": "ISSUE_XXX",
+                "descripción": "string",
+                "severidad": "crítico|importante|mejora",
+                "tipo": "arquitectura|lógica|código|integración|performance",
+                "recomendación": "string",
+                "línea": "number (opcional)"
+              }
+            ],
+            "resumen": "string"
+          }
+        },
+        "evaluation_criteria": {
+          "functional_compliance": "¿Está TODO implementado?",
+          "architecture_respect": "¿Se respeta la arquitectura?",
+          "code_quality": "Claridad, modularidad, errores",
+          "edge_cases": "¿Edge cases contemplados?",
+          "integration": "¿Integraciones correctas?"
+        },
+        "approval_rules": {
+          "pass_conditions": [
+            "0 issues críticos",
+            "Implementación cumple lo esencial del documento"
+          ],
+          "fail_conditions": [
+            "1+ issues críticos",
+            "Múltiples importantes que comprometen el sistema"
+          ]
+        }
+      },
+      {
+        "id": "corrector",
+        "name": "Fase 4: Corrector",
+        "description": "Corrige issues detectados",
+        "input": {
+          "code": "implementación_anterior",
+          "issues": "issues_del_validador.json"
+        },
+        "output": {
+          "type": "json",
+          "structure": {
+            "status": "fixed|partial",
+            "changes": [
+              {
+                "issue_id": "string",
+                "action": "fixed|skipped|partial",
+                "descripción": "string"
+              }
+            ],
+            "código_actualizado": "string",
+            "notas": "string"
+          }
+        },
+        "priority_order": [
+          "crítico",
+          "importante",
+          "mejora"
+        ],
+        "constraints": {
+          "no_refactor_unrelated_code": true,
+          "maintain_architecture": true,
+          "no_new_bugs": true
+        }
+      }
+    ],
+    "loop_control": {
+      "max_iterations": 3,
+      "condition": "decisions === 'rechazado'",
+      "stages_in_loop": ["corrector", "validador"],
+      "exit_conditions": [
+        "validador.decision === 'aprobado'",
+        "iteraciones >= max_iterations"
+      ]
+    }
+  },
+  "execution": {
+    "default_timeouts": {
+      "analyzer": "15 minutos",
+      "implementador": "60-90 minutos",
+      "validador": "30-45 minutos",
+      "corrector": "30-60 minutos",
+      "total_pipeline": "3-4 horas"
+    },
+    "parallel_execution": false,
+    "output_directory": {
+      "default": "${PROJECT_ROOT}/FASE_X/DiaX-Y/implementacion/",
+      "logs": "${OUTPUT_DIR}/logs/",
+      "code": "${OUTPUT_DIR}/codigo/",
+      "reports": "${OUTPUT_DIR}/reports/"
+    },
+    "artifact_types": [
+      "código_implementado.dart",
+      "issues_detectados.json",
+      "issues_corregidos.json",
+      "cambios_implementados.md",
+      "validacion_final.md",
+      "loop_history.json",
+      "execution_log.json"
+    ]
+  },
+  "configuration_options": {
+    "lenguaje": {
+      "type": "enum",
+      "options": ["dart", "python", "javascript", "typescript"],
+      "default": "dart"
+    },
+    "proyecto_tipo": {
+      "type": "enum",
+      "options": ["flutter", "web", "backend", "generic"],
+      "default": "flutter"
+    },
+    "max_loops": {
+      "type": "number",
+      "min": 1,
+      "max": 5,
+      "default": 3
+    },
+    "generar_tests": {
+      "type": "boolean",
+      "default": true
+    },
+    "generar_documentación": {
+      "type": "boolean",
+      "default": true
+    },
+    "nivel_estrictez": {
+      "type": "enum",
+      "options": ["strict", "normal", "lenient"],
+      "default": "strict"
+    }
+  },
+  "error_handling": {
+    "documento_incompleto": {
+      "error_code": "ANALYZER_INCOMPLETE",
+      "action": "stop_and_report",
+      "message": "El documento técnico está incompleto. Ejecutá ANALISIS primero."
+    },
+    "demasiados_loops": {
+      "error_code": "LOOP_MAX_EXCEEDED",
+      "action": "escalate_and_report",
+      "message": "Se excedió el máximo de loops. Clarificá el documento con PM."
+    },
+    "spec_no_respetar": {
+      "error_code": "SPEC_COMPLIANCE_FAILED",
+      "action": "corrector_retry",
+      "message": "La implementación no respeta la especificación. CORRECTOR reintentará."
+    }
+  },
+  "integration": {
+    "pre_requisites": [
+      "Documento técnico completo",
+      "Proyecto inicializado",
+      "Dependencias instaladas",
+      "Sin conflictos git pendientes"
+    ],
+    "output_formats": {
+      "código": ["dart", "json", "markdown"],
+      "reportes": ["json", "markdown", "html"],
+      "logs": ["json", "txt"]
+    },
+    "webhook_support": true,
+    "api_endpoint": "https://api.vrm-pipeline.local/v1/execute"
+  },
+  "metadata": {
+    "created_at": "2026-04-08",
+    "last_updated": "2026-04-08",
+    "status": "production-ready",
+    "maintainer": "VRM Development Team",
+    "documentation": "docs/skills/vrm-quality-pipeline-skill.md"
+  }
+}

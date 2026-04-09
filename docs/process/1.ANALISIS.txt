@@ -1,0 +1,114 @@
+PASO 0: 
+pide los valores de DOC, PASO y AGENTE
+
+Actúa como un ingeniero de software senior, arquitecto de sistemas y especialista en diseño de producto con enfoque en ejecución real.
+
+Contexto:
+Estoy desarrollando un sistema llamado "LUMIS". Tengo un documento de planificación general.
+
+Tu tarea NO es analizar todo el sistema, sino enfocarte EXCLUSIVAMENTE en una parte específica.
+
+Entrada:
+* pide los valores de DOC, PASO y AGENTE
+* Documento: [DOC]
+* Paso: [PASO]
+
+Objetivo:
+Quiero que hagas un análisis exhaustivo y accionable únicamente de este paso, con nivel de profundidad suficiente como para que un equipo pueda implementarlo sin ambigüedades.
+
+---
+
+Estructura obligatoria de la respuesta:
+
+1. Comprensión del paso
+
+* Explica qué problema resuelve este paso
+* Qué inputs recibe
+* Qué outputs debe generar
+* Qué rol cumple dentro del sistema
+
+2. Supuestos y ambigüedades
+
+* Detecta TODO lo que no está definido o es ambiguo
+* Lista preguntas críticas que deberían resolverse antes de implementar
+
+3. Diseño funcional
+
+* Flujo completo paso a paso (tipo pipeline)
+* Casos normales
+* Edge cases
+* Manejo de errores
+
+4. Diseño técnico
+
+* Arquitectura sugerida
+* Componentes involucrados
+* APIs / endpoints necesarios
+* Modelos de datos (schemas sugeridos)
+* Integraciones externas (si aplica)
+
+5. Decisiones tecnológicas
+
+* Lenguajes / frameworks recomendados
+* Librerías o herramientas clave
+* Justificación técnica (no genérica)
+
+6. Plan de implementación
+
+* Desglose en tareas pequeñas (tipo backlog técnico)
+* Orden recomendado de desarrollo
+* Dependencias entre tareas
+
+7. Riesgos y cuellos de botella
+
+* Técnicos
+* Operativos
+* Escalabilidad
+* Costos
+
+8. Métricas de éxito
+
+* Cómo validar que este paso está bien implementado
+* KPIs técnicos y de negocio
+
+9. Estrategia de testing
+
+* Unit tests
+* Integration tests
+* Casos críticos a validar
+
+10. Optimización y escalabilidad futura
+
+* Qué problemas aparecerán al escalar
+* Cómo dejar preparado el diseño desde ahora
+
+---
+
+Reglas importantes:
+
+* NO des respuestas genéricas
+* NO resumas
+* NO expliques teoría innecesaria
+* TODO debe ser accionable y específico
+* Si algo no está definido, NO lo inventes: señálalo explícitamente
+
+Formato:
+
+* Usa listas, bullets y estructura clara
+* Piensa como si esto fuera a implementarse mañana por un equipo real
+
+Nivel de exigencia:
+Quiero que respondas como si esto fuera a ser revisado por un CTO extremadamente exigente.
+Cualquier omisión o ambigüedad es un error.
+
+IMPORTANTE:
+Guarda este analisis en el archivo /[PASO]/analisis-[AGENTE].md Estandariza este análisis en la siguiente estructura:
+- Diseño funcional
+- Diseño técnico
+- Decisiones
+- Riesgos
+- Plan
+
+
+
+

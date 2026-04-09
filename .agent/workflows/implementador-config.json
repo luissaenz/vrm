@@ -1,0 +1,233 @@
+{
+  "command": {
+    "id": "vrm.implementador",
+    "name": "Implementador",
+    "displayName": "🚀 VRM Implementador - Quality Pipeline",
+    "description": "Inicia el pipeline de análisis, implementación y validación con entrada interactiva",
+    "category": "VRM Pipeline",
+    "icon": "▶️",
+    "enabled": true,
+    "version": "1.0.0"
+  },
+  "execution": {
+    "type": "interactive",
+    "prompt_file": "IMPLEMENTADOR-PROMPT.txt",
+    "mode": "conversational",
+    "require_confirmation": true
+  },
+  "parameters": {
+    "document_path": {
+      "type": "string",
+      "required": true,
+      "description": "Ruta del documento técnico a analizar",
+      "placeholder": "docs/mvp-Definition.md",
+      "validation": "file_exists & is_markdown",
+      "examples": [
+        "docs/mvp-Definition.md",
+        "FASE_1/Dia4-5/analisis-FINAL.md",
+        "FASE_1/Dia1-2/analisis-FINAL.md"
+      ]
+    },
+    "language": {
+      "type": "enum",
+      "required": true,
+      "description": "Lenguaje de programación",
+      "default": "dart",
+      "options": [
+        {
+          "value": "dart",
+          "label": "🔹 Dart (Flutter)",
+          "description": "Para aplicaciones móviles"
+        },
+        {
+          "value": "python",
+          "label": "🟦 Python",
+          "description": "Para backend y scripts"
+        },
+        {
+          "value": "javascript",
+          "label": "🟨 JavaScript",
+          "description": "Para web y Node.js"
+        },
+        {
+          "value": "typescript",
+          "label": "🔷 TypeScript",
+          "description": "Para web avanzado"
+        }
+      ]
+    },
+    "project_type": {
+      "type": "enum",
+      "required": true,
+      "description": "Tipo de proyecto",
+      "default": "flutter",
+      "options": [
+        {
+          "value": "flutter",
+          "label": "📱 Flutter",
+          "description": "Apps móviles"
+        },
+        {
+          "value": "web",
+          "label": "🌐 Web",
+          "description": "Aplicaciones web"
+        },
+        {
+          "value": "backend",
+          "label": "⚙️ Backend",
+          "description": "Servidores y APIs"
+        },
+        {
+          "value": "generic",
+          "label": "📦 Generic",
+          "description": "Otro tipo de proyecto"
+        }
+      ]
+    },
+    "max_loops": {
+      "type": "number",
+      "required": false,
+      "description": "Máximo de loops de corrección",
+      "default": 3,
+      "min": 1,
+      "max": 5,
+      "options": [
+        {
+          "value": 1,
+          "label": "1 - Sin reintentos"
+        },
+        {
+          "value": 2,
+          "label": "2 - 1 reintento"
+        },
+        {
+          "value": 3,
+          "label": "3 - 2 reintentos (Recomendado)"
+        },
+        {
+          "value": 4,
+          "label": "4 - 3 reintentos"
+        },
+        {
+          "value": 5,
+          "label": "5 - 4 reintentos"
+        }
+      ]
+    },
+    "generate_tests": {
+      "type": "boolean",
+      "required": false,
+      "description": "Generar tests automáticamente",
+      "default": true
+    },
+    "generate_documentation": {
+      "type": "boolean",
+      "required": false,
+      "description": "Generar documentación",
+      "default": true
+    },
+    "strictness_level": {
+      "type": "enum",
+      "required": false,
+      "description": "Nivel de estrictez en validación",
+      "default": "strict",
+      "options": [
+        {
+          "value": "strict",
+          "label": "🔴 Strict (Máxima exigencia)",
+          "description": "Para producción"
+        },
+        {
+          "value": "normal",
+          "label": "🟡 Normal (Balanceado)",
+          "description": "Recomendado"
+        },
+        {
+          "value": "lenient",
+          "label": "🟢 Lenient (Permisivo)",
+          "description": "Menos exigente"
+        }
+      ]
+    },
+    "output_directory": {
+      "type": "string",
+      "required": false,
+      "description": "Directorio de salida",
+      "default": "FASE_1/Dia4-5/implementacion",
+      "dynamic": true,
+      "placeholder": "Auto-detectado según fase"
+    }
+  },
+  "pre_execution_checks": {
+    "document_exists": true,
+    "document_is_markdown": true,
+    "document_has_required_sections": true,
+    "project_initialized": true,
+    "write_permissions": true,
+    "dependencies_installed": true,
+    "no_merge_conflicts": true
+  },
+  "execution_flow": {
+    "step_1_collect_inputs": {
+      "type": "interactive",
+      "description": "Recopilar parámetros del usuario"
+    },
+    "step_2_validate_inputs": {
+      "type": "validation",
+      "description": "Validar que todos los inputs sean correctos"
+    },
+    "step_3_preflight_checks": {
+      "type": "system_check",
+      "description": "Verificar estado del sistema y proyecto"
+    },
+    "step_4_execute_skill": {
+      "type": "skill_execution",
+      "skill": "vrm-quality-pipeline",
+      "description": "Ejecutar el skill con los parámetros recopilados"
+    },
+    "step_5_monitor_execution": {
+      "type": "monitoring",
+      "description": "Mostrar progreso en tiempo real"
+    },
+    "step_6_generate_report": {
+      "type": "reporting",
+      "description": "Generar reporte final"
+    }
+  },
+  "output": {
+    "type": "structured",
+    "format": "markdown",
+    "includes": [
+      "execution_summary",
+      "statistics",
+      "generated_files",
+      "next_steps",
+      "troubleshooting_links"
+    ]
+  },
+  "shortcuts": {
+    "windows": "Ctrl+Shift+I",
+    "mac": "Cmd+Shift+I",
+    "linux": "Ctrl+Shift+I"
+  },
+  "related_commands": [
+    "vrm.validador",
+    "vrm.corrector",
+    "vrm.documentador"
+  ],
+  "documentation": {
+    "readme": ".agent/workflows/implementador.md",
+    "examples": ".agent/workflows/INVOCATION_EXAMPLES.md",
+    "skill_docs": "docs/skills/vrm-quality-pipeline-skill.md"
+  },
+  "metadata": {
+    "created_at": "2026-04-08",
+    "version": "1.0.0",
+    "status": "production-ready",
+    "maintainer": "VRM Development Team",
+    "compatible_with": [
+      "Claude Code",
+      "Antigravity IDE"
+    ]
+  }
+}

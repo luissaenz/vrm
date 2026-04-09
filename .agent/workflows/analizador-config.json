@@ -1,0 +1,205 @@
+{
+  "command": {
+    "id": "vrm.analizador",
+    "name": "Analizador",
+    "displayName": "🔍 VRM Analizador - Análisis Exhaustivo",
+    "description": "Análisis exhaustivo de especificaciones siguiendo proceso ANALISIS.txt. Guarda resultado en carpeta original con versionado automático",
+    "category": "VRM Analysis",
+    "icon": "🔍",
+    "enabled": true,
+    "version": "1.0.0"
+  },
+  "execution": {
+    "type": "interactive",
+    "prompt_file": "ANALIZADOR-PROMPT.txt",
+    "mode": "conversational",
+    "require_confirmation": true
+  },
+  "parameters": {
+    "document_path": {
+      "type": "string",
+      "required": true,
+      "description": "Ruta del documento a analizar",
+      "placeholder": "docs/mvp-Definition.md",
+      "validation": "file_exists | is_text",
+      "examples": [
+        "docs/mvp-Definition.md",
+        "FASE_1/Dia4-5/especificacion.md",
+        "FASE_1/Dia4-5/analisis-FINAL.md"
+      ]
+    },
+    "section": {
+      "type": "string",
+      "required": true,
+      "description": "Sección específica a analizar",
+      "placeholder": "FASE 1",
+      "examples": [
+        "FASE 1",
+        "Dia 4-5",
+        "Grabación de Video",
+        "Feature: Auto-Stitch",
+        "Componente: Camera Controller"
+      ]
+    },
+    "agent_name": {
+      "type": "string",
+      "required": false,
+      "description": "Nombre del agente IA (para el nombre del archivo)",
+      "default": "auto",
+      "placeholder": "claude",
+      "notes": "Si es 'auto', se detecta automáticamente"
+    }
+  },
+  "output": {
+    "type": "file",
+    "format": "markdown",
+    "filename_pattern": "[section]-analisis-[agent].md",
+    "location": "same_as_input",
+    "versioning": {
+      "enabled": true,
+      "pattern": "[section]-analisis-[agent]([N]).md",
+      "auto_increment": true,
+      "overwrite": false,
+      "notes": "Si existe, crea (1), (2), (3), etc. automáticamente"
+    },
+    "metadata": {
+      "includes": [
+        "document_source",
+        "section_analyzed",
+        "agent_name",
+        "timestamp",
+        "version"
+      ]
+    }
+  },
+  "analysis_process": {
+    "based_on": "docs/process/ANALISIS.txt",
+    "sections": [
+      {
+        "number": 1,
+        "name": "Comprensión del Paso",
+        "description": "Explica qué problema resuelve, inputs, outputs, rol"
+      },
+      {
+        "number": 2,
+        "name": "Supuestos y Ambigüedades",
+        "description": "Detecta TODO lo no definido, preguntas críticas"
+      },
+      {
+        "number": 3,
+        "name": "Diseño Funcional",
+        "description": "Flujo completo, casos normales, edge cases, manejo de errores"
+      },
+      {
+        "number": 4,
+        "name": "Diseño Técnico",
+        "description": "Arquitectura, componentes, APIs, modelos de datos, integraciones"
+      },
+      {
+        "number": 5,
+        "name": "Decisiones Tecnológicas",
+        "description": "Lenguajes, frameworks, librerías, justificación técnica"
+      },
+      {
+        "number": 6,
+        "name": "Plan de Implementación",
+        "description": "Tareas pequeñas, orden, dependencias"
+      },
+      {
+        "number": 7,
+        "name": "Riesgos y Cuellos de Botella",
+        "description": "Técnicos, operativos, escalabilidad, costos"
+      },
+      {
+        "number": 8,
+        "name": "Métricas de Éxito",
+        "description": "Validación, KPIs técnicos y de negocio"
+      },
+      {
+        "number": 9,
+        "name": "Estrategia de Testing",
+        "description": "Unit tests, integration tests, casos críticos"
+      },
+      {
+        "number": 10,
+        "name": "Optimización y Escalabilidad Futura",
+        "description": "Problemas al escalar, preparación desde ahora"
+      }
+    ]
+  },
+  "pre_execution_checks": {
+    "document_exists": true,
+    "is_readable": true,
+    "contains_section": true,
+    "output_directory_writable": true,
+    "valid_filename": true
+  },
+  "execution_flow": {
+    "step_1_collect_inputs": {
+      "type": "interactive",
+      "description": "Recopilar documento y sección"
+    },
+    "step_2_validate_inputs": {
+      "type": "validation",
+      "description": "Validar que archivo y sección existen"
+    },
+    "step_3_preflight_checks": {
+      "type": "system_check",
+      "description": "Verificar permisos y espacio en disco"
+    },
+    "step_4_execute_analysis": {
+      "type": "analysis_execution",
+      "description": "Ejecutar análisis de 10 secciones"
+    },
+    "step_5_check_versioning": {
+      "type": "file_management",
+      "description": "Verificar si archivo existe, incrementar versión si necesario"
+    },
+    "step_6_write_output": {
+      "type": "file_write",
+      "description": "Guardar análisis en archivo"
+    },
+    "step_7_confirm_success": {
+      "type": "notification",
+      "description": "Confirmar guardado exitoso"
+    }
+  },
+  "output_example": {
+    "filename": "docs/claude-analisis.md",
+    "content_preview": "# 📊 Análisis: FASE 1\n\n**Documento:** docs/mvp-Definition.md\n**Sección:** FASE 1\n**Agente:** claude\n**Fecha:** 2026-04-08T14:30:15Z\n\n---\n\n## 1. Comprensión del Paso\n[Análisis detallado...]\n\n## 2. Supuestos y Ambigüedades\n[Ambigüedades encontradas...]\n\n[... 8 secciones más ...]\n\n---\n\n✅ Análisis completado exitosamente"
+  },
+  "versioning_examples": {
+    "first_run": "docs/FASE_1-analisis-claude.md",
+    "second_run": "docs/FASE_1-analisis-claude(1).md",
+    "third_run": "docs/FASE_1-analisis-claude(2).md",
+    "note": "Automático - NO sobrescribe archivos existentes"
+  },
+  "shortcuts": {
+    "windows": "Ctrl+Alt+A",
+    "mac": "Cmd+Alt+A",
+    "linux": "Ctrl+Alt+A",
+    "notes": "Opcional, configurar en keybindings.json"
+  },
+  "related_commands": [
+    "vrm.implementador",
+    "vrm.unificador"
+  ],
+  "documentation": {
+    "skill": "docs/skills/skill-analizador.md",
+    "command": "analizador.md",
+    "process": "docs/process/ANALISIS.txt",
+    "examples": ".agent/workflows/ANALIZADOR-PROMPT.txt"
+  },
+  "metadata": {
+    "created_at": "2026-04-08",
+    "version": "1.0.0",
+    "status": "production-ready",
+    "maintainer": "VRM Development Team",
+    "compatible_with": [
+      "Claude Code",
+      "Antigravity IDE"
+    ],
+    "based_on": "docs/process/ANALISIS.txt",
+    "output_location": "same_as_input_document"
+  }
+}

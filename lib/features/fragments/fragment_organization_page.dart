@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart';
 import '../../shared/widgets/header.dart';
 import '../../shared/widgets/step_indicator.dart';
 import '../preparation/directors_card_page.dart';
@@ -192,11 +193,14 @@ class _FragmentOrganizationPageState extends State<FragmentOrganizationPage> {
             ElevatedButton(
               onPressed: () {
                 if (widget.analysis == null) return;
+                final projectId = const Uuid().v4();
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) =>
-                        RecordingPage(analysis: widget.analysis!),
+                    builder: (context) => RecordingPage(
+                      analysis: widget.analysis!,
+                      projectId: projectId,
+                    ),
                   ),
                 );
               },

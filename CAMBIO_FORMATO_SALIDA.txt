@@ -1,0 +1,191 @@
+═══════════════════════════════════════════════════════════════════════════════
+  ✅ CAMBIO DE FORMATO DE SALIDA - /ANALIZADOR
+═══════════════════════════════════════════════════════════════════════════════
+
+🔄 CAMBIO REALIZADO
+─────────────────────────────────────────────────────────────────────────────
+
+De:
+  [agente]-analisis.md
+
+A:
+  [seccion]-analisis-[agente]([N]).md
+
+Donde:
+  [seccion] = Nombre de la sección analizada (sanitizada)
+  [agente] = Nombre del agente IA (claude, antigravity, openai, etc.)
+  [N] = Número de versión si existe (1), (2), (3), etc.
+
+
+📋 EJEMPLOS
+─────────────────────────────────────────────────────────────────────────────
+
+ANTES (v1):
+  docs/claude-analisis.md
+  docs/claude-analisis(1).md
+
+AHORA (v2):
+  docs/FASE_1-analisis-claude.md
+  docs/FASE_1-analisis-claude(1).md
+  docs/FASE_1-analisis-claude(2).md
+
+Más ejemplos:
+  • Dia_4-5-analisis-claude.md
+  • Grabacion_Video-analisis-claude.md
+  • Feature_AutoStitch-analisis-antigravity.md
+  • My_Component-analisis-openai(1).md
+
+
+✨ BENEFICIOS
+─────────────────────────────────────────────────────────────────────────────
+
+✅ CLARIDAD
+   Sabe inmediatamente qué sección se analizó
+
+✅ TRAZABILIDAD
+   Qué agente lo analizó (claude, antigravity, etc.)
+
+✅ MEJOR ORGANIZACIÓN
+   Múltiples análisis de la misma sección juntos
+
+✅ MENOS CONFUSO
+   Archivos nombrados por contenido, no solo por agente
+
+
+📁 ARCHIVOS ACTUALIZADOS
+─────────────────────────────────────────────────────────────────────────────
+
+CONFIGURACIÓN:
+  ✅ .claude/commands/analizador-config.json
+     • filename_pattern: "[section]-analisis-[agent].md"
+     • pattern versioning: "[section]-analisis-[agent]([N]).md"
+
+COMANDO:
+  ✅ .claude/commands/analizador.md
+     • Todos los ejemplos actualizados
+     • Documentación del patrón
+
+PROMPT:
+  ✅ .claude/commands/ANALIZADOR-PROMPT.txt
+     • Ejemplos con nuevo formato
+     • Explicación del patrón
+
+SKILL:
+  ✅ docs/skills/skill-analizador.md
+     • Patrón actualizado
+     • Ejemplos nuevos
+
+RESUMEN:
+  ✅ docs/skills/ANALIZADOR_SUMMARY.txt
+     • Todos los ejemplos actualizados
+
+GUÍA:
+  ✅ NUEVO_COMANDO_ANALIZADOR.txt
+     • Patrón documentado
+
+
+🎯 EJEMPLOS PRÁCTICOS
+─────────────────────────────────────────────────────────────────────────────
+
+Caso 1: Analizar FASE 1
+  Documento: docs/mvp-Definition.md
+  Sección: FASE 1
+  → Archivo: docs/FASE_1-analisis-claude.md
+
+Caso 2: Reanálisis de FASE 1
+  (misma sección, segunda vez)
+  → Archivo: docs/FASE_1-analisis-claude(1).md (automático)
+
+Caso 3: Componente específico
+  Documento: FASE_1/Dia4-5/especificacion.md
+  Sección: Grabación de Video - Captura de Frames
+  → Archivo: FASE_1/Dia4-5/Grabacion_Video_Captura-analisis-claude.md
+
+Caso 4: Con diferente agente
+  Documento: docs/features/recording.md
+  Sección: Feature Auto-Stitch
+  Agente: antigravity
+  → Archivo: docs/features/Feature_AutoStitch-analisis-antigravity.md
+
+
+🔄 VERSIONADO AUTOMÁTICO
+─────────────────────────────────────────────────────────────────────────────
+
+Múltiples análisis de la MISMA sección:
+
+Primera ejecución:
+  /Analizador
+  Documento: docs/mvp-Definition.md
+  Sección: FASE 1
+  → FASE_1-analisis-claude.md
+
+Segunda ejecución:
+  /Analizador
+  Documento: docs/mvp-Definition.md
+  Sección: FASE 1
+  → FASE_1-analisis-claude(1).md (automático, no sobrescribe)
+
+Tercera ejecución:
+  → FASE_1-analisis-claude(2).md (automático)
+
+Puedes comparar los 3 archivos para ver cómo evolucionó el análisis
+
+
+📊 SANITIZACIÓN DE NOMBRES
+─────────────────────────────────────────────────────────────────────────────
+
+El sistema sanitiza automáticamente los nombres de secciones:
+
+Entrada:                      Resultado en archivo:
+───────────────────────────────────────────────────
+"FASE 1"                   → "FASE_1-analisis-..."
+"Día 4-5"                  → "Dia_4-5-analisis-..."
+"Grabación de Video"       → "Grabacion_Video-..."
+"Feature: Auto-Stitch"     → "Feature_AutoStitch-..."
+"My Component"             → "My_Component-..."
+
+Reglas:
+  • Espacios → Guiones bajos (_)
+  • Puntuación → Removida o reemplazada
+  • Mayúsculas → Preservadas (excepto en algunos casos)
+
+
+✅ COMPATIBILIDAD
+─────────────────────────────────────────────────────────────────────────────
+
+✓ Funciona con cualquier nombre de sección
+✓ Funciona con cualquier agente IA
+✓ Versionado automático sigue funcionando
+✓ Guarda en carpeta original (no cambiado)
+✓ Sin sobrescrituras accidentales
+
+
+═══════════════════════════════════════════════════════════════════════════════
+
+RESUMEN:
+
+Formato anterior: [agente]-analisis.md
+Formato nuevo:   [seccion]-analisis-[agente]([N]).md
+
+Beneficio: Claridad inmediata sobre qué se analizó
+
+✓ Todos los archivos actualizados
+✓ Ejemplos documentados
+✓ Versionado automático integrado
+
+🟢 LISTO PARA USAR
+
+═══════════════════════════════════════════════════════════════════════════════
+
+Próxima vez que ejecutes:
+
+  /Analizador
+
+Obtendrás:
+
+  [seccion]-analisis-[agente].md
+
+Ejemplo:
+  FASE_1-analisis-claude.md ✅
+
+═══════════════════════════════════════════════════════════════════════════════

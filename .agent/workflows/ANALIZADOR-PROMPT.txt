@@ -1,0 +1,282 @@
+═══════════════════════════════════════════════════════════════════════════════
+  /ANALIZADOR - ANÁLISIS EXHAUSTIVO DE ESPECIFICACIONES (ENTRADA INTERACTIVA)
+═══════════════════════════════════════════════════════════════════════════════
+
+📋 INSTRUCCIONES
+
+Este comando ejecuta un análisis exhaustivo siguiendo el proceso de ANALISIS.txt
+y guarda el resultado automáticamente en la carpeta del documento original.
+
+─────────────────────────────────────────────────────────────────────────────
+PREGUNTA 1: ¿DOCUMENTO A ANALIZAR?
+─────────────────────────────────────────────────────────────────────────────
+
+¿De qué documento quieres obtener un análisis?
+
+Ejemplos válidos:
+  • docs/mvp-Definition.md
+  • FASE_1/Dia4-5/especificacion.md
+  • path/to/documento.md
+
+O pega el contenido directamente si prefieres.
+
+IMPORTANTE: El análisis se guardará en la MISMA CARPETA que el documento.
+
+Respuesta: [ESCRIBE LA RUTA O PEGA CONTENIDO]
+
+
+─────────────────────────────────────────────────────────────────────────────
+PREGUNTA 2: ¿QUÉ SECCIÓN ESPECÍFICA?
+─────────────────────────────────────────────────────────────────────────────
+
+¿Qué sección, fase o componente quieres que analice?
+
+Ejemplos:
+  • FASE 1
+  • Día 4-5
+  • Grabación de Video
+  • Feature: Auto-Stitch
+  • Componente: Camera Controller
+  • [Descripción libre de lo que quieres analizar]
+
+Respuesta: [NOMBRE DE LA SECCIÓN A ANALIZAR]
+
+
+─────────────────────────────────────────────────────────────────────────────
+PREGUNTA 3: CONFIRMACIÓN
+─────────────────────────────────────────────────────────────────────────────
+
+Voy a resumir lo que vas a obtener:
+
+ENTRADA:
+  • Documento: [RESPUESTA 1]
+  • Sección: [RESPUESTA 2]
+
+SALIDA:
+  • Ubicación: [Carpeta del documento]
+  • Nombre: [seccion]-analisis-[agente].md
+  • Versionado: Si existe, será (1), (2), (3), ... automático
+
+CONTENIDO DEL ANÁLISIS (10 secciones):
+  1. Comprensión del Paso
+  2. Supuestos y Ambigüedades
+  3. Diseño Funcional
+  4. Diseño Técnico
+  5. Decisiones Tecnológicas
+  6. Plan de Implementación
+  7. Riesgos y Cuellos de Botella
+  8. Métricas de Éxito
+  9. Estrategia de Testing
+  10. Optimización y Escalabilidad Futura
+
+¿CONFIRMAS? [ESCRIBE: SÍ o NO]
+
+
+═══════════════════════════════════════════════════════════════════════════════
+  RESUMEN Y EJECUCIÓN
+═══════════════════════════════════════════════════════════════════════════════
+
+Si respondiste SÍ:
+
+PASO 1: Validación Previa
+  ✓ Verificar que documento existe
+  ✓ Verificar que sección existe en documento
+  ✓ Verificar permisos de escritura en carpeta
+  → Si algo falla, reportaré error
+
+PASO 2: Ejecución del Análisis
+  Siguiendo proceso exacto de ANALISIS.txt:
+
+  ✓ Analizar comprensión del paso
+  ✓ Detectar supuestos y ambigüedades
+  ✓ Diseñar funcionalmente
+  ✓ Diseñar técnicamente
+  ✓ Justificar decisiones
+  ✓ Planificar implementación
+  ✓ Identificar riesgos
+  ✓ Definir métricas de éxito
+  ✓ Planificar testing
+  ✓ Considerar escalabilidad
+
+PASO 3: Guardado del Resultado
+  Generaré archivo con nombre:
+  [carpeta-original]/[seccion]-analisis-[agente].md
+
+  Si ya existe → automáticamente:
+  [carpeta-original]/[seccion]-analisis-[agente](1).md
+  [carpeta-original]/[seccion]-analisis-[agente](2).md
+  etc.
+
+  NO sobrescribe archivos existentes
+
+
+═══════════════════════════════════════════════════════════════════════════════
+  RESULTADO FINAL
+═══════════════════════════════════════════════════════════════════════════════
+
+Archivo generado: [carpeta-original]/[seccion]-analisis-[agente].md
+
+Contenido:
+┌──────────────────────────────────────────────────────────────┐
+│ # 📊 Análisis: [Sección]                                     │
+│                                                               │
+│ **Documento:** [ruta del documento]                          │
+│ **Sección:** [nombre de sección]                             │
+│ **Agente:** [agente IA usado]                                │
+│ **Fecha:** [timestamp]                                       │
+│                                                               │
+│ ---                                                           │
+│                                                               │
+│ ## 1. Comprensión del Paso                                   │
+│ [Análisis detallado]                                         │
+│                                                               │
+│ ## 2. Supuestos y Ambigüedades                               │
+│ [Problemas encontrados]                                      │
+│                                                               │
+│ ## 3. Diseño Funcional                                       │
+│ [Flujo, casos, edge cases]                                   │
+│                                                               │
+│ ## 4. Diseño Técnico                                         │
+│ [Arquitectura, componentes, APIs]                            │
+│                                                               │
+│ ## 5. Decisiones Tecnológicas                                │
+│ [Stack elegido y por qué]                                    │
+│                                                               │
+│ ## 6. Plan de Implementación                                 │
+│ [Tareas desglosadas]                                         │
+│                                                               │
+│ ## 7. Riesgos y Cuellos de Botella                           │
+│ [Análisis de riesgos]                                        │
+│                                                               │
+│ ## 8. Métricas de Éxito                                      │
+│ [KPIs y validación]                                          │
+│                                                               │
+│ ## 9. Estrategia de Testing                                  │
+│ [Tests recomendados]                                         │
+│                                                               │
+│ ## 10. Optimización y Escalabilidad Futura                   │
+│ [Preparación para escala]                                    │
+│                                                               │
+│ ---                                                           │
+│                                                               │
+│ ✅ Análisis completado exitosamente                          │
+└──────────────────────────────────────────────────────────────┘
+
+
+PRÓXIMOS PASOS:
+  1. Revisa el archivo generado
+  2. Si necesitas cambios → hazlos manualmente
+  3. Si quieres hacer un nuevo análisis → ejecuta /Analizador nuevamente
+     (Se creará automáticamente con número (1), (2), etc.)
+  4. Puedes usar /Implementador con este análisis como entrada
+
+
+═══════════════════════════════════════════════════════════════════════════════
+  EJEMPLOS RÁPIDOS
+═══════════════════════════════════════════════════════════════════════════════
+
+EJEMPLO 1: Analizar FASE 1 de MVP
+──────────────────────────────────
+Pregunta 1: docs/mvp-Definition.md
+Pregunta 2: FASE 1
+Pregunta 3: SÍ
+
+Resultado: docs/FASE_1-analisis-claude.md ✅
+
+
+EJEMPLO 2: Reanálisis (Versionado Automático)
+──────────────────────────────────────────────
+Primera ejecución:
+  Pregunta 1: docs/mvp-Definition.md
+  Pregunta 2: FASE 1
+  Pregunta 3: SÍ
+  → docs/FASE_1-analisis-claude.md
+
+Segunda ejecución (misma sección):
+  Pregunta 1: docs/mvp-Definition.md
+  Pregunta 2: FASE 1
+  Pregunta 3: SÍ
+  → docs/FASE_1-analisis-claude(1).md ✅ (automático)
+
+
+EJEMPLO 3: Analizar Componente
+────────────────────────────────
+Pregunta 1: FASE_1/Dia4-5/especificacion.md
+Pregunta 2: Grabación de Video - Captura de Frames
+Pregunta 3: SÍ
+
+Resultado: FASE_1/Dia4-5/Grabacion_Video_Captura-analisis-claude.md ✅
+
+
+═══════════════════════════════════════════════════════════════════════════════
+  CARACTERÍSTICAS ESPECIALES
+═══════════════════════════════════════════════════════════════════════════════
+
+✅ VERSIONADO AUTOMÁTICO
+   Si ejecutas /Analizador múltiples veces con el mismo documento y sección:
+   1ª vez: [seccion]-analisis-[agente].md
+   2ª vez: [seccion]-analisis-[agente](1).md
+   3ª vez: [seccion]-analisis-[agente](2).md
+   etc.
+
+   → No sobrescribe, mantiene historial
+
+✅ AGNÓSTICO DE UBICACIÓN
+   El análisis se guarda SIEMPRE en la carpeta donde está el documento
+
+   Documento en:     docs/mvp.md
+   Análisis en:      docs/[seccion]-analisis-[agente].md
+
+   Documento en:     FASE_1/Dia4-5/spec.md
+   Análisis en:      FASE_1/Dia4-5/[seccion]-analisis-[agente].md
+
+✅ PROCESO EXHAUSTIVO
+   Sigue exactamente los 10 pasos de ANALISIS.txt
+   Nada es omitido o abreviado
+
+✅ ACCIONABLE
+   Análisis completo y detallado para implementación
+   Sin ambigüedades ni vaguedades
+
+
+═══════════════════════════════════════════════════════════════════════════════
+  TROUBLESHOOTING
+═══════════════════════════════════════════════════════════════════════════════
+
+PROBLEMA: "Documento no existe"
+SOLUCIÓN:
+  • Verifica la ruta exacta
+  • Usa rutas absolutas si es posible
+  • O pega el contenido directamente
+
+PROBLEMA: "Sección no encontrada"
+SOLUCIÓN:
+  • Verifica que la sección esté en el documento
+  • Usa nombre exacto
+  • O describe qué quieres analizar
+
+PROBLEMA: "Permisos denegados"
+SOLUCIÓN:
+  • Verifica que tengas permisos de escritura en la carpeta
+  • Intenta ejecutar con permisos elevados
+  • O especifica otra carpeta
+
+PROBLEMA: "¿Dónde está el archivo generado?"
+SOLUCIÓN:
+  • Mismo lugar que el documento original
+  • Nombre: [seccion]-analisis-[agente].md
+  • Búscalo con Find en el IDE
+
+
+═══════════════════════════════════════════════════════════════════════════════
+                              ¡LISTO PARA COMENZAR!
+═══════════════════════════════════════════════════════════════════════════════
+
+Responde las 3 preguntas arriba y el sistema generará un análisis exhaustivo.
+
+¿LISTO? Responde la PREGUNTA 1:
+
+📄 ¿DOCUMENTO A ANALIZAR?
+(Ej: docs/mvp-Definition.md o FASE_1/Dia4-5/especificacion.md)
+
+═══════════════════════════════════════════════════════════════════════════════
