@@ -777,5 +777,47 @@
   "helpAndSupport": "Ayuda y Soporte",
   "@helpAndSupport": {
     "description": "Help and support link"
+  },
+  "fragmentDisplay": "FRAGMENTO {current} / {total}",
+  "@fragmentDisplay": {
+    "description": "Display format for current fragment out of total fragments",
+    "placeholders": {
+      "current": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "takeLabel": "Take",
+  "@takeLabel": {
+    "description": "Label for recording take number"
+  },
+  "videoLoadError": "Error al cargar el video",
+  "@videoLoadError": {
+    "description": "Error message when video fails to load"
+  },
+  "videoLoadErrorDesc": "No se pudo cargar el clip grabado. Intenta grabar de nuevo.",
+  "@videoLoadErrorDesc": {
+    "description": "Description text for video load error"
+  },
+  "acceptClipError": "Error al aceptar el clip: {error}",
+  "@acceptClipError": {
+    "description": "Error message when accepting a clip fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "rejectClipError": "Error al rechazar el clip: {error}",
+  "@rejectClipError": {
+    "description": "Error message when rejecting a clip fails",
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
   }
 }

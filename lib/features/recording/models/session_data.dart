@@ -1,3 +1,11 @@
+/// Estados posibles de un clip en el proceso de revisión.
+enum ClipStatus {
+  pending,
+  recorded,
+  approved,
+  rejected,
+}
+
 /// InformaciÃ³n de takes por chunk dentro de una sesiÃ³n de grabaciÃ³n.
 class ChunkTakeInfo {
   final int total;
@@ -26,16 +34,18 @@ class ChunkTakeInfo {
 class SessionData {
   final String projectId;
   final List<int> chunksRecorded;
-  final int currentChunk;
+  final int currentChunkIndex;
   final Map<int, ChunkTakeInfo> takesPerChunk;
+  final Map<int, String> approvedClips;
   final DateTime startedAt;
   final DateTime lastUpdatedAt;
 
   SessionData({
     required this.projectId,
     this.chunksRecorded = const [],
-    this.currentChunk = 0,
+    this.currentChunkIndex = 0,
     this.takesPerChunk = const {},
+    this.approvedClips = const {},
     required this.startedAt,
     required this.lastUpdatedAt,
   });
@@ -43,9 +53,12 @@ class SessionData {
   Map<String, dynamic> toJson() => {
     'projectId': projectId,
     'chunksRecorded': chunksRecorded,
-    'currentChunk': currentChunk,
+    'currentChunkIndex': currentChunkIndex,
     'takesPerChunk': takesPerChunk.map(
       (k, v) => MapEntry(k.toString(), v.toJson()),
+    ),
+    'approvedClips': approvedClips.map(
+      (k, v) => MapEntry(k.toString(), v),
     ),
     'startedAt': startedAt.toIso8601String(),
     'lastUpdatedAt': lastUpdatedAt.toIso8601String(),
@@ -53,18 +66,23 @@ class SessionData {
 
   factory SessionData.fromJson(Map<String, dynamic> json) {
     final rawTakes = json['takesPerChunk'] as Map<String, dynamic>?;
+    final rawApproved = json['approvedClips'] as Map<String, dynamic>?;
     return SessionData(
       projectId: json['projectId'] as String,
       chunksRecorded: (json['chunksRecorded'] as List?)
               ?.map((e) => e as int)
               .toList() ??
           [],
-      currentChunk: json['currentChunk'] as int? ?? 0,
+      currentChunkIndex: json['currentChunkIndex'] as int? ?? 0,
       takesPerChunk: rawTakes?.map(
             (k, v) => MapEntry(
               int.parse(k),
               ChunkTakeInfo.fromJson(v as Map<String, dynamic>),
             ),
+          ) ??
+          {},
+      approvedClips: rawApproved?.map(
+            (k, v) => MapEntry(int.parse(k), v as String),
           ) ??
           {},
       startedAt: DateTime.parse(json['startedAt'] as String),
@@ -74,15 +92,17 @@ class SessionData {
 
   SessionData copyWith({
     List<int>? chunksRecorded,
-    int? currentChunk,
+    int? currentChunkIndex,
     Map<int, ChunkTakeInfo>? takesPerChunk,
+    Map<int, String>? approvedClips,
     DateTime? lastUpdatedAt,
   }) {
     return SessionData(
       projectId: projectId,
       chunksRecorded: chunksRecorded ?? this.chunksRecorded,
-      currentChunk: currentChunk ?? this.currentChunk,
+      currentChunkIndex: currentChunkIndex ?? this.currentChunkIndex,
       takesPerChunk: takesPerChunk ?? this.takesPerChunk,
+      approvedClips: approvedClips ?? this.approvedClips,
       startedAt: startedAt,
       lastUpdatedAt: lastUpdatedAt ?? this.lastUpdatedAt,
     );

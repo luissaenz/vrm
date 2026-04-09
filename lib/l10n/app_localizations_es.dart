@@ -582,4 +582,29 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get helpAndSupport => 'Ayuda y Soporte';
+
+  @override
+  String fragmentDisplay(String current, String total) {
+    return 'FRAGMENTO $current / $total';
+  }
+
+  @override
+  String get takeLabel => 'Take';
+
+  @override
+  String get videoLoadError => 'Error al cargar el video';
+
+  @override
+  String get videoLoadErrorDesc =>
+      'No se pudo cargar el clip grabado. Intenta grabar de nuevo.';
+
+  @override
+  String acceptClipError(String error) {
+    return 'Error al aceptar el clip: $error';
+  }
+
+  @override
+  String rejectClipError(String error) {
+    return 'Error al rechazar el clip: $error';
+  }
 }

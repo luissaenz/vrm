@@ -1165,6 +1165,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Help & Support'**
   String get helpAndSupport;
+
+  /// Display format for current fragment out of total fragments
+  ///
+  /// In en, this message translates to:
+  /// **'FRAGMENT {current} / {total}'**
+  String fragmentDisplay(String current, String total);
+
+  /// Label for recording take number
+  ///
+  /// In en, this message translates to:
+  /// **'Take'**
+  String get takeLabel;
+
+  /// Error message when video fails to load
+  ///
+  /// In en, this message translates to:
+  /// **'Error loading video'**
+  String get videoLoadError;
+
+  /// Description text for video load error
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load the recorded clip. Try recording again.'**
+  String get videoLoadErrorDesc;
+
+  /// Error message when accepting a clip fails
+  ///
+  /// In en, this message translates to:
+  /// **'Error accepting clip: {error}'**
+  String acceptClipError(String error);
+
+  /// Error message when rejecting a clip fails
+  ///
+  /// In en, this message translates to:
+  /// **'Error rejecting clip: {error}'**
+  String rejectClipError(String error);
 }
 
 class _AppLocalizationsDelegate

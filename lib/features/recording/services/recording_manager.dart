@@ -1,5 +1,7 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:path_provider/path_provider.dart';
 import '../models/clip_metadata.dart';
 import '../models/session_data.dart';
 import '../config/camera_config.dart';
@@ -130,7 +132,7 @@ class RecordingManager {
           : [...sessionData.chunksRecorded, chunkIndex];
 
       sessionData = sessionData.copyWith(
-        currentChunk: chunkIndex,
+        currentChunkIndex: chunkIndex,
         chunksRecorded: updatedChunks,
         takesPerChunk: updatedTakes,
         lastUpdatedAt: DateTime.now(),
@@ -182,6 +184,67 @@ class RecordingManager {
       _isProcessing = false;
       return (clipPath: null, error: e);
     }
+  }
+
+  /// Acepta el clip actual y avanza al siguiente fragmento.
+  /// Actualiza sessionData con el clip aprobado y incrementa currentChunkIndex.
+  Future<void> acceptCurrentClip(String clipPath) async {
+    final currentChunk = sessionData.currentChunkIndex;
+
+    // Actualizar approvedClips
+    final updatedApproved = Map<int, String>.from(sessionData.approvedClips);
+    updatedApproved[currentChunk] = clipPath;
+
+    // Avanzar al siguiente fragmento
+    final nextChunk = currentChunk + 1;
+
+    sessionData = sessionData.copyWith(
+      currentChunkIndex: nextChunk,
+      approvedClips: updatedApproved,
+      lastUpdatedAt: DateTime.now(),
+    );
+
+    // Persistir cambios en disco
+    await _saveSessionDataToDisk();
+
+    debugPrint('[RecordingManager] Clip accepted for chunk $currentChunk: $clipPath');
+  }
+
+  /// Guarda sessionData en disco como JSON.
+  Future<void> _saveSessionDataToDisk() async {
+    try {
+      final directory = await getApplicationDocumentsDirectory();
+      final projectDir = Directory('${directory.path}/vrm_data/projects/${sessionData.projectId}');
+      await projectDir.create(recursive: true);
+
+      final sessionFile = File('${projectDir.path}/session_data.json');
+      final jsonData = jsonEncode(sessionData.toJson());
+      await sessionFile.writeAsString(jsonData);
+
+      debugPrint('[RecordingManager] Session data saved to ${sessionFile.path}');
+    } catch (e) {
+      debugPrint('[RecordingManager] Failed to save session data: $e');
+      // No lanzamos error para no bloquear el flujo de grabación
+    }
+  }
+
+  /// Rechaza el clip actual, elimina el archivo y mantiene el fragmento actual para re-grabación.
+  /// Lanza [Exception] si falla el borrado del archivo.
+  Future<void> rejectCurrentClip(String clipPath) async {
+    try {
+      final file = File(clipPath);
+      if (await file.exists()) {
+        await file.delete();
+        debugPrint('[RecordingManager] Rejected clip deleted: $clipPath');
+      } else {
+        debugPrint('[RecordingManager] Rejected clip not found: $clipPath');
+      }
+    } catch (e) {
+      debugPrint('[RecordingManager] Failed to delete rejected clip: $e');
+      // No lanzamos error, solo logueamos para no bloquear el flujo
+    }
+
+    // No actualizamos sessionData ya que permanecemos en el mismo fragmento
   }
 
   /// Limpia recursos. Llamar al salir de la página.

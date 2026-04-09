@@ -578,4 +578,29 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get helpAndSupport => 'Help & Support';
+
+  @override
+  String fragmentDisplay(String current, String total) {
+    return 'FRAGMENT $current / $total';
+  }
+
+  @override
+  String get takeLabel => 'Take';
+
+  @override
+  String get videoLoadError => 'Error loading video';
+
+  @override
+  String get videoLoadErrorDesc =>
+      'Could not load the recorded clip. Try recording again.';
+
+  @override
+  String acceptClipError(String error) {
+    return 'Error accepting clip: $error';
+  }
+
+  @override
+  String rejectClipError(String error) {
+    return 'Error rejecting clip: $error';
+  }
 }

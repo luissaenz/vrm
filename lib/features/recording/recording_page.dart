@@ -11,6 +11,7 @@ import 'models/session_data.dart';
 import 'widgets/voice_indicator.dart';
 import 'widgets/telepronter.dart';
 import 'recording_end_page.dart';
+import 'clip_review_page.dart';
 import 'services/voice_command_service.dart';
 import 'services/permission_service.dart';
 import 'services/camera_service.dart';
@@ -450,26 +451,24 @@ class _RecordingPageState extends State<RecordingPage>
     });
 
     try {
-      await _recordingManager!.stopRecording();
+      final clipPath = await _recordingManager!.stopRecording();
 
       if (mounted) {
-        // Calculate duration for feedback
-        final durationMs = _recordingManager?.currentRecordingDurationMs;
-
         setState(() {
           _recordingState = RecordingState.idle;
           _isProcessingRecording = false;
         });
 
-        // Show feedback
-        final durationStr = durationMs != null
-            ? '${(durationMs / 1000).toStringAsFixed(1)}s'
-            : '';
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Clip guardado — $durationStr'),
-            backgroundColor: const Color(0xFF2DD4BF),
-            duration: const Duration(seconds: 2),
+        // Navegar a página de revisión
+        Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (context) => ClipReviewPage(
+              clipPath: clipPath,
+              projectId: widget.projectId,
+              analysis: widget.analysis,
+              currentFragmentIndex: _activeFragmentIndex,
+              recordingManager: _recordingManager!,
+            ),
           ),
         );
       }
