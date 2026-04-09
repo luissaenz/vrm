@@ -594,6 +594,42 @@
   "@exportVideo": {
     "description": "Action to export the video"
   },
+  "videoNotAvailable": "No video available",
+  "@videoNotAvailable": {
+    "description": "Message when no video is available for export"
+  },
+  "videoFileNotFound": "Video file not found. Process again.",
+  "@videoFileNotFound": {
+    "description": "Error when video file does not exist"
+  },
+  "errorSavingVideo": "Error saving video. Try again.",
+  "@errorSavingVideo": {
+    "description": "Error message when saving to gallery fails"
+  },
+  "videoSavedGallery": "Video saved to your gallery",
+  "@videoSavedGallery": {
+    "description": "Success message when video is saved to gallery"
+  },
+  "exported": "Exported",
+  "@exported": {
+    "description": "Button text after successful export"
+  },
+  "galleryPermissionTitle": "Required Permissions",
+  "@galleryPermissionTitle": {
+    "description": "Title for gallery permission dialog"
+  },
+  "galleryPermissionMessage": "Gallery access is needed to save the video.",
+  "@galleryPermissionMessage": {
+    "description": "Message for gallery permission dialog"
+  },
+  "notNow": "Not now",
+  "@notNow": {
+    "description": "Cancel button for permission dialog"
+  },
+  "openSettings": "Open Settings",
+  "@openSettings": {
+    "description": "Button to open app settings"
+  },
   "voiceStatusPassive": "LUMIS LISTENING...",
   "voiceStatusActive": "WHAT'S THE PLAN?",
   "accountProfile": "Account Profile",

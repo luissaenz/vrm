@@ -47,6 +47,10 @@ dependencies:
 
   # Permissions
   permission_handler: ^11.3.0
+
+  # Exportación (Día 6)
+  photo_manager: ^3.5.0       # Guardado en galería nativa
+  share_plus: ^10.1.0         # Share sheet nativo
   
   # Utils
   intl: ^0.20.2

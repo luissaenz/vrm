@@ -7,9 +7,9 @@
 1.  **Día 1-2: Grabación Crítica** (Captura de clips .mp4 en disco) -> ✅ COMPLETADO
 2.  **Día 3: Revisión Visual** (Validación de clips post-grabación) -> ✅ COMPLETADO
 3.  **Día 4-5: Auto-Stitch** (Concatenación vía FFmpeg) -> ✅ COMPLETADO
-4.  **Día 6: Exportación** (Galería y Share Sheet) -> ⏳ PENDIENTE (**PRÓXIMO HITO**)
+4.  **Día 6: Exportación** (Galería y Share Sheet) -> ✅ COMPLETADO
 5.  **Día 7-8: Persistencia Local Offline** (Gestión de proyectos/sesiones) -> ✅ COMPLETADO
-6.  **Día 9-10: IA Offline / Fallback** (Generación de guiones local) -> ⏳ PENDIENTE
+6.  **Día 9-10: IA Offline / Fallback** (Generación de guiones local) -> ⏳ PENDIENTE (**PRÓXIMO HITO**)
 
 **Dependencias Críticas:**
 - La Revisión (Día 3) depende de que los archivos se graben correctamente (Día 1-2).
@@ -25,7 +25,8 @@
 - **Revisión (F9):** `clip_review_page.dart` permite previsualizar clips, aceptarlos o repetirlos.
 - **Motor de Stitching (F10):** `FFmpegStitcherService` implementado con soporte para *stream copy* (rápido) y *re-encoding* (fallback).
 - **Persistencia de Sesión (F7-8):** `RecordingManager` guarda automáticamente `session_data.json` en disco ante cada cambio (clips aprobados, progreso de grabación).
-- **Servicios Core:** `RecordingManager`, `ClipStorageService`, `CameraService` y `PermissionService` estabilizados.
+- **Exportación (F11):** `ExportService` permite guardar el video final en la galería nativa y disparar el share sheet.
+- **Servicios Core:** `RecordingManager`, `ClipStorageService`, `CameraService`, `PermissionService` y `ExportService` estabilizados.
 - **Modelos de Datos:** `ProjectState`, `SessionData`, `AssetManifest` y `ScriptBundle` definidos y con soporte JSON.
 
 ### ⚠️ Parcialmente Implementado
@@ -33,7 +34,6 @@
 - **Teleprompter (F6-F7):** Integrado en la grabación pero pendiente de refinamientos finales de sincronización con la voz.
 
 ### 🔴 No existe aún
-- **Exportación (F11):** No hay integración con `photo_manager` ni `share_plus`.
 - **IA Fallback (F4-F5):** Pendiente implementar la generación de guiones basada en templates locales.
 
 ---
@@ -58,6 +58,8 @@
 - `ffmpeg_kit_flutter`: ^6.0.3
 - `path_provider`, `path`, `sqflite`, `shared_preferences`.
 - `permission_handler`, `intl`, `uuid`.
+- `photo_manager`: ^3.5.0
+- `share_plus`: ^10.1.0
 
 ---
 
@@ -66,6 +68,8 @@
 - **Persistencia "Hot":** La sesión se guarda en cada "Accept" de clip para prevenir pérdida de progreso por crash o salida accidental.
 - **Desacoplamiento de Hardware:** El `CameraService` abstrae la complejidad de la cámara nativa, permitiendo al `RecordingManager` centrarse en el flujo de negocio.
 - **Fallback de Re-encoding:** Si la unión rápida de streams falla, se intenta un re-encodificado ultra-rápido para asegurar que el video final siempre se genere.
+- **Secuencia Exportación Segura:** Se prioriza el guardado en galería antes de abrir el share sheet para asegurar la persistencia local incluso si el usuario cancela la distribución.
+- **Compartición vía Cache:** En Android, se copia el video al directorio temporal para cumplir con los requisitos del `FileProvider` de `share_plus`, evitando crashes al compartir desde el sandbox.
 
 ---
 
@@ -77,6 +81,7 @@
 | Día 3 | ✅ | `clip_review_page.dart`, `recording_manager.dart` | Implementación de revisión obligatoria post-toma. | Soporta auto-accept de 3s. |
 | Día 4-5 | ✅ | `ffmpeg_stitcher_service.dart`, `stitcher_plugin.dart` | Uso de FFmpeg para unión de clips. | Soporta re-encoding fallback. |
 | Día 7-8 | ✅ | `session_data.dart`, `recording_manager.dart` | Persistencia JSON automática en disco. | Adelantado para mayor robustez. |
+| Día 6 | ✅ | `export_service.dart`, `recording_end_page.dart` | Guardado en galería y share sheet nativo. | Implementado según Blueprint definitivo. |
 
 ---
 
@@ -85,7 +90,7 @@
 - [x] La pantalla de revisión reproduce el video grabado inmediatamente.
 - [x] La unión de clips genera un video único `final.mp4` reproducible.
 - [x] El proceso de sesión se recupera tras cerrar y abrir la app (vía `session_data.json`).
-- [ ] El video final se guarda en la galería de fotos del dispositivo (Día 6).
+- [x] El video final se guarda en la galería de fotos del dispositivo (Día 6).
 - [ ] No hay fugas de memoria (leaks) tras múltiples ciclos de grabación/revisión.
 
 ---

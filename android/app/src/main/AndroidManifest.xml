@@ -4,6 +4,11 @@
     <uses-feature android:name="android.hardware.camera" android:required="false" />
     <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Para Android 13+ (API 33+): acceso a video -->
+    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
+    <!-- Para Android 9 y anterior (API < 29): escritura externa -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28" />
     <application
         android:label="VRM Atomic Camera"
         android:name="${applicationName}"
@@ -48,6 +53,10 @@
         </intent>
         <intent>
             <action android:name="android.speech.RecognitionService" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.SEND" />
+            <data android:mimeType="video/*" />
         </intent>
     </queries>
 </manifest>

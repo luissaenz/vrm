@@ -890,6 +890,60 @@ abstract class AppLocalizations {
   /// **'Export Video'**
   String get exportVideo;
 
+  /// Message when no video is available for export
+  ///
+  /// In en, this message translates to:
+  /// **'No video available'**
+  String get videoNotAvailable;
+
+  /// Error when video file does not exist
+  ///
+  /// In en, this message translates to:
+  /// **'Video file not found. Process again.'**
+  String get videoFileNotFound;
+
+  /// Error message when saving to gallery fails
+  ///
+  /// In en, this message translates to:
+  /// **'Error saving video. Try again.'**
+  String get errorSavingVideo;
+
+  /// Success message when video is saved to gallery
+  ///
+  /// In en, this message translates to:
+  /// **'Video saved to your gallery'**
+  String get videoSavedGallery;
+
+  /// Button text after successful export
+  ///
+  /// In en, this message translates to:
+  /// **'Exported'**
+  String get exported;
+
+  /// Title for gallery permission dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Required Permissions'**
+  String get galleryPermissionTitle;
+
+  /// Message for gallery permission dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Gallery access is needed to save the video.'**
+  String get galleryPermissionMessage;
+
+  /// Cancel button for permission dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get notNow;
+
+  /// Button to open app settings
+  ///
+  /// In en, this message translates to:
+  /// **'Open Settings'**
+  String get openSettings;
+
   /// No description provided for @voiceStatusPassive.
   ///
   /// In en, this message translates to:

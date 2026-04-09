@@ -4,9 +4,11 @@ import 'dart:math';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:video_player/video_player.dart';
 import '../../core/theme.dart';
 import 'package:vrm_app/l10n/app_localizations.dart';
+import '../../core/services/export_service.dart';
 
 class RecordingEndPage extends StatefulWidget {
   final String? finalVideoPath;
@@ -21,6 +23,8 @@ class _RecordingEndPageState extends State<RecordingEndPage> {
   VideoPlayerController? _videoController;
   bool _isVideoInitialized = false;
   bool _isPlaying = false;
+  bool _isExporting = false;
+  bool _exportDone = false;
 
   @override
   void initState() {
@@ -70,6 +74,104 @@ class _RecordingEndPageState extends State<RecordingEndPage> {
     setState(() {
       _isPlaying = !_isPlaying;
     });
+  }
+
+  Future<void> _exportVideo() async {
+    final l10n = AppLocalizations.of(context)!;
+
+    // Guard: verificar que existe el path
+    if (widget.finalVideoPath == null) {
+      _showSnackBar(l10n.videoNotAvailable, isError: true);
+      return;
+    }
+
+    final file = File(widget.finalVideoPath!);
+    if (!file.existsSync()) {
+      _showSnackBar(l10n.videoFileNotFound, isError: true);
+      return;
+    }
+
+    if (mounted) {
+      setState(() => _isExporting = true);
+    }
+
+    try {
+      // Paso 1: Guardar en galería
+      final exportService = ExportService();
+      final result = await exportService.saveToGallery(widget.finalVideoPath!);
+
+      if (!result.success) {
+        if (result.error == 'permanently_denied') {
+          // Permiso denegado permanentemente: mostrar diálogo
+          if (mounted) {
+            final shouldOpenSettings = await _showPermissionDeniedDialog();
+            if (shouldOpenSettings) {
+              await openAppSettings();
+            }
+            // Aún así abrir share sheet (no requiere permiso de galería)
+            await exportService.shareVideo(widget.finalVideoPath!);
+          }
+        } else {
+          // Error al guardar: mostrar SnackBar y abrir share igualmente
+          if (mounted) {
+            _showSnackBar(l10n.errorSavingVideo, isError: true);
+            await exportService.shareVideo(widget.finalVideoPath!);
+          }
+        }
+      } else {
+        // Éxito: SnackBar de confirmación
+        if (mounted) {
+          _showSnackBar(l10n.videoSavedGallery);
+          // Abrir share sheet
+          await exportService.shareVideo(widget.finalVideoPath!);
+        }
+      }
+    } catch (e) {
+      debugPrint('[RecordingEndPage] Export error: $e');
+      if (mounted) {
+        _showSnackBar(l10n.errorSavingVideo, isError: true);
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isExporting = false;
+          _exportDone = true;
+        });
+      }
+    }
+  }
+
+  void _showSnackBar(String message, {bool isError = false}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: isError ? Colors.red : Colors.green,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
+
+  Future<bool> _showPermissionDeniedDialog() async {
+    final l10n = AppLocalizations.of(context)!;
+    final result = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.galleryPermissionTitle),
+        content: Text(l10n.galleryPermissionMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(l10n.notNow),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(l10n.openSettings),
+          ),
+        ],
+      ),
+    );
+    return result ?? false;
   }
 
   @override
@@ -350,6 +452,8 @@ class _RecordingEndPageState extends State<RecordingEndPage> {
   }
 
   Widget _buildBottomAction(BuildContext context, AppLocalizations l10n) {
+    final hasVideo = widget.finalVideoPath != null;
+
     return Positioned(
       bottom: 0,
       left: 0,
@@ -369,10 +473,13 @@ class _RecordingEndPageState extends State<RecordingEndPage> {
           ),
         ),
         child: ElevatedButton(
-          onPressed: () {},
+          onPressed: (_isExporting || _exportDone || !hasVideo) ? null : _exportVideo,
           style: ElevatedButton.styleFrom(
             backgroundColor: context.appColors.forest,
             foregroundColor: Colors.white,
+            disabledBackgroundColor: _exportDone
+                ? Colors.green
+                : context.appColors.forest.withValues(alpha: 0.5),
             minimumSize: const Size(double.infinity, 56),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(28),
@@ -380,20 +487,32 @@ class _RecordingEndPageState extends State<RecordingEndPage> {
             elevation: 10,
             shadowColor: context.appColors.forest.withValues(alpha: 0.1),
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                l10n.exportVideo,
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 17,
-                  fontWeight: FontWeight.w700,
+          child: _isExporting
+              ? const SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  ),
+                )
+              : Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      _exportDone ? l10n.exported : (hasVideo ? l10n.exportVideo : l10n.videoNotAvailable),
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Icon(
+                      _exportDone ? Icons.check_rounded : Icons.ios_share_rounded,
+                      size: 20,
+                    ),
+                  ],
                 ),
-              ),
-              const SizedBox(width: 12),
-              const Icon(Icons.ios_share_rounded, size: 20),
-            ],
-          ),
         ),
       ),
     );

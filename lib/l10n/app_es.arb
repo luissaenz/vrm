@@ -594,6 +594,42 @@
   "@exportVideo": {
     "description": "Action to export the video"
   },
+  "videoNotAvailable": "Sin video disponible",
+  "@videoNotAvailable": {
+    "description": "Message when no video is available for export"
+  },
+  "videoFileNotFound": "El archivo de video no fue encontrado. Vuelve a procesar.",
+  "@videoFileNotFound": {
+    "description": "Error when video file does not exist"
+  },
+  "errorSavingVideo": "Error al guardar el video. Intenta de nuevo.",
+  "@errorSavingVideo": {
+    "description": "Error message when saving to gallery fails"
+  },
+  "videoSavedGallery": "Video guardado en tu galería",
+  "@videoSavedGallery": {
+    "description": "Success message when video is saved to gallery"
+  },
+  "exported": "Exportado",
+  "@exported": {
+    "description": "Button text after successful export"
+  },
+  "galleryPermissionTitle": "Permisos requeridos",
+  "@galleryPermissionTitle": {
+    "description": "Title for gallery permission dialog"
+  },
+  "galleryPermissionMessage": "Se necesita acceso a la galería para guardar el video.",
+  "@galleryPermissionMessage": {
+    "description": "Message for gallery permission dialog"
+  },
+  "notNow": "Ahora no",
+  "@notNow": {
+    "description": "Cancel button for permission dialog"
+  },
+  "openSettings": "Ir a Configuración",
+  "@openSettings": {
+    "description": "Button to open app settings"
+  },
   "voiceStatusPassive": "LUMIS ESCUCHANDO...",
   "@voiceStatusPassive": {
     "description": "Status when voice assistant is passively listening"

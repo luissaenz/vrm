@@ -1,0 +1,98 @@
+import 'dart:io';
+import 'package:flutter/foundation.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:photo_manager/photo_manager.dart';
+import 'package:share_plus/share_plus.dart';
+
+/// Resultado de la operación de guardado en galería.
+typedef ExportResult = ({bool success, String? assetId, String? error});
+
+/// Servicio singleton para exportar videos a la galería y share sheet.
+/// Implementa el flujo del Día 6: saveToGallery → shareVideo.
+class ExportService {
+  static final ExportService _instance = ExportService._internal();
+  factory ExportService() => _instance;
+  ExportService._internal();
+
+  /// Guarda un video en la galería nativa del dispositivo.
+  ///
+  /// Flujo:
+  /// 1. Verifica que el archivo existe en disco.
+  /// 2. Verifica/solicita permisos de fotos via permission_handler.
+  /// 3. Si permiso permanentemente denegado, retorna error.
+  /// 4. Usa photo_manager para guardar el video.
+  Future<ExportResult> saveToGallery(String filePath) async {
+    // 1. Verificar existencia del archivo
+    final file = File(filePath);
+    if (!file.existsSync()) {
+      return (success: false, assetId: null, error: 'file_not_found');
+    }
+
+    // 2. Verificar permisos via permission_handler
+    final photosStatus = await Permission.photos.status;
+    if (photosStatus.isPermanentlyDenied) {
+      return (success: false, assetId: null, error: 'permanently_denied');
+    }
+
+    if (!photosStatus.isGranted) {
+      final result = await Permission.photos.request();
+      if (!result.isGranted) {
+        final isPermanentlyDenied = result.isPermanentlyDenied;
+        return (
+          success: false,
+          assetId: null,
+          error: isPermanentlyDenied ? 'permanently_denied' : 'denied'
+        );
+      }
+    }
+
+    // 3. Guardar en galería usando photo_manager
+    try {
+      // En iOS 14+ con acceso limitado, agregar directamente al álbum
+      final result = await PhotoManager.editor.saveVideo(file);
+      return (success: true, assetId: result.id, error: null);
+    } catch (e) {
+      debugPrint('[ExportService] Error saving to gallery: $e');
+      return (success: false, assetId: null, error: 'exception');
+    }
+  }
+
+  /// Abre el share sheet nativo con el video adjunto.
+  ///
+  /// Flujo:
+  /// 1. Copia el archivo a getTemporaryDirectory() (Android FileProvider).
+  /// 2. Comparte via share_plus.
+  /// 3. Limpia el archivo temporal en finally.
+  Future<void> shareVideo(String filePath, {String? subject}) async {
+    final file = File(filePath);
+    if (!file.existsSync()) {
+      debugPrint('[ExportService] shareVideo: file not found at $filePath');
+      return;
+    }
+
+    final tempDir = await getTemporaryDirectory();
+    final tempFilePath = '${tempDir.path}/vrm_final.mp4';
+
+    try {
+      // Copiar a directorio temporal para Android FileProvider
+      await file.copy(tempFilePath);
+      final xFile = XFile(tempFilePath);
+
+      await Share.shareXFiles(
+        [xFile],
+        subject: subject,
+      );
+    } finally {
+      // Limpiar archivo temporal
+      try {
+        final tempFile = File(tempFilePath);
+        if (await tempFile.exists()) {
+          await tempFile.delete();
+        }
+      } catch (e) {
+        debugPrint('[ExportService] Failed to delete temp file: $e');
+      }
+    }
+  }
+}

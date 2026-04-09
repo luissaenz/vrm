@@ -53,5 +53,7 @@
 	<string>Esta aplicación requiere acceso a la cámara para grabar videos.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Esta aplicación necesita acceso a la biblioteca de fotos para guardar y seleccionar videos.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>VRM necesita acceso a tu galería para guardar el video final de tu proyecto.</string>
 </dict>
 </plist>

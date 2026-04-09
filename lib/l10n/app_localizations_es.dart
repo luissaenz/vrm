@@ -444,6 +444,35 @@ class AppLocalizationsEs extends AppLocalizations {
   String get exportVideo => 'Exportar Video';
 
   @override
+  String get videoNotAvailable => 'Sin video disponible';
+
+  @override
+  String get videoFileNotFound =>
+      'El archivo de video no fue encontrado. Vuelve a procesar.';
+
+  @override
+  String get errorSavingVideo => 'Error al guardar el video. Intenta de nuevo.';
+
+  @override
+  String get videoSavedGallery => 'Video guardado en tu galería';
+
+  @override
+  String get exported => 'Exportado';
+
+  @override
+  String get galleryPermissionTitle => 'Permisos requeridos';
+
+  @override
+  String get galleryPermissionMessage =>
+      'Se necesita acceso a la galería para guardar el video.';
+
+  @override
+  String get notNow => 'Ahora no';
+
+  @override
+  String get openSettings => 'Ir a Configuración';
+
+  @override
   String get voiceStatusPassive => 'LUMIS ESCUCHANDO...';
 
   @override
