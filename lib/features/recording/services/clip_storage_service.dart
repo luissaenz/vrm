@@ -48,7 +48,7 @@ class ClipStorageService {
       _projectsDirName,
       projectId,
       _clipsDirName,
-      'chunk_${chunkIndex}_take_${takeNumber}.mp4',
+      'chunk_${chunkIndex}_take_$takeNumber.mp4',
     );
   }
 
@@ -104,7 +104,7 @@ class ClipStorageService {
     final clipsDir = await ensureClipsDirectory();
     final destPath = p.join(
       clipsDir.path,
-      'chunk_${chunkIndex}_take_${takeNumber}.mp4',
+      'chunk_${chunkIndex}_take_$takeNumber.mp4',
     );
     final destFile = File(destPath);
 
@@ -133,7 +133,7 @@ class ClipStorageService {
         throw FileSystemException('Recorded clip is empty (corrupt)');
       }
 
-      debugPrint('[ClipStorage] Clip saved: $destPath (${size} bytes)');
+      debugPrint('[ClipStorage] Clip saved: $destPath ($size bytes)');
 
       return destPath;
     } catch (e) {
@@ -153,7 +153,7 @@ class ClipStorageService {
         }
 
         debugPrint(
-          '[ClipStorage] Clip saved (fallback): $destPath (${size} bytes)',
+          '[ClipStorage] Clip saved (fallback): $destPath ($size bytes)',
         );
         return destPath;
       } catch (fallbackError) {
@@ -177,7 +177,7 @@ class ClipStorageService {
     final clipsDir = await ensureClipsDirectory();
     final filePath = p.join(
       clipsDir.path,
-      'chunk_${chunkIndex}_take_${takeNumber}.mp4',
+      'chunk_${chunkIndex}_take_$takeNumber.mp4',
     );
     final file = File(filePath);
     if (await file.exists()) {

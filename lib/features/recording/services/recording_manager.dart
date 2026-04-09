@@ -137,8 +137,8 @@ class RecordingManager {
       );
 
       debugPrint(
-        '[RecordingManager] Clip saved: chunk=${chunkIndex}, take=${takeNumber}, '
-        'duration=${durationMs}ms, size=${fileSize}bytes',
+        '[RecordingManager] Clip saved: chunk=$chunkIndex, take=$takeNumber, '
+        'duration=$durationMs ms, size=$fileSize bytes',
       );
 
       return savedPath;

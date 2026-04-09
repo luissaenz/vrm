@@ -274,7 +274,7 @@ class _RecordingPageState extends State<RecordingPage>
 
   void _handleVoiceCommand(String command) {
     final cmd = command.toLowerCase().trim();
-    print('[Lumis Voice] Ejecutando comando: $cmd');
+    debugPrint('[Lumis Voice] Ejecutando comando: $cmd');
 
     if (cmd.contains('grabar') || cmd.contains('record')) {
       if (_recordingState == RecordingState.idle) {
@@ -382,13 +382,11 @@ class _RecordingPageState extends State<RecordingPage>
 
     // SessionData is already initialized in initState
     // Initialize RecordingManager lazily on first use
-    if (_recordingManager == null) {
-      _recordingManager = RecordingManager(
-        camera: _cameraService,
-        storage: _clipStorageService,
-        sessionData: _sessionData!,
-      );
-    }
+    _recordingManager ??= RecordingManager(
+      camera: _cameraService,
+      storage: _clipStorageService,
+      sessionData: _sessionData!,
+    );
 
     // Check storage space before starting
     final hasSpace = await _clipStorageService.hasFreeSpace();
