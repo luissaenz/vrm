@@ -10,7 +10,7 @@ Partimos de un documento técnico consolidado que define qué construir. Tu misi
 
 ## ⛔ PROHIBICIONES ABSOLUTAS
 - **NO** preguntes qué hacer. Lee tus entradas y ejecuta. Si hay ambigüedades menores, aplica un supuesto razonable, documéntalo con un comentario `// SUPUESTO: ...` y continúa.
-- **NO** rediseñes la arquitectura. Implementa lo que dice el `D:\Develop\Personal\vrm\LAST\analisis-FINAL.md`. Si detectas un error CRÍTICO que impide la ejecución, detenete y explícalo — pero solo si es genuinamente imposible de implementar tal como está.
+- **NO** rediseñes la arquitectura. Implementa lo que dice el `analisis-FINAL.md`. Si detectas un error CRÍTICO que impide la ejecución, detenete y explícalo — pero solo si es genuinamente imposible de implementar tal como está.
 - **NO** dejes stubs, placeholders ni TODOs. Si una funcionalidad está en alcance del paso, se implementa COMPLETA. Un `// TODO: implementar` es equivalente a no haber hecho la tarea.
 - **NO** modifiques código fuera del alcance del paso actual.
 
@@ -22,7 +22,7 @@ Partimos de un documento técnico consolidado que define qué construir. Tu misi
 ## 📥 Entradas
 
 1. **Fuente de Verdad:** `D:\Develop\Personal\vrm\LAST\analisis-FINAL.md`
-2. **Contexto de Fase:** `D:\Develop\Personal\vrm\docs\estado-fase.md`
+2. **Contexto de Fase:** `D:\Develop\Personal\vrm\LAST\estado-fase.md`
 3. **Plan General:** `D:\Develop\Personal\vrm\docs\mvp-Definition.md` (referencia contextual)
 4. **Código existente del proyecto**
 
@@ -51,22 +51,71 @@ Estás construyendo un **MVP listo para producción**. Esto significa:
 
 ## 🚀 Proceso de Ejecución
 
-1. **Lectura:** Lee `D:\Develop\Personal\vrm\LAST\analisis-FINAL.md` y `D:\Develop\Personal\vrm\docs\estado-fase.md` completos antes de escribir una sola línea.
+1. **Lectura:** Lee `analisis-FINAL.md` y `estado-fase.md` completos antes de escribir una sola línea.
 2. **Plan Mental:** Identifica el orden de implementación basado en las dependencias del análisis.
 3. **Implementación:** Ejecuta tarea por tarea según el plan del análisis.
-4. **Verificación Pre-Entrega:** Antes de considerar tu trabajo terminado:
+4. **Auto-Revisión Obligatoria:** Después de implementar, ejecuta el proceso de limpieza definido abajo.
+5. **Verificación Pre-Entrega:** Valida contra la checklist final.
 
-### ✅ Checklist Pre-Entrega (OBLIGATORIO)
+---
+
+## 🧹 AUTO-REVISIÓN DE CÓDIGO (OBLIGATORIO)
+
+> [!IMPORTANT]
+> Este paso NO es opcional. Después de completar la implementación, DEBES revisar CADA archivo que creaste o modificaste buscando y corrigiendo los siguientes problemas ANTES de dar por terminada tu tarea.
+
+### Revisión archivo por archivo:
+Para cada archivo que tocaste, léelo completo y verifica:
+
+**Errores de código muerto (dead code):**
+- Código después de un `return`, `throw` o `break` que nunca se ejecuta → Eliminalo.
+- Ramas de `if/else` imposibles de alcanzar → Eliminá la rama muerta.
+- Variables asignadas pero nunca leídas → Eliminá la variable.
+
+**Imports y dependencias:**
+- Imports no utilizados → Eliminá el import.
+- Imports duplicados → Dejá solo uno.
+
+**Null-safety y operadores:**
+- Operador `??` en expresiones que no pueden ser null → Eliminá el `??` y el valor por defecto.
+- Operador `?.` en variables non-nullable → Usá `.` directo.
+- Cast innecesario con `as` cuando el tipo ya es correcto → Eliminá el cast.
+
+**Estilo y formato:**
+- Llaves innecesarias en interpolación de strings (`${variable}` cuando `$variable` alcanza) → Simplificá.
+- Variables declaradas con `var` cuando el tipo es obvio y se prefiere `final` → Usá `final`.
+- Parámetros no utilizados en callbacks → Reemplazá con `_`.
+
+**Lógica:**
+- Condiciones siempre verdaderas o siempre falsas → Simplificá o eliminá.
+- `try/catch` vacíos (que silencian errores sin hacer nada) → Agregá al menos un log o rethrow.
+
+### Proceso concreto:
+```
+Por cada archivo modificado:
+  1. Leer el archivo completo
+  2. Buscar cada patrón de la lista anterior
+  3. Corregir cada hallazgo
+  4. Releer el archivo para confirmar que la corrección no introdujo nuevos problemas
+```
+
+---
+
+## ✅ Checklist Pre-Entrega (OBLIGATORIO)
+
+Solo DESPUÉS de completar la auto-revisión:
+
 - [ ] **Cero errores nuevos** en el panel de Problems / linter / compilador.
 - [ ] **Cero warnings nuevos** (imports no usados, variables sin usar, tipos faltantes).
 - [ ] **Cero TODOs** dentro del alcance del paso.
 - [ ] **Cero stubs** (`throw UnimplementedError()`, `pass`, `// implement later`).
+- [ ] **Auto-revisión completada** — cada archivo fue releído y limpiado.
 - [ ] El código **compila** correctamente.
 - [ ] El happy path se puede **ejecutar** sin crash.
-- [ ] Cada criterio de aceptación del `D:\Develop\Personal\vrm\LAST\analisis-FINAL.md` está cubierto.
+- [ ] Cada criterio de aceptación del `analisis-FINAL.md` está cubierto.
 
 > [!IMPORTANT]
-> Si tu implementación introduce CUALQUIER entrada nueva en el panel de Problems (errores, warnings, TODOs), tu entrega se considera INCOMPLETA.
+> Si tu implementación introduce CUALQUIER entrada nueva en el panel de Problems (errores, warnings, TODOs, dead code, unused imports), tu entrega se considera INCOMPLETA.
 
 ---
 
@@ -77,7 +126,7 @@ Estás construyendo un **MVP listo para producción**. Esto significa:
 - Si una función requiere lógica compleja, impleméntala. No la dejes como stub.
 
 ### Fidelidad a la Arquitectura
-- Respeta nombres, estructuras, patrones y convenciones de `D:\Develop\Personal\vrm\docs\estado-fase.md`.
+- Respeta nombres, estructuras, patrones y convenciones de `estado-fase.md`.
 - Si el análisis dice "crear `ClipReviewScreen`", el archivo se llama así, no `ReviewClipsPage`.
 
 ### Supuestos Explícitos
@@ -98,8 +147,9 @@ Tu entregable es **código implementado directamente en el proyecto**, no un doc
 
 Al finalizar, genera un breve resumen en consola o chat con:
 - Lista de archivos creados/modificados.
+- Hallazgos corregidos durante la auto-revisión (si los hubo).
 - Supuestos aplicados (si los hubo).
-- Criterios de aceptación cubiertos (referenciando los del `D:\Develop\Personal\vrm\LAST\analisis-FINAL.md`).
+- Criterios de aceptación cubiertos (referenciando los del `analisis-FINAL.md`).
 - Cualquier issue detectado que esté fuera de tu alcance.
 
 ---
