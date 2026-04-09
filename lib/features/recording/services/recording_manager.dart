@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
+import '../../../core/services/ffmpeg_stitcher_service.dart';
 import '../models/clip_metadata.dart';
 import '../models/session_data.dart';
 import '../config/camera_config.dart';
@@ -245,6 +246,46 @@ class RecordingManager {
     }
 
     // No actualizamos sessionData ya que permanecemos en el mismo fragmento
+  }
+
+  /// Inicia el proceso de stitching de los clips aprobados.
+  /// Actualiza sessionData con el resultado.
+  Future<String> startStitching({
+    required void Function(double progress, String status) onProgress,
+    required void Function(String error) onError,
+  }) async {
+    final approvedClips = (sessionData.approvedClips.entries.toList()
+          ..sort((a, b) => a.key.compareTo(b.key)))
+        .map((e) => e.value)
+        .toList();
+    if (approvedClips.isEmpty) {
+      throw StateError('No approved clips to stitch');
+    }
+
+    final stitcherService = FFmpegStitcherService();
+    final finalVideoPath = await stitcherService.stitchVideos(
+      projectId: sessionData.projectId,
+      clipPaths: approvedClips,
+      onProgress: (progress) {
+        onProgress(progress.progress, progress.status);
+      },
+      onError: onError,
+    );
+
+    // Update session data
+    sessionData = sessionData.copyWith(
+      stitchingCompleted: true,
+      finalVideoPath: finalVideoPath,
+      stitchedAt: DateTime.now(),
+      lastUpdatedAt: DateTime.now(),
+    );
+
+    // Persist changes
+    await _saveSessionDataToDisk();
+
+    debugPrint('[RecordingManager] Stitching completed: $finalVideoPath');
+
+    return finalVideoPath;
   }
 
   /// Limpia recursos. Llamar al salir de la página.

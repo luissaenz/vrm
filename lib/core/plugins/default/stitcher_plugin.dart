@@ -1,40 +1,64 @@
+import 'package:flutter/foundation.dart';
 import '../../plugins/i_post_processor.dart';
 import '../../models/asset_manifest.dart';
+import '../../services/ffmpeg_stitcher_service.dart';
 
-/// Plugin Default: Stitcher Nativo (Placeholder para MVP)
-/// En producción usará AVFoundation (iOS) / MediaCodec (Android)
-/// Por ahora solo marca el asset como procesado
+/// Plugin Default: FFmpeg Stitcher
+/// Usa FFmpeg para concatenar clips de video en un archivo final
+///
+/// Nota: En la implementación actual del MVP, RecordingManager llama
+/// directamente a FFmpegStitcherService para simplificar el flujo.
+/// Este plugin se mantiene para futura integración con el pipeline VRM
+/// si se requiere extensibilidad por parte de otros plugins.
 class StitcherPlugin implements IPostProcessor {
+  final FFmpegStitcherService _stitcherService = FFmpegStitcherService();
+
   @override
-  String get pluginId => 'native_stitcher_v1';
+  String get pluginId => 'ffmpeg_stitcher_v1';
 
   @override
   Future<AssetManifest> enhance(AssetManifest rawAsset) async {
-    // TODO: Implementar stitching real con APIs nativas
-    // iOS: AVFoundation AVMutableComposition
-    // Android: MediaCodec + MediaMuxer
-    //
-    // Por ahora retorna el asset marcado como procesado
-    // para no bloquear el flujo del MVP
+    // Asumir que rawAsset contiene la lista de clips en metadata['clips']
+    final clips = rawAsset.metadata?['clips'] as List<String>? ?? [];
 
-    return rawAsset.copyWith(
-      status: 'processed',
-      metadata: {
-        ...?rawAsset.metadata,
-        'processed_at': DateTime.now().toIso8601String(),
-        'processor': pluginId,
-      },
-    );
+    if (clips.isEmpty) {
+      throw ArgumentError('No clips provided for stitching');
+    }
+
+    // Asumir projectId está en metadata
+    final projectId = rawAsset.metadata?['projectId'] as String? ?? 'unknown';
+
+    try {
+      final finalVideoPath = await _stitcherService.stitchVideos(
+        projectId: projectId,
+        clipPaths: clips,
+        onProgress: (progress) {
+          // Progress callback - could be exposed to UI if needed
+          debugPrint('Stitching progress: ${progress.progress} - ${progress.status}');
+        },
+        onError: (error) {
+          throw Exception('Stitching failed: $error');
+        },
+      );
+
+      return rawAsset.copyWith(
+        status: 'stitched',
+        metadata: {
+          ...?rawAsset.metadata,
+          'finalVideoPath': finalVideoPath,
+          'stitched_at': DateTime.now().toIso8601String(),
+          'processor': pluginId,
+        },
+      );
+    } catch (e) {
+      return rawAsset.copyWith(
+        status: 'stitching_failed',
+        metadata: {
+          ...?rawAsset.metadata,
+          'error': e.toString(),
+          'processor': pluginId,
+        },
+      );
+    }
   }
-
-  // TODO: Implementar método real de stitching
-  // Future<String> _stitchVideos(List<String> videoPaths) async {
-  //   // Platform-specific implementation
-  //   if (Platform.isIOS) {
-  //     return await _stitchWithAVFoundation(videoPaths);
-  //   } else if (Platform.isAndroid) {
-  //     return await _stitchWithMediaCodec(videoPaths);
-  //   }
-  //   throw UnsupportedError('Platform not supported');
-  // }
 }

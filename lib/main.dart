@@ -4,6 +4,8 @@ import 'package:vrm_app/l10n/app_localizations.dart';
 import 'package:vrm_app/core/theme.dart';
 import 'package:vrm_app/features/dashboard/dashboard_page.dart';
 import 'package:vrm_app/features/onboarding/pages/onboarding_flow.dart';
+import 'package:vrm_app/features/recording/pages/stitch_progress_page.dart';
+import 'package:vrm_app/features/recording/recording_end_page.dart';
 
 import 'package:flutter/services.dart';
 
@@ -41,7 +43,32 @@ class VRMApp extends StatelessWidget {
       home: startWithOnboarding
           ? const OnboardingFlow()
           : const DashboardPage(),
-      routes: {'/dashboard': (context) => const DashboardPage()},
+      routes: {
+        '/dashboard': (context) => const DashboardPage(),
+        '/stitch-progress': (context) => const StitchProgressPage(
+          projectId: '',
+          approvedClips: [],
+        ), // Placeholder, will be replaced by onGenerateRoute
+      },
+      onGenerateRoute: (settings) {
+        if (settings.name == '/stitch-progress') {
+          final args = settings.arguments as Map<String, dynamic>;
+          return MaterialPageRoute(
+            builder: (context) => StitchProgressPage(
+              projectId: args['projectId'] as String,
+              approvedClips: args['approvedClips'] as List<String>,
+            ),
+          );
+        } else if (settings.name == '/recording-end') {
+          final args = settings.arguments as Map<String, dynamic>?;
+          return MaterialPageRoute(
+            builder: (context) => RecordingEndPage(
+              finalVideoPath: args?['finalVideoPath'] as String?,
+            ),
+          );
+        }
+        return null;
+      },
     );
   }
 }

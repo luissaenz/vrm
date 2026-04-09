@@ -39,6 +39,9 @@ class SessionData {
   final Map<int, String> approvedClips;
   final DateTime startedAt;
   final DateTime lastUpdatedAt;
+  final bool stitchingCompleted;
+  final String? finalVideoPath;
+  final DateTime? stitchedAt;
 
   SessionData({
     required this.projectId,
@@ -48,6 +51,9 @@ class SessionData {
     this.approvedClips = const {},
     required this.startedAt,
     required this.lastUpdatedAt,
+    this.stitchingCompleted = false,
+    this.finalVideoPath,
+    this.stitchedAt,
   });
 
   Map<String, dynamic> toJson() => {
@@ -62,6 +68,9 @@ class SessionData {
     ),
     'startedAt': startedAt.toIso8601String(),
     'lastUpdatedAt': lastUpdatedAt.toIso8601String(),
+    'stitchingCompleted': stitchingCompleted,
+    'finalVideoPath': finalVideoPath,
+    'stitchedAt': stitchedAt?.toIso8601String(),
   };
 
   factory SessionData.fromJson(Map<String, dynamic> json) {
@@ -87,6 +96,9 @@ class SessionData {
           {},
       startedAt: DateTime.parse(json['startedAt'] as String),
       lastUpdatedAt: DateTime.parse(json['lastUpdatedAt'] as String),
+      stitchingCompleted: json['stitchingCompleted'] as bool? ?? false,
+      finalVideoPath: json['finalVideoPath'] as String?,
+      stitchedAt: json['stitchedAt'] != null ? DateTime.parse(json['stitchedAt'] as String) : null,
     );
   }
 
@@ -96,6 +108,9 @@ class SessionData {
     Map<int, ChunkTakeInfo>? takesPerChunk,
     Map<int, String>? approvedClips,
     DateTime? lastUpdatedAt,
+    bool? stitchingCompleted,
+    String? finalVideoPath,
+    DateTime? stitchedAt,
   }) {
     return SessionData(
       projectId: projectId,
@@ -105,6 +120,9 @@ class SessionData {
       approvedClips: approvedClips ?? this.approvedClips,
       startedAt: startedAt,
       lastUpdatedAt: lastUpdatedAt ?? this.lastUpdatedAt,
+      stitchingCompleted: stitchingCompleted ?? this.stitchingCompleted,
+      finalVideoPath: finalVideoPath ?? this.finalVideoPath,
+      stitchedAt: stitchedAt ?? this.stitchedAt,
     );
   }
 }

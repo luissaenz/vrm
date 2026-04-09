@@ -138,10 +138,13 @@ class _ClipReviewPageState extends State<ClipReviewPage>
           },
         );
       } else {
-        // Todos los fragmentos completados - ir a página final
+        // Todos los fragmentos completados - iniciar stitching
         Navigator.of(context).pushReplacementNamed(
-          '/recording-end',
-          arguments: {'projectId': widget.projectId},
+          '/stitch-progress',
+          arguments: {
+            'projectId': widget.projectId,
+            'approvedClips': widget.recordingManager.sessionData.approvedClips.values.toList(),
+          },
         );
       }
     } catch (e) {

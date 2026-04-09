@@ -56,11 +56,14 @@ dependencies:
     sdk: flutter
   flutter_tts: ^4.2.5
   speech_to_text: ^7.3.0
-  
+
   # Plugin Architecture
   uuid: ^4.0.0
   json_schema: ^5.2.2
   disk_space: ^0.2.1
+
+  # Video Processing
+  ffmpeg_kit_flutter: ^6.0.3
 
 dev_dependencies:
   flutter_test:

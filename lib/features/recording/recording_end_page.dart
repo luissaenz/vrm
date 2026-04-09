@@ -1,12 +1,76 @@
+import 'dart:async';
+import 'dart:io';
 import 'dart:math';
 import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:video_player/video_player.dart';
 import '../../core/theme.dart';
 import 'package:vrm_app/l10n/app_localizations.dart';
 
-class RecordingEndPage extends StatelessWidget {
-  const RecordingEndPage({super.key});
+class RecordingEndPage extends StatefulWidget {
+  final String? finalVideoPath;
+
+  const RecordingEndPage({super.key, this.finalVideoPath});
+
+  @override
+  State<RecordingEndPage> createState() => _RecordingEndPageState();
+}
+
+class _RecordingEndPageState extends State<RecordingEndPage> {
+  VideoPlayerController? _videoController;
+  bool _isVideoInitialized = false;
+  bool _isPlaying = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.finalVideoPath != null) {
+      _initializeVideo();
+    }
+  }
+
+  @override
+  void dispose() {
+    _videoController?.dispose();
+    super.dispose();
+  }
+
+  Future<void> _initializeVideo() async {
+    try {
+      _videoController = VideoPlayerController.file(File(widget.finalVideoPath!));
+      await _videoController!.initialize().timeout(
+        const Duration(seconds: 5),
+        onTimeout: () => throw TimeoutException('Video initialization exceeded 5s'),
+      );
+
+      if (mounted) {
+        setState(() {
+          _isVideoInitialized = true;
+        });
+      }
+    } catch (e) {
+      debugPrint('[RecordingEndPage] Video initialization failed: $e');
+      if (mounted) {
+        setState(() {
+          _isVideoInitialized = false;
+        });
+      }
+    }
+  }
+
+  void _togglePlayPause() {
+    if (_videoController == null) return;
+
+    if (_isPlaying) {
+      _videoController!.pause();
+    } else {
+      _videoController!.play();
+    }
+    setState(() {
+      _isPlaying = !_isPlaying;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -239,63 +303,42 @@ class RecordingEndPage extends StatelessWidget {
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
-                    Image.network(
-                      'https://lh3.googleusercontent.com/aida-public/AB6AXuAkNwjAe5DxGHmB5DkyeysYvofLj9IhXPZG2E4aE3ipqAP49jklm0bKiNrUr9AaRFteHE6r5AHbEnDK_RsZAs-Stx3Uig8umuQweWNviKffOx64k7b1x1kDAFx5rAknPnDsj0_kz8vZFMmjdTp6uIWSfZaTiIIlr7KYmISCYRBazGL7YuI2J4g5iBVLH9Sh4Nvy76qR8Uqbca8MYmvCC9909ndWkzECJWkjwoAcWfOo0NNNWWnLVe-6i2IY7t1KqGBnQGs9m8Ar0KCY',
-                      fit: BoxFit.cover,
-                      width: double.infinity,
-                      height: double.infinity,
-                    ),
+                    if (_isVideoInitialized && _videoController != null)
+                      VideoPlayer(_videoController!)
+                    else
+                      Container(
+                        color: Colors.grey[300],
+                        child: const Center(
+                          child: CircularProgressIndicator(),
+                        ),
+                      ),
                     Container(color: Colors.black.withValues(alpha: 0.1)),
-                    Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        onTap: () {},
-                        child: Container(
-                          width: 56,
-                          height: 56,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.9),
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.1),
-                                blurRadius: 15,
-                              ),
-                            ],
-                          ),
-                          child: Icon(
-                            Icons.play_arrow_rounded,
-                            color: context.appColors.forest,
-                            size: 30,
-                          ),
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      bottom: 16,
-                      right: 16,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: context.appColors.forest.withValues(
-                            alpha: 0.8,
-                          ),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: const Text(
-                          "02:14",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 11,
-                            fontWeight: FontWeight.w600,
-                            letterSpacing: 0.5,
+                    if (_isVideoInitialized)
+                      Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: _togglePlayPause,
+                          child: Container(
+                            width: 56,
+                            height: 56,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.9),
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.1),
+                                  blurRadius: 15,
+                                ),
+                              ],
+                            ),
+                            child: Icon(
+                              _isPlaying ? Icons.pause : Icons.play_arrow,
+                              color: context.appColors.forest,
+                              size: 28,
+                            ),
                           ),
                         ),
                       ),
-                    ),
                   ],
                 ),
               ),
