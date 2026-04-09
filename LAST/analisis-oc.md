@@ -1,293 +1,226 @@
-# 🧠 ANÁLISIS TÉCNICO: REVISIÓN DE CLIPS (Día 3 - Agente OC)
+# 📋 ANÁLISIS TÉCNICO: Auto-Stitch (Día 4-5)
 
-## 📋 Perfil del Rol
-**Agente:** OC (Principal Systems Architect)  
-**Objetivo:** Análisis técnico de la pantalla de revisión visual post-grabación para validar la calidad de cada fragmento antes de proceder.  
-**Alcance:** Funcionalidades F7.1 - F7.6 (Revisión y Aprobación de Fragmentos)
-
----
-
-## 🏗️ 1. Anatomía de Componentes
-
-### 1.1 ClipReviewPage (Widget Principal)
-
-#### Inputs/Props
-| Prop | Tipo | Requerido | Descripción |
-|------|------|-----------|-------------|
-| `videoFile` | File | Sí | Archivo `.mp4` recién grabado |
-| `segmentIndex` | int | Sí | Índice del fragmento actual (0-based) |
-| `totalSegments` | int | Sí | Total de fragmentos en el guion |
-| `segmentText` | String | Sí | Texto del guion correspondiente al fragmento |
-| `projectId` | String | Sí | ID del proyecto para persistencia |
-| `takeNumber` | int | Sí | Número de intento actual |
-| `onKeep` | VoidCallback | Sí | Callback cuando usuario acepta el clip |
-| `onRetry` | VoidCallback | Sí | Callback cuando usuario rechaza el clip |
-
-#### Outputs/Events
-- **`onKeep()`**: Navega al siguiente fragmento o a `RecordingEndPage` si es el último
-- **`onRetry()`**: Elimina archivo actual y vuelve a `RecordingPage` para re-grabar
-
-#### Estado Interno
-```dart
-VideoPlayerController? _controller;  // Control del stream de video
-bool _isInitialized = false;          // UI: spinner vs video
-bool _isPlaying = true;              // Estado del botón play/pause
-bool _isMuted = true;                 // F7.4: Silenciado por defecto
-int _autoAcceptCountdown = 3;         // F7.3: Contador de aprobación pasiva
-Timer? _autoAcceptTimer;              // Timer para aprobación pasiva
-double _currentPosition = 0.0;       // Posición actual del video
-```
-
-### 1.2 Componentes Hijos
-
-#### ClipVideoPlayer
-- Widget que envuelve `VideoPlayer` 
-- Maneja loop automático (F7.1)
-- Responde a mute/unmute (F7.4)
-- Aspect ratio: 9:16 (vertical) o detectado del video
-
-#### ReviewOverlay
-- Muestra texto del guion sobre el video (opcional, toggle)
-- Indicador de progreso: "FRAGMENTO 3/8"
-- Contador de takes: "Take 2/3"
-
-#### DecisionButtons
-- **Botón Repetir** (rojo, 🗑️): Descarta y vuelve a grabar
-- **Botón Siguiente** (verde, ✅): Acepta y avanza
-- Posición: flotantes sobre el video, esquinas inferiores
-
-#### AutoAcceptProgressBar (F7.3 - MVP+)
-- Barra de progreso horizontal
-- Visible solo cuando el video está en loop
-- 3 segundos para decisión pasiva
-- Texto: "Aceptando en..."
+**Agente:** oc  
+**Paso:** Día 4-5 - Auto-Stitch por Línea de Comandos  
+**Fase:** Fase 1 - Core de Grabación
 
 ---
 
-## 🔄 2. Mapa de Concurrencia y Lifecycle
+## 1. DISEÑO FUNCIONAL
 
-### 2.1 Estados del Widget
+### 1.1 Happy Path
 
-```
-[initState]
-     │
-     ▼
-[Loading Video] ──(error)──> [Error State]
-     │                        │
-     ▼                        ▼
-[Video Ready] ──(user action)──> [User Decision]
-     │                        │
-     ▼                        ▼
-[Auto-Loop Playback]          [Navigate Out]
-     │
-     ├──(onKeep)──────────────> [RecordingPage/Siguiente]
-     │
-     └──(onRetry)─────────────> [RecordingPage/Regrabar]
-```
+1. El usuario completa la grabación y revisión de todos los chunks (flujo días 1-3).
+2. El usuario presiona "Generar Video Final" en la UI (nueva pantalla o botón en Review).
+3. El sistema obtiene la lista de `approvedClips` desde `SessionData`.
+4. El `StitcherService` verifica que todos los clips existen y son válidos.
+5. El sistema ejecuta el comando FFmpeg para concatenar secuencialmente.
+6. Se muestra progressbar con porcentaje y estimated time.
+7. Al finalizar, el `final.mp4` se almacena en `{projectId}/final.mp4`.
+8. La UI muestra previsualización del video final y opciones de Exportación (Día 6).
 
-### 2.2 Zonas Rojas (Condiciones de Carrera)
+### 1.2 Edge Cases para MVP
 
-| Zona | Problema | Estrategia |
-|------|----------|------------|
-| **Inicialización** | `_controller.initialize()` es async. Si usuario sale antes, puede quedar "Zombie Controller" | Verificar `mounted` en callbacks async; llamar `dispose()` inmediatamente en `didChangeAppLifecycleState` |
-| **Archivo en Disco** | El video puede estar escribiéndose cuando intentamos cargarlo | Implementar retry con delay de 500ms si falla `initialize()` |
-| **Aprobación Pasiva** | Timer puede ejecutarse después de que usuario actúa | Cancelar timer en `onKeep()` y `onRetry()` antes de navegar |
-| **Navigación During Loop** | Al navegar, el video puede seguir reproduciéndose | Detener controller en `dispose()` y limpiar timer |
+| Edge Case | Comportamiento MVP |
+|-----------|-------------------|
+| Solo 1 clip aprobado | Copiar el clip como final.mp4 (no requiere stitch). |
+| Clip corrupto o no encontrado | Mostrar error: "Clip {n} no disponible. ¿Regrabar?" y cancelar stitch. |
+| FFmpeg falla (codec incompatible) | Fallback: intentar recodificar con `-c:v libx264 -c:a aac`. |
+| Sin clips aprobados | Deshabilitar botón de stitch; tooltip: "Graba al menos un clip". |
+| Usuario cierra app durante stitch | Cancelar operación; parcial no se guarda. |
 
-### 2.3 Ciclo de Vida (Lifecycle)
+### 1.3 Experiencia de Usuario (Manejo de Errores)
 
-```dart
-@override
-void initState() {
-  super.initState();
-  _initializeVideo();      // Cargar video async
-  _startAutoAcceptTimer(); // F7.3: Iniciar cuenta regresiva
-}
-
-@override
-void dispose() {
-  _autoAcceptTimer?.cancel();  // Limpiar timer
-  _controller?.dispose();      // Liberar recursos video
-  super.dispose();
-}
-
-@override
-void didChangeAppLifecycleState(AppLifecycleState state) {
-  if (state == AppLifecycleState.paused) {
-    _controller?.pause();       // Pausar video si app va a background
-  } else if (state == AppLifecycleState.resumed) {
-    if (_isPlaying) _controller?.play();
-  }
-}
-```
+- **Spiner con texto**: "Uniendo videos... {X}% completado"
+- **Error de stitch**: Diálogo modal con mensaje claro + botón "Reintentar" + "Cancelar".
+- **Stitch exitoso**: Transición automática a pantalla de previsualización/exportación.
 
 ---
 
-## 🛡️ 3. Protocolos de Error y Resiliencia
+## 2. DISEÑO TÉCNICO
 
-### 3.1 Caso: Video Corrupto o No Encontrado
+### 2.1 Componentes Nuevos o Modificados
 
-```
-SI VideoPlayerController.initialize() LANZA error:
-  ├── Mostrar tarjeta de error con ícono de alerta
-  ├── Mensaje: "No se pudo cargar la previsualización"
-  ├── Botón "Grabar de nuevo" → onRetry()
-  └── Botón "Volver al menú" → Navigator.pop()
-```
-
-### 3.2 Caso: Cierre de App Durante Revisión
-
-```
-El clip ya está persistido en disco por RecordingManager.
-Al reabrir proyecto:
-  ├── RecordingManager.detectarClipsHuérfanos()
-  ├── Mostrar modal: "Se encontró un clip sin revisar"
-  └── Opciones: "Revisar" | "Descartar"
-```
-
-### 3.3 Caso: Fallo de Persistencia en Aprobación
-
-```
-SI onKeep() FALLA al actualizar SessionData:
-  ├── Reintentar hasta 3 veces con exponential backoff
-  ├── Si falla: guardar en cola de "pendingSync"
-  ├── Mostrar SnackBar: "Guardando..."
-  └── Permitir navegación de todas formas (datos no críticos)
-```
-
-### 3.4 Persistencia de Decisiones
-
-| Decisión | Donde se guarda | Cuándo |
-|----------|-----------------|--------|
-| Clip aceptado | `SessionData.takesPerChunk[chunkIndex].selectedTake` | Inmediato en `onKeep()` |
-| Clip rechazado | No se guarda (archivo se elimina) | En `onRetry()` |
-| Contador takes | `SessionData.takesPerChunk[chunkIndex].total` | En `RecordingManager.stopRecording()` |
-
----
-
-## 📝 4. Diseño Técnico Nominativo
-
-### 4.1 Archivos y Clases
-
-| Archivo | Clase | Responsabilidad |
-|---------|-------|-----------------|
-| `lib/features/recording/clip_review_page.dart` | `ClipReviewPage` | Pantalla principal de revisión |
-| `lib/features/recording/widgets/clip_video_player.dart` | `ClipVideoPlayer` | Widget de reproducción con loop |
-| `lib/features/recording/widgets/decision_buttons.dart` | `DecisionButtons` | Botones Repetir/Siguiente |
-| `lib/features/recording/widgets/review_overlay.dart` | `ReviewOverlay` | Overlay con texto y progreso |
-| `lib/features/recording/widgets/auto_accept_bar.dart` | `AutoAcceptProgressBar` | Barra de aprobación pasiva |
-
-### 4.2 Métodos Principales
+####Nuevo: `lib/features/recording/services/stitcher_service.dart`
+Servicio dedicado que maneja la lógica de stitching usando FFmpeg.
 
 ```dart
-// ClipReviewPage
-Future<void> _initializeVideo() async;
-void _togglePlayPause();
-void _toggleMute();
-void _handleKeep() async;  // F7.2: Aceptar clip
-void _handleRetry() async; // F7.2: Repetir clip
-void _startAutoAcceptTimer(); // F7.3: Aprobación pasiva
-void _cancelAutoAcceptTimer();
-
-// ClipVideoPlayer  
-void setLooping(bool looping); // F7.1
-void setMuted(bool muted);      // F7.4
-
-// DecisionButtons
-void onKeepPressed();
-void onRetryPressed();
-```
-
-### 4.3 Modelo de Datos
-
-```dart
-// Extensión de SessionData existente
-class ReviewDecision {
-  final int chunkIndex;
-  final bool accepted;
-  final int takeNumber;
-  final DateTime reviewedAt;
+class StitcherService {
+  final String projectId;
+  final ClipStorageService _storage;
   
-  Map<String, dynamic> toJson() => {...};
+  Future<String> stitchClips({
+    required List<String> clipPaths,
+    required void Function(double progress) onProgress,
+  });
+  
+  Future<String?> getFinalVideoPath();
+  Future<void> cancelStitch();
+}
+```
+
+**Responsabilidades:**
+1. Validar que todos los clips existan.
+2. Generar archivo de lista para FFmpeg (concat demuxer).
+3. Ejecutar comando FFmpeg con progress callback.
+4. Manejar fallbacks de codec.
+5. Gestionar cancelación.
+
+#### Modificado: `lib/core/plugins/default/stitcher_plugin.dart`
+Actualizar para delegar al `StitcherService` real con FFmpeg.
+
+#### Modificado: `lib/features/recording/services/recording_manager.dart`
+Añadir método `getApprovedClipsOrdered()` que retorna la lista de paths en orden de chunk.
+
+#### Nueva Pantalla: `lib/features/recording/pages/export_preview_page.dart` (Día 6 base)
+Pantalla que muestra el video final generado y las opciones de exportación.
+
+### 2.2 Flujo de Datos
+
+```
+[SessionData.approvedClips] → [StitcherService.stitchClips()]
+                                      ↓
+                              [Validar archivos]
+                                      ↓
+                              [Generar list.txt]
+                                      ↓
+                              [FFmpeg: -f concat -safe 0 -i list.txt]
+                                      ↓
+                              [Output: final.mp4]
+                                      ↓
+                              [Guardar en project folder]
+                                      ↓
+                              [Actualizar session_data.json]
+```
+
+### 2.3 Comando FFmpeg
+
+El método de concatenación más robusto para clips del mismo codec es el **concat demuxer**:
+
+```bash
+# 1. Generar archivo de lista:
+file 'chunk_0_take_1.mp4'
+file 'chunk_1_take_2.mp4'
+file 'chunk_2_take_1.mp4'
+
+# 2. Comando:
+ffmpeg -f concat -safe 0 -i list.txt -c copy output.mp4
+```
+
+**Fallback** (si codecs difieren o copy falla):
+```bash
+ffmpeg -f concat -safe 0 -i list.txt -c:v libx264 -preset fast -crf 23 -c:a aac -b:a 128k output.mp4
+```
+
+### 2.4 Integración con Contratos Existentes
+
+- La estructura de carpetas ya existe: `{projectId}/clips/`.
+- El `final.mp4` debe ir en `{projectId}/final.mp4` (mismo nivel que `clips/`).
+- El `session_data.json` debe actualizarse con `finalVideoPath` y `stitchedAt`.
+- El `ClipStorageService` ya tiene `projectId` y métodos para rutas absolutas.
+
+### 2.5 Modelo de Datos (Extensiones)
+
+```dart
+// En session_data.dart
+class SessionData {
+  // ... campos existentes ...
+  
+  String? finalVideoPath;
+  DateTime? stitchedAt;
 }
 ```
 
 ---
 
-## 🎯 5. Diseño para la Salida (Pilares)
-
-### 5.1 Diseño Funcional
-
-| Feature | Implementación |
-|---------|-----------------|
-| **F7.1 Loop Automático** | VideoPlayer con `setLooping(true)`. Se reproduce automáticamente al cargar |
-| **F7.2 Botones de Decisión** | Dos botones flotantes: 🗑️ Repetir (rojo) y ✅ Siguiente (verde) |
-| **F7.3 Aprobación Pasiva** | Timer de 3 segundos. Barra de progreso decreciente. Cancelar al interactuar |
-| **F7.4 Silenciado por Defecto** | `_isMuted = true` inicial. Icono de speaker para toggle |
-| **F7.5 Contador de Takes** | Mostrar "Take X/Y" en overlay, donde Y viene de SessionData |
-| **F7.6 Transición Suave** | Usar `PageRouteBuilder` con `SlideTransition` al navegar |
-
-### 5.2 Diseño Técnico
-
-- **Video Player**: Usar `video_player` nativo (no Chewie) para control total del loop y mute
-- **Navigación**: `Navigator.pushReplacement` para evitar ciclos Grabar→Revisar→Grabar
-- **Persistencia**: Integración con `RecordingManager` existente para actualizar `SessionData`
-
-### 5.3 Decisiones de Diseño
+## 3. DECISIONES
 
 | Decisión | Justificación |
 |----------|---------------|
-| **VideoPlayer nativo vs Chewie** | Control total sobre estética "Atomic" y menor dependencia inicial |
-| **Mute por defecto (F7.4)** | Evita interrumpir flujo mental con audio al revisar |
-| **Aprobación pasiva como MVP+** | Requiere timer y UI adicional; MVP usa solo botones explícitos |
-| **Loop automático (F7.1)** | Permite revisión continua sin interacción para verificar calidad |
+| **Usar `ffmpeg_kit_flutter`** en lugar de APIs nativas (AVFoundation/MediaCodec) | El plan MVP lo define explícitamente; reduce complejidad de implementación multiplataforma; ofrece más control sobre parámetros de encoding. |
+| **Concat Demuxer** como método principal | Funciona cuando clips tienen el mismo codec (nuestro caso, todos vienen de la misma cámara). Es más rápido que re-encoding. |
+| **Fallback a re-encoding** solo si concat falla | Evita crear 2 archivos si no es necesario; respeta principio de mínima transformación. |
+| **Progress via FFmpeg session** | `FFmpegKit` proporciona callbacks de progress que permiten actualizar UI. |
+| **Cancelación vía `FFmpegKit.cancel()`** | Mecanismo nativo de FFmpegKit para detener ejecución en curso. |
 
-### 5.4 Riesgos Identificados
+### Dependencias a agregar en pubspec.yaml
+
+```yaml
+dependencies:
+  ffmpeg_kit_flutter: ^6.0.3
+```
+
+> **Nota:** Según el plan MVP, `ffmpeg_kit_flutter` no está en pubspec.yaml actual. Se debe agregar.
+
+---
+
+## 4. CRITERIOS DE ACEPTACIÓN
+
+- [ ] El usuario ve botón "Generar Video" solo cuando hay ≥1 clip aprobado.
+- [ ] El sistema valida que todos los clips de `approvedClips` existan antes de iniciar.
+- [ ] La UI muestra progressbar con porcentaje (0-100%) durante el stitch.
+- [ ] El `final.mp4` se genera correctamente y es reproducible en el dispositivo.
+- [ ] Si FFmpeg falla, el usuario ve mensaje de error claro con opción de reintentar.
+- [ ] Si el usuario cancela, el proceso se detiene y no deja archivos parciales.
+- [ ] El `session_data.json` se actualiza con `finalVideoPath` después de stitch exitoso.
+- [ ] El stitch funciona con 1 solo clip (copia directa, no concat).
+- [ ] No hay fugas de memoria tras múltiples ciclos de stitch.
+
+---
+
+## 5. RIESGOS
 
 | Riesgo | Probabilidad | Impacto | Mitigación |
-|--------|--------------|---------|-------------|
-| Memory leak por VideoPlayer | Media | Alto | dispose() obligatorio en cleanup |
-| Race condition en aprobación | Baja | Medio | Cancelar timer antes de navegación |
-| Video corrupto no detectable | Baja | Alto | Retry con timeout, fallback a error UI |
-| Timer ejecutándose en background | Baja | Bajo | Pausar timer en `AppLifecycleState.paused` |
+|--------|---------------|---------|------------|
+| **FFmpegKit no transpila en iOS/Android nativo** | Media | Alto | Probar en device físico temprano (Día 4). Si falla, usar fallback a implementación Dart con `video_player` + `image_video_stitcher` o método nativo directo. |
+| **Clips con codecs diferentes** | Baja | Medio | El Grabación (Día 1-2) usa configuración fija. Risk bajo, pero implementar fallback de re-encoding. |
+| **Stitch muy largo para videos largos** | Media | Bajo | Implementar estimated time basado en duración total; permitir cancel. |
+| **Memoria insuficiente en stitch de muchos clips** | Baja | Alto | Limitar a 20 clips por sesión (MVP); no hay videos tan largos. |
 
 ---
 
-## 📋 6. Plan de Implementación Atómico
+## 6. PLAN
 
-### Tarea 1: ClipReviewPage Esqueleto (25 líneas)
-- Crear StatefulWidget con props requeridas
-- Scaffold con Stack (video + overlay)
-- Botones de decisión con layout básico
+### Tareas Atómicas
 
-### Tarea 2: ClipVideoPlayer con Loop (40 líneas)
-- Integrar VideoPlayerController
-- Implementar `setLooping(true)` en inicialización
-- Manejo de estados: loading, ready, error
+| # | Tarea | Complejidad | Dependencias |
+|---|-------|-------------|---------------|
+| 1 | Agregar `ffmpeg_kit_flutter` a pubspec.yaml | Baja | Ninguna |
+| 2 | Crear `StitcherService` con método `stitchClips()` | Alta |pubsec actualizado |
+| 3 | Implementar validación de archivos existentes | Media | Ninguna |
+| 4 | Implementar generación de `list.txt` para concat | Media | Ninguna |
+| 5 | Implementar ejecución FFmpeg con progress callback | Alta | Ninguna |
+| 6 | Agregar fallback de re-encoding | Media | Tarea 5 |
+| 7 | Actualizar `StitcherPlugin` para delegar al servicio | Media | Tareas 2-6 |
+| 8 | Añadir método `getApprovedClipsOrdered()` en RecordingManager | Baja | Ninguna |
+| 9 | Crear UI: botón "Generar Video" en Review screen | Baja | Ninguna |
+| 10 | Crear UI: pantalla de progress con progressbar | Media | Tareas 2-6 |
+| 11 | Manejar errores y retry en UI | Media | Tareas 2-10 |
+| 12 | Guardar `finalVideoPath` en session_data.json | Baja | Tareas 2-10 |
+| 13 | Testing en dispositivo físico (iOS + Android) | Alta | Todas las anteriores |
 
-### Tarea 3: DecisionButtons y Navegación (30 líneas)
-- Botones flotantes con colores correcto (rojo/verde)
-- Conectar onKeep/onRetry a Navigation
-- Animación de transición
+### Orden Recomendado
 
-### Tarea 4: Silenciado y Contador Takes (20 líneas)
-- Toggle mute con icono
-- Mostrar "Take X" desde props
-
-### Tarea 5: Aprobación Pasiva MVP+ (25 líneas)
-- Timer de 3 segundos
-- ProgressBar visual
-- Cancelación al interactuar
-
-### Tarea 6: Integración con RecordingPage (15 líneas)
-- Modificar _stopRecording() para navegar a ClipReviewPage
-- Pasar todos los parámetros requeridos
-- Manejar caso último fragmento → RecordingEndPage
+1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 → 9 → 10 → 11 → 12 → 13
 
 ---
 
-## 🚀 Estado: READY FOR IMPLEMENTATION
+## 🔮 ROADMAP (NO implementar en MVP)
 
-**Archivo de salida:** `D:\Develop\Personal\vrm\LAST\analisis-oc.md`  
-**Dependencias:** `video_player` (existente), `RecordingManager` (existente), `SessionData` (existente)  
-**Compatibilidad:** MVP core (F7.1-F7.2-F7.4-F7.5-F7.6), MVP+ incluye F7.3
+- **Stitching con transiciones**: Agregar fade-in/out entre clips usando filtros de FFmpeg.
+- **Preview de transiciones**: Mostrar miniaturas de clips con indicador de transición.
+- **Re-stitch parcial**: Permitir reemplazar un clip específico sin re-stitchear todo.
+- **Stitching en background**: Usar isolate para que el stitch continúe si la app pasa a background.
+- **Compresión avanzada**: Ofrecer opciones de calidad (720p, 1080p, 4K) antes de export.
+- **Watermark**: Insertar marca de agua configurable.
+
+### Decisiones de Diseño que NO Bloquean el Roadmap
+
+- El `finalVideoPath` se guarda en `session_data.json` para permitir re-stitch posterior.
+- El servicio de stitch es independiente de la UI, permitiendo reutilización en otros flujos.
+- Los logs de FFmpeg se capturan para debugging futuro sin mostrarse al usuario MVP.
+
+---
+
+**Documento generado:** Día 4-5 - Análisis Auto-Stitch  
+**Siguiente paso:** Implementación de StitcherService y UI asociada.

@@ -20,6 +20,7 @@ Estamos desarrollando el sistema **"LUMIS"**. Contamos con:
 > [!CAUTION]
 > **SI HAS RECIBIDO/LEÍDO ESTE DOCUMENTO:** Tu objetivo actual NO es preguntar qué hacer, sino **EMPEZAR EL ANÁLISIS TÉCNICO** del paso indicado y **GUARDARLO** en el archivo destino definido abajo.
 
+
 ---
 
 ## 📥 Entradas y Objetivos
@@ -54,8 +55,7 @@ Internamente debes cubrir estos puntos para asegurar profundidad:
 
 > [!IMPORTANT]
 > **REGLA DE ORO DE ESCRITURA:**
-> El ÚNICO archivo que este proceso tiene permitido modificar es:
-> `D:\Develop\Personal\vrm\LAST\analisis-[AGENTE].md`
+> El ÚNICO archivo que este proceso tiene permitido modificar es: `D:\Develop\Personal\vrm\LAST\analisis-[AGENTE].md`
 
 El output se estructura en **6 secciones**, separando explícitamente lo que es MVP de lo que es roadmap:
 
