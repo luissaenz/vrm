@@ -1,5 +1,3 @@
-## [FOLDER]
-
 UNIFICACION
 --------------------
 
@@ -15,8 +13,7 @@ Tu tarea es ANALIZARLOS CRÍTICAMENTE, detectar diferencias, elegir las mejores 
 
 Entrada:
 
-Pregunta por [FOLDER]
-Los documentos existentes en la carpeta [FOLDER]
+Los documentos existentes en la carpeta /LAST
 
 ---
 
@@ -118,4 +115,4 @@ Formato:
 * Claro, estructurado, sin redundancias
 * Lenguaje técnico preciso
 
-Guarda el documento unificado en /[FOLDER]/analisis-FINAL.md
+Guarda el documento unificado en /LAST/analisis-FINAL.md

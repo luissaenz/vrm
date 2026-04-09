@@ -1,5 +1,4 @@
-PASO 0: 
-pide los valores de DOC, PASO y AGENTE
+## PASO: AGENTE:
 
 Actúa como un ingeniero de software senior, arquitecto de sistemas y especialista en diseño de producto con enfoque en ejecución real.
 
@@ -9,8 +8,7 @@ Estoy desarrollando un sistema llamado "LUMIS". Tengo un documento de planificac
 Tu tarea NO es analizar todo el sistema, sino enfocarte EXCLUSIVAMENTE en una parte específica.
 
 Entrada:
-* pide los valores de DOC, PASO y AGENTE
-* Documento: [DOC]
+* Documento: D:\Develop\Personal\vrm\docs\mvp-Definition.md
 * Paso: [PASO]
 
 Objetivo:
@@ -102,7 +100,7 @@ Quiero que respondas como si esto fuera a ser revisado por un CTO extremadamente
 Cualquier omisión o ambigüedad es un error.
 
 IMPORTANTE:
-Guarda este analisis en el archivo /[PASO]/analisis-[AGENTE].md Estandariza este análisis en la siguiente estructura:
+Guarda este analisis en el archivo /LAST/analisis-[AGENTE].md Estandariza este análisis en la siguiente estructura:
 - Diseño funcional
 - Diseño técnico
 - Decisiones
