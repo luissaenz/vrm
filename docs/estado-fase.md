@@ -7,7 +7,7 @@
 1.  **Día 1-2: Grabación Crítica** (Captura de clips .mp4 en disco) -> ✅ COMPLETADO
 2.  **Día 3: Revisión Visual** (Validación de clips post-grabación) -> ✅ COMPLETADO
 3.  **Día 4-5: Auto-Stitch** (Concatenación vía FFmpeg) -> ✅ COMPLETADO
-4.  **Día 6: Exportación** (Galería y Share Sheet) -> ✅ COMPLETADO
+4.  **Día 6: Exportación** (Galería y Share Sheet) -> ✅ COMPLETADO (Refactorizando a `gal`)
 5.  **Día 7-8: Persistencia Local Offline** (Gestión de proyectos/sesiones) -> ✅ COMPLETADO
 6.  **Día 9-10: IA Offline / Fallback** (Generación de guiones local) -> ⏳ PENDIENTE (**PRÓXIMO HITO**)
 
@@ -25,8 +25,9 @@
 - **Revisión (F9):** `clip_review_page.dart` permite previsualizar clips, aceptarlos o repetirlos.
 - **Motor de Stitching (F10):** `FFmpegStitcherService` implementado con soporte para *stream copy* (rápido) y *re-encoding* (fallback).
 - **Persistencia de Sesión (F7-8):** `RecordingManager` guarda automáticamente `session_data.json` en disco ante cada cambio (clips aprobados, progreso de grabación).
-- **Exportación (F11):** `ExportService` permite guardar el video final en la galería nativa y disparar el share sheet.
-- **Servicios Core:** `RecordingManager`, `ClipStorageService`, `CameraService`, `PermissionService` y `ExportService` estabilizados.
+- **Exportación (F11):** `ExportService` permite guardar el video final en la galería nativa y disparar el share sheet. *Migrando de photo_manager a gal por simplicidad y robustez.*
+- **Servicios Core:** `RecordingManager`, `ClipStorageService`, `CameraService`, `PermissionService`, `VoiceCommandService` y `ExportService` (en proceso de abstracción) estabilizados.
+- **Páginas Adicionales:** `StitchProgressPage` (feedback visual de unión) y `RecordingEndPage` (resumen y exportación).
 - **Modelos de Datos:** `ProjectState`, `SessionData`, `AssetManifest` y `ScriptBundle` definidos y con soporte JSON.
 
 ### ⚠️ Parcialmente Implementado
@@ -46,6 +47,9 @@
 - `lib/core/models/`: Definición de los estados persistentes del sistema.
 - `vrm_data/projects/{id}/`: Estructura en disco para clips, sesión y video final.
 
+### Interfaces de Servicio (Contratos)
+- `IExportService`: Define `saveVideoToGallery`, `shareVideo`, `hasGalleryPermission` y `requestGalleryPermission`.
+
 ### Convenciones de Naming
 - Archivos de UI: `snake_case_page.dart`.
 - Servicios: `PascalCaseService`.
@@ -58,7 +62,8 @@
 - `ffmpeg_kit_flutter`: ^6.0.3
 - `path_provider`, `path`, `sqflite`, `shared_preferences`.
 - `permission_handler`, `intl`, `uuid`.
-- `photo_manager`: ^3.5.0
+- `photo_manager`: ^3.5.0 (En proceso de remoción).
+- `gal`: ^2.4.0 (Nueva dependencia para exportación).
 - `share_plus`: ^10.1.0
 
 ---
@@ -70,6 +75,7 @@
 - **Fallback de Re-encoding:** Si la unión rápida de streams falla, se intenta un re-encodificado ultra-rápido para asegurar que el video final siempre se genere.
 - **Secuencia Exportación Segura:** Se prioriza el guardado en galería antes de abrir el share sheet para asegurar la persistencia local incluso si el usuario cancela la distribución.
 - **Compartición vía Cache:** En Android, se copia el video al directorio temporal para cumplir con los requisitos del `FileProvider` de `share_plus`, evitando crashes al compartir desde el sandbox.
+- **Migración a `gal`:** Se elige `gal` sobre `photo_manager` para el guardado final por su API simplificado y mejor soporte de permisos específicos de escritura en Android 13+.
 
 ---
 
@@ -81,7 +87,7 @@
 | Día 3 | ✅ | `clip_review_page.dart`, `recording_manager.dart` | Implementación de revisión obligatoria post-toma. | Soporta auto-accept de 3s. |
 | Día 4-5 | ✅ | `ffmpeg_stitcher_service.dart`, `stitcher_plugin.dart` | Uso de FFmpeg para unión de clips. | Soporta re-encoding fallback. |
 | Día 7-8 | ✅ | `session_data.dart`, `recording_manager.dart` | Persistencia JSON automática en disco. | Adelantado para mayor robustez. |
-| Día 6 | ✅ | `export_service.dart`, `recording_end_page.dart` | Guardado en galería y share sheet nativo. | Implementado según Blueprint definitivo. |
+| Día 6 | ✅ | `export_service.dart`, `recording_end_page.dart` | Migración a `gal` y abstracción vía Interfaz. | En fase de refinamiento. |
 
 ---
 
@@ -90,8 +96,11 @@
 - [x] La pantalla de revisión reproduce el video grabado inmediatamente.
 - [x] La unión de clips genera un video único `final.mp4` reproducible.
 - [x] El proceso de sesión se recupera tras cerrar y abrir la app (vía `session_data.json`).
-- [x] El video final se guarda en la galería de fotos del dispositivo (Día 6).
+- [x] El video final se guarda en la galería de fotos (Day 6 - `gal`).
+- [x] El Share Sheet muestra el archivo adjunto correctamente (Day 6 - `share_plus`).
+- [x] Se solicitan permisos de medios correctamente en Android 13+ y iOS.
 - [ ] No hay fugas de memoria (leaks) tras múltiples ciclos de grabación/revisión.
+- [ ] El video exportado sigue un patrón de nombre consistente (`VRM_VIDEO_...`).
 
 ---
 **Idioma de respuesta:** Español 🇪🇸

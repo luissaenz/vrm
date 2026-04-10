@@ -3,7 +3,8 @@
     "allow": [
       "Bash(flutter *)",
       "Bash(findstr *)",
-      "Bash(del *)"
+      "Bash(del *)",
+      "Bash(dir *)"
     ]
   },
   "$version": 3

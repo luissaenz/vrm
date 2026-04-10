@@ -1,137 +1,206 @@
-# Análisis Técnico: Día 6 — Exportación (Galería + Share Sheet)
+# Análisis Técnico — Día 7-8: Persistencia Local Offline
+
+**Agente:** qwen
+**Fecha:** 10 de abril de 2026
+**Alcance:** Sistema de persistencia JSON para reanudación de proyectos/sesiones interrumpidas
+
+---
 
 ## 1. Diseño Funcional
 
-### Happy Path Detallado
-1. El usuario completa el stitching → `RecordingManager` retorna `finalVideoPath` → navega a `RecordingEndPage`.
-2. `RecordingEndPage` recibe `finalVideoPath` y muestra preview del video con botón "Exportar Video" (ya existe, `onPressed` vacío).
-3. Usuario toca "Exportar Video".
-4. El sistema verifica permisos de almacenamiento/galería. Si no están concedidos, muestra diálogo nativo de solicitud.
-5. El video `final.mp4` se guarda en la galería nativa del dispositivo (app Fotos / Google Photos).
-6. Inmediatamente después del guardado exitoso, se abre el modal nativo de compartir del OS (`share_plus`) con el archivo como adjunto.
-7. El usuario elige destino o cierra el share sheet.
-8. Se marca la exportación como completada en `session_data.json` y se muestra confirmación visual breve ("Guardado ✓").
+### Happy Path
+1. El usuario inicia un proyecto → graba clips → acepta/rechaza tomas.
+2. En cada "Accept" de clip, `RecordingManager` persiste `session_data.json` en disco automáticamente.
+3. El usuario **cierra la app accidentalmente** (crash, background kill, batería baja).
+4. Al reabrir la app, el **Dashboard** muestra el proyecto con un badge "Borrador en curso" indicando el progreso guardado (ej: "3/10 fragmentos grabados").
+5. El usuario toca el proyecto → se le ofrece **"Reanudar grabación"** o **"Descartar progreso"**.
+6. Si reanuda, `RecordingPage` carga la sesión desde `session_data.json`, restaura:
+   - `currentChunkIndex` → el teleprompter muestra el fragmento correcto.
+   - `approvedClips` → los clips ya aceptados no se re-graban.
+   - `takesPerChunk` → se mantiene el historial de intentos.
+7. El usuario continúa grabando desde donde quedó como si nada hubiera pasado.
 
-### Edge Cases que Afectan al MVP
-- **`finalVideoPath` es null o archivo no existe:** El stitching pudo haber fallado silenciosamente o el archivo fue borrado. El botón debe estar deshabilitado y mostrar tooltip "Video no disponible".
-- **Permisos de galería denegados permanentmente:** El usuario rechazó permisos anteriormente y seleccionó "no volver a preguntar". Se muestra diálogo explicativo con botón "Abrir Configuración" para ir a settings del OS.
-- **Espacio insuficiente en galería:** `photo_manager` puede fallar si el almacenamiento está lleno. Se captura el error y se muestra mensaje específico con opción de reintentar.
-- **Video > formato/galería incompatibilidad:** Algunos dispositivos pueden rechazar ciertos codecs. Si `photo_manager` falla, se intenta fallback con `share_plus` directamente desde la ruta temporal del archivo (sin copiar a galería).
+### Edge Cases (MVP)
+| Escenario | Comportamiento esperado |
+|---|---|
+| **App crashea DURANTE grabación activa** (sin stopRecording) | Al reabrir, el clip parcial guardado por `_handleBackgroundTransition` o `dispose()` aparece como "última toma no revisada". El usuario la ve en ClipReview y decide Accept/Reject. |
+| **session_data.json existe pero clips fueron borrados manualmente** | Al reanudar, se detectan paths inválidos → se limpian del session_data y se notifica al usuario: "Algunos clips se perdieron. Re-grabando desde fragmento X." |
+| **Múltiples sesiones huérfanas** (usuario creó proyecto pero nunca terminó) | Dashboard lista todas las sesiones con estado "Incompleto". El usuario puede reanudar cualquiera o borrarlas. |
+| **stitchingCompleted = true pero final.mp4 no existe** | Se marca la sesión como "Error de exportación". Se ofrece re-ejecutar stitching o descartar. |
+| **Proyecto completo (final.mp4 existe)** | Dashboard muestra "Listo para exportar" con acceso directo a `RecordingEndPage` para exportar/compartir. |
 
-### Manejo de Errores — Qué Ve el Usuario
-| Escenario | Feedback Visual | Acción Disponible |
-|---|---|---|
-| Permisos denegados | SnackBar: "Se necesitan permisos de galería para guardar" + botón "Ir a Ajustes" | Botón que abre `AppSettings.openAppSettings()` |
-| Error al guardar | SnackBar: "Error al guardar el video. Intenta de nuevo." | Botón "Reintentar" re-ejecuta el flujo |
-| Share sheet cancelado por usuario | Sin mensaje (comportamiento esperado — el video ya está en galería) | Ninguna, el video ya se guardó |
-| Archivo corrupto/inexistente | Botón deshabilitado con texto "Video no disponible" | Ninguno, el usuario debe rehacer el stitching |
+### Manejo de Errores
+- **Fallo de lectura JSON:** Si `session_data.json` está corrupto, se crea uno nuevo vacío y se notifica: "No se pudo recuperar el progreso anterior. Empezando desde cero."
+- **Fallo de escritura JSON:** Se loguea en debug pero NO se bloquea el flujo de grabación (comportamiento actual, se mantiene).
+- **Sin espacio en disco:** Se detecta antes de iniciar grabación (ya implementado en `ClipStorageService.hasFreeSpace`) y se muestra SnackBar bloqueante.
 
 ---
 
 ## 2. Diseño Técnico
 
-### Componente Nuevo: `ExportService`
-**Archivo:** `lib/core/services/export_service.dart`
+### 2.1 Componentes Nuevos
 
-Servicio stateless que encapsula las operaciones de exportación. No depende de `RecordingManager` ni de ningún estado de UI.
+#### `SessionRecoveryService` (nuevo)
+**Responsabilidad:** Centralizar la carga, validación y sanitización de sesiones desde disco.
 
+**Interfaces:**
 ```
-class ExportService {
-  // Guarda el video en la galería del dispositivo
-  Future<GallerySaveResult> saveToGallery(String videoPath)
+SessionRecoveryService
+  ├─ loadSession(projectId: String) → Future<SessionData?>
+  ├─ listActiveSessions() → Future<List<SessionSummary>>
+  ├─ validateAndSanitize(SessionData) → Future<SessionData>
+  └─ deleteSession(projectId: String) → Future<void>
+```
 
-  // Abre el share sheet nativo con el video
-  Future<void> shareVideo(String videoPath)
+**Inputs:**
+- `projectId: String` — identificador único del proyecto.
+- Path base: `{appDir}/vrm_data/projects/{projectId}/session_data.json`
+
+**Outputs:**
+- `SessionData?` — null si no existe sesión.
+- `SessionSummary` — DTO para Dashboard con: projectId, progress (clips aprobados / total chunks), lastUpdatedAt, stitchingCompleted, finalVideoPath.
+
+**Lógica de `validateAndSanitize`:**
+1. Verificar que cada path en `approvedClips` exista como `File`.
+2. Si un clip no existe → removerlo del mapa y loguear warning.
+3. Si `currentChunkIndex` apunta a un chunk ya aprobado → avanzar al siguiente no aprobado.
+4. Si todos los chunks están aprobados pero `stitchingCompleted = false` → marcar como "listo para stitching".
+5. Retornar sesión saneada.
+
+#### `ProjectLifecycleManager` (nuevo)
+**Responsabilidad:** Orquestar la creación, actualización y consulta de `ProjectState` en el flujo completo.
+
+**Interfaces:**
+```
+ProjectLifecycleManager
+  ├─ createProject(inputSchema: InputSchema) → Future<ProjectState>
+  ├─ updateProjectScript(ProjectState, ScriptBundle) → Future<ProjectState>
+  ├─ getProjectState(projectId: String) → Future<ProjectState?>
+  └─ linkSessionToProject(projectId: String, sessionData: SessionData) → Future<void>
+```
+
+**Inputs/Outputs:**
+- Usa `ProjectRepository` existente (ya tiene save/load/list/delete).
+- `InputSchema` viene del `NewProjectPage` cuando el usuario pega su guión.
+- `ScriptBundle` viene del mock/IA fallback tras la segmentación.
+
+### 2.2 Modificaciones a Componentes Existentes
+
+#### `RecordingManager` (modificación menor)
+- **Actual:** SessionData se inicializa "eagerly" en `initState` de `RecordingPage` con valores frescos (ignora sesión previa).
+- **Cambio:** Antes de crear SessionData nuevo, consultar `SessionRecoveryService.loadSession(projectId)`.
+  - Si existe → recuperar sesión.
+  - Si no existe → crear nueva (comportamiento actual).
+
+#### `RecordingPage` (modificación de flujo)
+- ** initState:** Intentar cargar sesión previa antes de crear nueva.
+- **Si hay sesión recuperada:** Mostrar diálogo opcional "¿Reanudar grabación desde fragmento X?" o "Empezar de nuevo".
+- **Si no hay sesión:** Comportamiento actual (iniciar desde fragmento 0).
+
+#### `DashboardPage` (modificación de UI)
+- Reemplazar los project cards hardcodeados (`VRMProjectCard` mock) con datos reales de `SessionRecoveryService.listActiveSessions()`.
+- Cada card muestra:
+  - Título: del `ProjectState.input.rawTopic` o "Proyecto sin título".
+  - Progreso: "X/Y fragmentos" (de `SessionData.approvedClips.length` vs `ScriptBundle.totalChunks`).
+  - Badge de estado:
+    - `stitchingCompleted=false` → "En progreso" (naranja)
+    - `stitchingCompleted=true` → "Listo para exportar" (verde)
+  - `lastUpdatedAt`: "Hace X horas" (con `intl`).
+- Tap en card → navegar a lógica de reanudación.
+
+#### `NewProjectPage` (modificación de flujo)
+- Tras segmentar el guión (mock o IA), **guardar `ProjectState`** con `input` y `script` antes de navegar a `RecordingPage`.
+- Generar `projectId` con `uuid` (ya instalado).
+- Pasar `projectId` a `FragmentOrganizationPage` → `RecordingPage`.
+
+### 2.3 Modelo de Datos (Extensión)
+
+#### `SessionSummary` (nuevo DTO)
+```
+SessionSummary {
+  projectId: String
+  title: String?             // De ProjectState.input.rawTopic
+  approvedClipsCount: int
+  totalChunks: int           // De ProjectState.script.totalChunks (si existe)
+  lastUpdatedAt: DateTime
+  stitchingCompleted: bool
+  finalVideoPath: String?
+  status: SessionStatus      // in_progress | ready_to_stitch | ready_to_export
 }
-
-class GallerySaveResult {
-  final bool success;
-  final String? assetId;  // ID del asset en galería (iOS) / path (Android)
-  final String? errorMessage;
-}
 ```
 
-**Responsabilidades:**
-- Solicitar y verificar permisos de galería vía `permission_handler` (ya instalado).
-- Usar `photo_manager` para escribir el video en la galería.
-- Usar `share_plus` para abrir el share sheet.
-- Retornar resultados tipados para que la UI reaccione apropiadamente.
+**Enum `SessionStatus`:**
+- `in_progress`: Hay clips aprobados pero stitching no completado.
+- `ready_to_stitch`: Todos los chunks tienen clips aprobados, stitching pendiente.
+- `ready_to_export`: Stitching completado, final.mp4 existe.
 
-### Modificación: `RecordingEndPage`
-**Archivo:** `lib/features/recording/recording_end_page.dart`
+### 2.4 Esquema de Paths en Disco (Consolidado)
 
-Cambios mínimos y localizados:
-1. Agregar estado `_isExporting` (bool) para controlar spinner durante exportación.
-2. Conectar el `onPressed` del botón "Export Video" (línea ~394) a `_handleExport()`.
-3. `_handleExport()` llama a `ExportService.saveToGallery()` → luego `ExportService.shareVideo()`.
-4. Mostrar `CircularProgressIndicator` overlay durante el proceso.
-5. Mostrar `SnackBar` de éxito/error según resultado.
-
-### Modificación: `SessionData`
-**Archivo:** `lib/features/recording/models/session_data.dart`
-
-Agregar campos:
-- `exportedAt: DateTime?` — marca cuando se exportó exitosamente.
-- `galleryAssetId: String?` — identificador del asset en galería (opcional, útil para futuras referencias).
-
-Estos campos son opcionales (`?`) para mantener compatibilidad con sesiones existentes que no tienen exportación. No rompen JSON parsing de sesiones previas.
-
-### Flujo de Integración
 ```
-RecordingEndPage._handleExport()
-  ├── setState(() => _isExporting = true)
-  ├── ExportService.saveToGallery(widget.finalVideoPath!)
-  │   ├── permission_handler.check(Permission.photos)  // iOS
-  │   ├── permission_handler.check(Permission.storage) // Android < 13
-  │   ├── PhotoManager.editor.saveVideoWithPath(videoPath)
-  │   └── Retorna GallerySaveResult
-  ├── [Si éxito] ExportService.shareVideo(widget.finalVideoPath!)
-  │   └── Share.shareXFiles([XFile(videoPath)])
-  ├── setState(() => _isExporting = false)
-  ├── [Opcional] RecordingManager actualiza sessionData con exportedAt
-  └── SnackBar de confirmación
+{appDir}/vrm_data/
+  user_profile.json                     ← Ya existe (OnboardingRepository)
+  projects/
+    {project_id}/
+      input_schema.json                 ← Pendiente: guardar al crear proyecto
+      script_bundle.json                ← Pendiente: guardar tras segmentación
+      session_data.json                 ← Ya existe (RecordingManager._saveSessionDataToDisk)
+      clips/
+        chunk_0_take_1.mp4              ← Ya existe (ClipStorageService)
+        chunk_0_take_2.mp4
+        chunk_1_take_1.mp4
+        ...
+      final.mp4                         ← Ya existe (FFmpegStitcherService)
 ```
 
-### No se Modifican
-- `RecordingManager` — la exportación es un paso posterior al stitching, no necesita cambios en el manager. Se maneja puramente en la UI layer + `ExportService`.
-- `FFmpegStitcherService` — ya genera `final.mp4` correctamente.
-- `CameraService`, `ClipStorageService` — no involucrados.
+### 2.5 Flujo de Reanudación (Secuencia)
+
+```
+1. Usuario abre Dashboard
+2. Dashboard consulta SessionRecoveryService.listActiveSessions()
+3. Muestra cards con proyectos en curso
+4. Usuario toca card → SessionRecoveryService.loadSession(projectId)
+5. validateAndSanitize() verifica integridad de clips
+6. Si válido → Navigator.push(RecordingPage) con sessionData recuperada
+7. RecordingPage inicializa RecordingManager con sessionData existente
+8. Teleprompter salta a currentChunkIndex
+9. Usuario continúa grabando
+```
 
 ---
 
 ## 3. Decisiones
 
-### D1: `photo_manager` como mecanismo principal de guardado
-**Justificación:** `photo_manager` tiene soporte nativo para escribir videos en la galería tanto en iOS (Photos framework) como en Android (MediaStore). Maneja automáticamente las diferencias de API levels y el caso especial de iCloud en iOS. Alternativas como `image_gallery_saver` son menos mantenidas y no soportan iOS tan robustamente.
+### D1: Mantener `session_data.json` separado de `project_state.json`
+**Justificación:** `SessionData` es volátil (cambia con cada clip). `ProjectState` es estable (input, script, assets). Separarlos evita re-escribir el JSON completo del proyecto en cada operación de grabación, reduciendo I/O y riesgo de corrupción.
 
-### D2: `permission_handler` para permisos (ya instalado) en lugar de dejar que `photo_manager` maneje permisos implícitamente
-**Justificación:** `photo_manager` puede solicitar permisos internamente, pero no expone buen control para detectar "permanently denied". Usar `permission_handler` (que ya es dependencia del proyecto) permite verificar el estado `PermissionStatus.permanentlyDenied` y ofrecer al usuario ir directamente a settings, mejorando la UX.
+### D2: Usar `ProjectRepository` existente como capa de persistencia de ProjectState
+**Justificación:** Ya implementa save/load/list/delete con manejo de errores robusto (`PersistenceException`). No reinventarlo.
 
-### D3: Secuencia save → share (no al revés ni en paralelo)
-**Justificación:** Si compartimos primero y el share sheet falla, el usuario pierde la acción sin tener el video en galería. Guardando primero, incluso si el share falla, el video ya está disponible en la app Fotos. El usuario puede compartir manualmente después.
+### D3: No migrar `session_data.json` al esquema de `ProjectRepository`
+**Justificación:** `SessionData` tiene una estructura diferente (mapas con keys numéricas, fechas) y su ciclo de vida está atado al flujo de grabación, no al CRUD de proyectos. Mantener `_saveSessionDataToDisk` en `RecordingManager` es correcto.
 
-### D4: No agregar `ExportService` como método dentro de `RecordingManager`
-**Justificación:** `RecordingManager` orquesta grabación → revisión → stitching. La exportación es un paso post-pipeline que no afecta el estado de la sesión de grabación. Mantenerlo separado reduce acoplamiento y facilita testing individual. La UI (`RecordingEndPage`) orquesta la secuencia.
+### D4: Validación de integridad de clips al reanudar
+**Justificación:** El usuario puede borrar clips manualmente del filesystem o el OS puede limpiar caché. Sin validación, el stitching fallaría silenciosamente o crasharía. La sanitización proactiva previene esto.
 
-### D5: No usar `share_plus` como mecanismo de guardado a galería
-**Justificación:** `share_plus` solo abre el share sheet. En iOS, el usuario podría elegir "Save Video" pero no es guaranteed. Necesitamos `photo_manager` para asegurar que el video se escribe directamente en la galería sin depender de la acción del usuario en el share sheet.
+### D5: Dashboard como punto de entrada a sesiones recuperables
+**Justificación:** Es la pantalla principal del usuario. Es el lugar natural para mostrar "trabajo en progreso" y permitir reanudación sin navegación oculta.
 
 ---
 
 ## 4. Criterios de Aceptación
 
-- [ ] Las dependencias `photo_manager` y `share_plus` están declaradas en `pubspec.yaml` con versiones compatibles.
-- [ ] `ExportService` existe en `lib/core/services/export_service.dart` con métodos `saveToGallery()` y `shareVideo()`.
-- [ ] El botón "Export Video" en `RecordingEndPage` llama a `ExportService` y muestra un indicador de carga mientras procesa.
-- [ ] Al guardar exitosamente en galería, el video es visible en la app nativa de Fotos/Google Photos del dispositivo.
-- [ ] Después de guardar en galería, se abre automáticamente el share sheet nativo con el video adjunto.
-- [ ] Si los permisos de galería están denegados permanentemente, se muestra un mensaje explicativo con un botón que abre la configuración del sistema.
-- [ ] Si el guardado falla por espacio insuficiente, se muestra un mensaje de error específico (genérico, no stack trace).
-- [ ] Si `finalVideoPath` es null o el archivo no existe, el botón "Export Video" aparece deshabilitado.
-- [ ] `SessionData` incluye campos opcionales `exportedAt` y `galleryAssetId` que se serializan/deserializan correctamente en JSON.
-- [ ] Tras una exportación exitosa, se muestra un `SnackBar` o indicador breve de confirmación ("Guardado ✓").
-- [ ] El usuario puede cancelar el share sheet sin afectar el video ya guardado en galería.
-- [ ] No hay memory leaks: tras navegar away de `RecordingEndPage`, los controladores de video y referencias al archivo se liberan correctamente.
+- [ ] Al crear un proyecto desde NewProjectPage, se genera un `projectId` (UUID) y se guarda `input_schema.json` en disco.
+- [ ] Tras segmentar el guión, se guarda `script_bundle.json` en la carpeta del proyecto.
+- [ ] `RecordingPage` intenta cargar `session_data.json` existente antes de crear una sesión nueva.
+- [ ] Si existe sesión previa válida, el usuario puede reanudar desde el `currentChunkIndex` guardado.
+- [ ] Si `session_data.json` está corrupto o no existe, se crea una sesión nueva sin error visible al usuario.
+- [ ] `SessionRecoveryService.validateAndSanitize()` elimina paths de `approvedClips` que no existen como archivos.
+- [ ] Dashboard muestra proyectos reales desde `SessionRecoveryService.listActiveSessions()`, no mocks.
+- [ ] Cada card de proyecto en Dashboard muestra progreso (X/Y fragmentos), estado y última actualización.
+- [ ] Tocar un proyecto "En progreso" en Dashboard navega a `RecordingPage` con la sesión recuperada.
+- [ ] Tocar un proyecto "Listo para exportar" navega a `RecordingEndPage` con acceso a exportar/compartir.
+- [ ] `ProjectLifecycleManager.linkSessionToProject()` asegura coherencia entre `SessionData` y `ProjectState`.
+- [ ] No hay fugas de memoria al listar/cargar sesiones múltiples (controllers disposed correctamente).
 
 ---
 
@@ -139,52 +208,112 @@ RecordingEndPage._handleExport()
 
 | Riesgo | Probabilidad | Impacto | Mitigación |
 |---|---|---|---|
-| `photo_manager` falla en iOS 17+ por cambios en Photos API | Media | Alto | Usar la versión más reciente de `photo_manager` (^3.x). Si falla, capturar error y ofrecer fallback: share directo con `share_plus` sin guardar en galería. |
-| `photo_manager` no solicita permisos correctamente en Android 13+ (permisos granulares de media) | Media | Medio | Usar `permission_handler` para verificar `Permission.photos` antes de llamar a `photo_manager`. Si denegado, guiar al usuario a settings. |
-| Video demasiado grande para el share sheet (algunos OS limitan archivos adjuntos) | Baja | Medio | `share_plus` generalmente maneja archivos locales sin límite estricto. Si el problema ocurre, el share sheet nativo del OS lo maneja; no hay control directo. Documentar como limitación de plataforma. |
-| El usuario cierra la app durante la exportación (a mitad de saveToGallery) | Baja | Medio | `photo_manager.editor.saveVideoWithPath()` es atómico — o completa o falla limpiamente. No deja archivos corruptos en galería. El video original en `vrm_data/` permanece intacto. |
-| `share_plus` no encuentra el archivo por problemas de FileProvider (Android) | Baja | Alto | Asegurar que `android/app/src/main/AndroidManifest.xml` tenga el `<provider>` configurado para `file_paths.xml`. Esto es requerido por `share_plus` en Android. |
+| **`session_data.json` se corrompe por write parcial (crash durante escritura)** | Baja | 🔴 ALTO | Usar patrón "write to temp + rename atómico": escribir `session_data.json.tmp`, luego `File.rename()` que es atómico en la mayoría de los filesystems. Si el `.json` no existe pero el `.tmp` sí, cargar el tmp. |
+| **Dashboard lista proyectos huérfanos (sin sesión ni clips)** | Media | 🟡 MEDIO | `listActiveSessions()` filtra: solo retorna proyectos con `approvedClips.count > 0` O `stitchingCompleted = true`. |
+| **Race condition: usuario toca Dashboard mientras se está guardando sesión** | Baja | 🟡 MEDIO | `SessionRecoveryService` lee archivos inmutables (no modifica). La escritura es solo desde `RecordingManager` que ya tiene su propio locking vía `_isProcessing`. |
+| **Path de clip referenciado en `approvedClips` usa ruta relativa inconsistente** | Media | 🔴 ALTO | Estandarizar: `ClipStorageService.absoluteClipPath()` siempre retorna ruta absoluta. Al cargar sesión, verificar con `File(path).exists()`. Si es relativo, reconstruir con la convención `{appDir}/vrm_data/projects/{projectId}/clips/chunk_X_take_Y.mp4`. |
+| **Proyecto con script_bundle.json ausente pero session_data.json presente** | Baja | 🟡 MEDIO | Si no hay `totalChunks` disponible, Dashboard muestra "Proyecto con X clips grabados" sin ratio de progreso. La reanudación funciona igual (usa `approvedClips` keys para determinar siguiente chunk). |
 
 ---
 
 ## 6. Plan
 
-### Tareas Atómicas (ordenadas)
+### Tarea 6.1: Crear `SessionRecoveryService`
+- **Complejidad:** Media
+- **Dependencias:** Ninguna (solo `path_provider`, `dart:io`)
+- **Sub-tareas:**
+  1. Implementar `loadSession(projectId)` → lee y parsea `session_data.json`.
+  2. Implementar `validateAndSanitize(session)` → verifica existencia de clips, ajusta `currentChunkIndex`.
+  3. Implementar `listActiveSessions()` → escanea carpeta `projects/`, carga cada `session_data.json`, retorna `List<SessionSummary>`.
+  4. Implementar `deleteSession(projectId)` → borra carpeta completa del proyecto.
+  5. Tests manuales: crear sesión, corromperla, validar recovery.
 
-| # | Tarea | Complejidad | Dependencias |
-|---|---|---|---|
-| 1 | Agregar `photo_manager` y `share_plus` al `pubspec.yaml` y ejecutar `flutter pub get` | Baja | Ninguna |
-| 2 | Crear `lib/core/services/export_service.dart` con la clase `ExportService` y el modelo `GallerySaveResult` | Baja | Tarea 1 |
-| 3 | Implementar `saveToGallery()` en `ExportService`: verificación de permisos + llamada a `photo_manager` + manejo de errores | Media | Tarea 2 |
-| 4 | Implementar `shareVideo()` en `ExportService`: llamada a `share_plus` + manejo de cancelación | Baja | Tarea 2 |
-| 5 | Extender `SessionData` con campos `exportedAt` y `galleryAssetId` (modelo + JSON + copyWith) | Baja | Ninguna |
-| 6 | Modificar `RecordingEndPage._buildBottomAction()`: conectar `onPressed` del botón a `_handleExport()`, agregar estado `_isExporting`, spinner overlay, SnackBar feedback | Media | Tareas 3, 4 |
-| 7 | Verificar configuración de Android para `share_plus`: asegurarse de que `AndroidManifest.xml` tiene el provider de FileProvider configurado (generalmente `share_plus` lo agrega automáticamente, pero verificar) | Baja | Tarea 1 |
-| 8 | Testing en dispositivo físico Android: permisos, guardado a galería, share sheet | Media | Tareas 1-7 |
-| 9 | Testing en dispositivo físico iOS: permisos Photos, guardado, share sheet | Media | Tareas 1-7 |
+### Tarea 6.2: Crear `ProjectLifecycleManager`
+- **Complejidad:** Media
+- **Dependencias:** `ProjectRepository` (existente), `uuid`
+- **Sub-tareas:**
+  1. Implementar `createProject(inputSchema)` → genera UUID, crea `ProjectState`, guarda vía `ProjectRepository`.
+  2. Implementar `updateProjectScript(state, scriptBundle)` → actualiza campo `script`, re-guarda.
+  3. Implementar `getProjectState(projectId)` → wrapper de `ProjectRepository.loadProject`.
+  4. Implementar `linkSessionToProject` → asegura que `session_data.json` y `project_state.json` estén en la misma carpeta.
 
-### Dependencias Visuales
+### Tarea 6.3: Modificar `NewProjectPage` para persistir proyecto
+- **Complejidad:** Baja
+- **Dependencias:** Tarea 6.2
+- **Sub-tareas:**
+  1. En `_optimizeScript()`, tras generar `ScriptAnalysis`, convertir a `ScriptBundle`.
+  2. Crear `InputSchema` con el texto del usuario.
+  3. Llamar `ProjectLifecycleManager.createProject(inputSchema)`.
+  4. Llamar `ProjectLifecycleManager.updateProjectScript(state, scriptBundle)`.
+  5. Pasar `projectId` a `FragmentOrganizationPage` → `RecordingPage`.
+
+### Tarea 6.4: Modificar `RecordingPage` para recuperación de sesión
+- **Complejidad:** Media
+- **Dependencias:** Tarea 6.1
+- **Sub-tareas:**
+  1. En `initState`, antes de crear `SessionData` nuevo, llamar `SessionRecoveryService.loadSession(projectId)`.
+  2. Si retorna sesión válida → llamar `validateAndSanitize()`.
+  3. Si sesión saneada tiene datos → mostrar diálogo "Reanudar grabación desde fragmento X?".
+  4. Si usuario acepta → usar sesión recuperada en `RecordingManager`.
+  5. Si usuario rechaza o no hay sesión → comportamiento actual (crear nueva).
+
+### Tarea 6.5: Modificar `DashboardPage` para mostrar proyectos reales
+- **Complejidad:** Alta
+- **Dependencias:** Tareas 6.1, 6.2, 6.3
+- **Sub-tareas:**
+  1. Reemplazar `_RecentProjectsSection` con `FutureBuilder` que consulta `SessionRecoveryService.listActiveSessions()`.
+  2. Para cada `SessionSummary`, construir `VRMProjectCard` con datos reales.
+  3. Implementar navegación: tap en card → cargar sesión → navegar a RecordingPage o RecordingEndPage según estado.
+  4. Agregar estado vacío: "No hay proyectos en curso. ¡Crea uno!"
+  5. Agregar swipe-to-delete opcional para descartar proyectos huérfanos.
+
+### Tarea 6.6: Guardar `input_schema.json` y `script_bundle.json` en flujo
+- **Complejidad:** Baja
+- **Dependencias:** Tarea 6.2
+- **Sub-tareas:**
+  1. Extender `ProjectLifecycleManager` con métodos de escritura de `input_schema.json` y `script_bundle.json` como archivos separados (además de `project_state.json` consolidado).
+  2. En `NewProjectPage`, tras crear proyecto, escribir ambos archivos.
+  3. En `SessionRecoveryService.loadSession`, si falta `totalChunks` en session_data, leer `script_bundle.json` para obtenerlo.
+
+### Tarea 6.7: Escritura atómica de `session_data.json`
+- **Complejidad:** Baja
+- **Dependencias:** Ninguna
+- **Sub-tareas:**
+  1. Modificar `_saveSessionDataToDisk` en `RecordingManager`.
+  2. Escribir primero a `session_data.json.tmp`.
+  3. Si escritura exitosa → `File.rename()` a `session_data.json`.
+  4. Al cargar, si `session_data.json` no existe pero `session_data.json.tmp` sí → cargar tmp y renombrar.
+
+### Orden recomendado de ejecución:
 ```
-T1 (deps) → T2 (servicio) → T3 (saveToGallery) → T6 (UI)
-                        → T4 (shareVideo)     → T6 (UI)
-T5 (modelo) → T6 (UI)
-T1 → T7 (Android config)
-T6 → T8 (testing Android)
-T6 → T9 (testing iOS)
+6.1 → 6.2 → 6.3 → 6.4 → 6.6 → 6.7 → 6.5
 ```
+(6.5 va último porque depende de que existan proyectos reales para mostrar)
 
 ---
 
 ## 🔮 Roadmap (NO implementar ahora)
 
-- **Compresión pre-exportación:** Antes de guardar/compartir, ofrecer opción de comprimir el video para reducir tamaño (especialmente útil para compartir por WhatsApp/Telegram con límites de archivo).
-- **Selección de calidad de exportación:** Permitir al usuario elegir resolución/bitrate del video final (720p, 1080p, original).
-- **Exportación directa a cloud:** Integración con Google Drive, iCloud Drive, Dropbox para backup automático.
-- **Re-exportación desde historial:** Si el usuario quiere re-exportar un proyecto antiguo, poder hacerlo sin re-grabar (requiere que `final.mp4` persista en disco).
-- **Métricas de exportación:** Trackear cuántas veces se exporta, a qué plataformas, para analizar uso real de la feature (post-MVP, con consentimiento del usuario).
-- **Watermark/Branding:** Opción de agregar watermark sutil de "Hecho con LUMIS" en la esquina del video exportado (para marketing orgánico).
+### Cloud Sync / Multi-dispositivo
+- **Mejora:** Sincronizar `vrm_data/` con cloud (Firebase, iCloud Drive, Google Drive) para permitir reanudar grabación en otro dispositivo.
+- **Decisión de diseño tomada:** Separar `SessionData` de `ProjectState` facilita sincronizar solo lo que cambió (deltas). Los paths de clips serán relativos al proyecto para ser portables entre dispositivos.
 
-### Decisiones de Diseño Pensando en el Futuro
-- `ExportService` se diseñó como clase separada (no acoplada a `RecordingManager`) para que sea extensible: se pueden agregar métodos como `compressVideo()`, `exportToCloud()` sin tocar la lógica de grabación.
-- Los campos `exportedAt` y `galleryAssetId` en `SessionData` son opcionales y extensibles: se pueden agregar `exportedPaths`, `shareDestinations`, etc. sin romper compatibilidad.
-- El flujo save → share es secuencial pero cada paso retorna resultado independiente, lo que permite en el futuro hacer save sin share, o share sin save, según preferencia del usuario.
+### Versionado de Sesiones
+- **Mejora:** Mantener histórico de `session_data` (tipo "save states") para permitir rollback a un punto anterior.
+- **Decisión de diseño tomada:** El patrón de escritura atómica (tmp + rename) es la base para implementar un sistema de versionado sencillo (renombrar a `session_data.v1.json`, `v2`, etc.).
+
+### Búsqueda y Filtrado de Proyectos
+- **Mejora:** Filtrar proyectos por fecha, tema, estado, duración.
+- **Decisión de diseño tomada:** `SessionSummary` incluye todos los campos necesarios para filtrado futuro sin re-estructuración.
+
+### Estadísticas de Producción
+- **Mejora:** Mostrar al usuario métricas como "tiempo total grabado", "takes promedio por fragmento", "proyectos completados esta semana".
+- **Decisión de diseño tomada:** `SessionData.takesPerChunk` y `startedAt`/`lastUpdatedAt` ya capturan los datos brutos necesarios.
+
+### Proyecto "Template"
+- **Mejora:** Permitir duplicar un proyecto existente como punto de partida (re-usar input/script, resetear sesión).
+- **Decisión de diseño tomada:** La separación ProjectState/SessionData permite clonar el state y crear una sesión nueva limpia.
+
+### Integración con IA Backend
+- **Mejora:** Cuando el backend de IA esté disponible, guardar las respuestas crudas del modelo en `input_schema.json` o un archivo separado para auditoría y re-uso.
+- **Decisión de diseño tomada:** `InputSchema.contextData` ya tiene campo para metadata extensible.

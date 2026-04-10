@@ -1,232 +1,92 @@
-# 📋 ANÁLISIS TÉCNICO - Día 6: Exportación (Galería y Share Sheet)
-
-**Paso:** Día 6 - Exportación (Galería y Share Sheet)  
-**Agente:** oc  
-**Estado:** PENDIENTE (próximo hito)
-
----
+# 📋 Análisis Día 7-8: Persistencia Local Offline
 
 ## 1. Diseño Funcional
 
 ### 1.1 Happy Path
+1. **Usuario inicia nueva sesión:** Crea un proyecto en Dashboard → entra a Grabación → se inicializa `SessionData` vacía con `projectId` y timestamps.
+2. **Grabación de clips:** Por cada chunk aprobado, `RecordingManager.acceptCurrentClip()` actualiza `sessionData` y dispara `_saveSessionDataToDisk()`.
+3. **Guardado automático:** Cada "Accept" o actualización de estado persisten inmediatamente a `vrm_data/projects/{projectId}/session_data.json`.
+4. **Recuperación de sesión:**
+   - Al abrir proyecto existente, el sistema debe detectar `session_data.json` y restaurar estado.
+   - El usuario retoma desde el `currentChunkIndex` persisted.
+5. **Interrupciones:**
+   - App en background: `stopAndSavePartial()` guarda clip parcial.
+   - Crash/cierre forzado: Al reopen, se reconstruye estado desde disco.
 
-1. **El usuario completa el Auto-Stitch** → tiene `final.mp4` generado en `vrm_data/projects/{projectId}/`
-2. **El usuario toca botón "Exportar"** en la UI de Stitch Progress o desde Review
-3. **El sistema verifica permisos de Photos** (iOS: PHPhotoLibrary, Android: WRITE_EXTERNAL_STORAGE)
-   - Si no hay permiso: solicitar permisos nativos → si se deniega, mostrar error accionable
-4. **El sistema copy `final.mp4` a galería del dispositivo** mediante `photo_manager`:
-   - iOS: Se guarda en Photos library (categoría Video)
-   - Android: Se guarda en DCIM/VRM o Movies/
-5. **El sistema dispara Share Sheet nativo** con el video ya guardado o con el archivo directo
-6. **El usuario ve toast/feedback: "Video guardado en Galería"** + opciones de-compartir activas
+### 1.2 Edge Cases MVP
+| Escenario | Manejo |
+|-----------|-------|
+| Session vacía (sin clips) al recuperar | Iniciar fresh, `currentChunkIndex = 0` |
+| Archivo corrupto (JSON inválido) | Log error + iniciar session nueva |
+| Archivo no existe | Crear nueva sesión |
+| Disk full durante save | Fallback: mantener solo en memoria, warn user |
+| Stitching completado + recuperar | Mostrar `RecordingEndPage` directamente |
+| `approvedClips` referencian archivos borrados | Warn user, предложить re-grabar chunk |
 
-### 1.2 Edge Cases para MVP
-
-| Escenario | Comportamiento |
-|-----------|----------------|
-| **No hay `final.mp4`** (stitch incompleto) | Bloquear exportación, mostrar mensaje "Debes completar la unión primero" |
-| **Permiso de galería denegado** | Mostrar diálogo con botón "Abrir Settings" y opción de-share alternativo |
-| **Dispositivo sin espacio** | Mostrar error "Espacio insuficiente en dispositivo" |
-| **Archivo corrupto o missing** | Reconstruir desde clips aprobados si existen, o mostrar error con opción de-reintentar stitch |
-| **Share Sheet cancelado por usuario** | No mostrar error, simplemente cerrar modal |
-
----
-
-## 2. Diseño Técnico
-
-### 2.1 Componentes Nuevos
-
-#### 2.1.1 ExportService (nuevo)
-**Ubicación:** `lib/core/services/export_service.dart`
-
-```dart
-class ExportService {
-  /// Guarda final.mp4 en galería y opcionalmente abre share sheet
-  Future<ExportResult> exportToGallery({
-    required String projectId,
-    required String finalVideoPath,
-    bool openShareSheet = true,
-  });
-}
-
-class ExportResult {
-  final bool success;
-  final String? galleryPath; // Path donde se guardó en galería
-  final String? errorMessage;
-}
-```
-
-**Responsabilidades:**
-- Verificar permisos de Photos
-- Guardar video en galería usando `photo_manager`
-- Limpiar archivos temporales si corresponde
-- callbacks de progreso
-
-#### 2.1.2 ShareService (nuevo)
-**Ubicación:** `lib/core/services/share_service.dart`
-
-```dart
-class ShareService {
-  /// Comparte archivo de video vía Share Sheet nativo
-  Future<void> shareVideo({
-    required String videoPath,
-    String? text,
-  });
-}
-```
-
-**Responsabilidades:**
-- Usar `share_plus` para abrir share sheet del OS
-- Soportar texto descriptivo opcional (ej: "Mira mi video VRM")
-
-### 2.2 Extensiones a Componentes Existentes
-
-#### 2.2.1 RecordingManager
-- Añadir método `exportFinalVideo()` que orchestina: Stitch → Export → Share
-- O integrarlo como acción en `StitchProgressPage`
-
-#### 2.2.2 StitchProgressPage
-- Añadir botón "Exportar a Galería" (icono: download_alt)
-- Añadir botón "Compartir" (icono: share)
-- Estados: idle → exporting → sharing → complete/error
-
-### 2.3 Modelos de Datos
-
-#### 2.3.1 ExportRecord (nuevo en session_data.json)
-```json
-{
-  "exportedAt": "2026-04-09T15:30:00Z",
-  "galleryPath": "/Photos/VRM/final_20260409.mp4",
-  "appVersion": "1.0.0"
-}
-```
-
-### 2.4 Integración con Permisos
-
-**PermissionService modificaciones:**
-- Añadir `requestPhotosPermission()` usando `photo_manager`:
-  - iOS: `PhotoManager.requestExtendAuthApproval()`
-  - Android: Verificar `StoragePermission` o permiso de gerente de fotos
-
-### 2.5 APIs/Contratos
-
-| Método | Input | Output |
-|--------|-------|--------|
-| `ExportService.exportToGallery()` | `projectId`, `finalVideoPath` | `ExportResult` |
-| `ShareService.shareVideo()` | `videoPath`, `text?` | `void` (dispara OS share sheet) |
-| `PermissionService.requestPhotosPermission()` | - | `bool` (aprobado/denegado) |
+### 1.3 Manejo de Errores
+- **Save failure:** Silently log, no bloquia grabación. Evitar UX blocking.
+- **Load failure:** Iniciar nueva sesión, no exponer stacktrace.
+- **Archivo borrado por usuario:** Verificar existencia antes de reproducir en revisión.
 
 ---
 
-## 3. Decisiones
+## 2. Decisiones
 
-### 3.1 Dependencias Seleccionadas
+### ✅ Decisiones Existentes (ya implementadas)
+1. **JSON como formato de persistencia** —Ligero, legible, sin dependencia SQLite para MVP.
+2. **Save on Accept** —Persistencia en cada paso crítico, no solo al final.
+3. **Ruta:** `vrm_data/projects/{projectId}/session_data.json` —Estructura definida.
+4. **Modelo `SessionData`** con `toJson()`/`fromJson()` —Contrato serializable.
+5. **`projectId` como clave** —Identificador único por proyecto.
 
-| Librería | Versión | Justificación |
-|----------|---------|----------------|
-| `photo_manager` | ^3.0.0 | API unificado para iOS/Android, estándar en Flutter |
-| `share_plus` | ^7.0.0 | Wrapper multiplataforma del native share sheet |
-
-**Justificación técnica:**
-- Ambas son dependencias declaradas en `mvp-Definition.md` y ya previstas en la arquitectura Fase 1.
-- `photo_manager` tiene mejor soporte en Android 13+ (Scoped Storage) que alternativas.
-- `share_plus` es mantenida por Flutter team (canonical).
-
-### 3.2 Flujo de Permisos
-
-**Decisión:** Verificar permisos ANTES de copiar a galería.
-
-1. Verificar `PermissionService.isPhotosPermissionGranted()`
-2. Si no → request → si deniega → mostrar UI de settings
-3. Si approve → proceder a copy
-
-**Alternativa considerada:** Copiar primero y catch permission error. Descartado porque genera用户体验 roto (archivo copiado parcialmente o perdido).
-
-### 3.3 Manejo de Errores
-
-- Cualquier error de export → no guardar en `session_data` como "exportado" (para permitir reintento)
-- Si el video ya existe en galería (mismo hash) → skip copy, usar existentes
+### ⚠️ Decisiones PENDIENTES Detectadas
+| Decisión | Status | Propuesta |
+|----------|--------|------------|
+| Carga de sesión existente | 🔴 No implementado | Agregar método estático `SessionData.load(projectId)` y `RecordingManager.loadOrCreate(projectId)` |
+| Reanudación automática al reopen | 🔴 No implementado | En `recording_page.dart`, chequear existencia antes de inicializar |
+| Validación de archivos al cargar | 🔴 No implementado | Verificar que `approvedClips` paths sigan existiendo |
 
 ---
 
-## 4. Criterios de Aceptación
+## 3. Criterios de Aceptación
 
-| # | Criterio | Verificable vía |
-|---|----------|-----------------|
-| 1 | El botón "Exportar" visible tras completar stitch | UI test |
-| 2 | Si no hay permiso, aparece diálogo nativo de permisos | Manual |
-| 3 | Video se guarda en Photos (iOS) o Galería (Android) | Explorador archivos |
-| 4 | Share Sheet nativo se abre tras exportar | Manual |
-| 5 | Si share cancela, no hay error/crash | Manual |
-| 6 | Si storage lleno, muestra error claro | Manual |
-| 7 | Spinner muestra durante exportación (>200ms) | UI test |
-| 8 | `session_data.json` actualiza tras export exitoso | JSON check |
+- [ ] `session_data.json` se escribe correctamente tras cada `acceptCurrentClip()`
+- [ ] El archivo contiene todos los campos: `projectId`, `currentChunkIndex`, `approvedClips`, `stitchingCompleted`, `finalVideoPath`
+- [ ] Al reabrir proyecto, el UI posiciona en el `currentChunkIndex` persisted
+- [ ] Clips asociados en `approvedClips` son reproducibles (archivo existe)
+- [ ] Si `stitchingCompleted = true`, mostrar `RecordingEndPage` directamente
+- [ ] Si archivo corrupto/inexistente, se crea session nueva sin crash
+- [ ] Sesión corrupta no bloquea navegación al Dashboard
 
 ---
 
-## 5. Riesgos
+## 4. Riesgos
 
 | Riesgo | Probabilidad | Impacto | Mitigación |
-|-------|-------------|--------|------------|
-| **photo_manager no autoriza en iOS 14+** | Media | Alto | Test temprano en dispositivo, tener fallback de-share directo |
-| **Scattered Storage deniega en Android 13+** | Media | Medio | Usar MediaStore API (photo_manager lo abstrae), test en Android 13 physical |
-| **Video grande (>1GB) agota memoria** | Baja | Alto | Chunked copy o streaming; para MVP: warn >500MB |
-| **Share Sheet no está disponible (app sandbox)** | Baja | Medio | Fallback: Guardar a Downloads, notificar usuario |
+|-------|--------------|---------|------------|
+| **Session recovery no implementada** | ALTA | 🔴 CRÍTICO | Agregar `SessionData.load(projectId)` + `RecordingManager.loadOrCreate()` |
+| **Approved clips referencian archivos borrados** | MEDIA | 🟡 MEDIO | Validar existencia en load + warn user |
+| **JSON corrupto por write concurrente** | BAJA | 🟡 MEDIO | Try/catch en load, fallback a nueva sesión |
 
 ---
 
-## 6. Plan de Implementación
+## 5. Plan de Implementación
 
-### Tarea 1: Añadir dependencias
-- [ ] Añadir `photo_manager: ^3.0.0` y `share_plus: ^7.0.0` en `pubspec.yaml`
-- [ ] flutter pub get
-
-### Tarea 2: Crear ExportService
-- [ ] Crear `lib/core/services/export_service.dart`
-- [ ] Implementar `exportToGallery()` con `photo_manager`
-- [ ] Implementar `_saveToGallery()` con AssetEntity
-- [ ] Testing: unit test con archivo mock
-
-### Tarea 3: Crear ShareService
-- [ ] Crear `lib/core/services/share_service.dart`
-- [ ] Implementar `shareVideo()` con `share_plus`
-
-### Tarefa 4: Extender PermissionService
-- [ ] Añadir `requestPhotosPermission()`
-- [ ] Añadir `isPhotosPermissionGranted()`
-
-### Tarea 5: Integrar en UI (StitchProgressPage)
-- [ ] Añadir botones "Exportar" y "Compartir"
-- [ ] Conectar a ExportService
-- [ ] Añadir estados de loading
-
-### Tarea 6: Testing QA
-- [ ] Test en iOS físico: permisos, gallery, share
-- [ ] Test en Android físico: permisos, gallery, share
-
-**Complejidad relativa:** Media (mayormente integración de libs existentes)
-
-**Dependencias:** 
-- Requiere `final.mp4` disponible (Día 4-5 completado)
-- Requiere `PermissionService` existente
+### Tareas Atómicas
+| # | Tarea | Complejidad | Dependencia |
+|---|-------|-------------|-------------|
+| 1 | Agregar `SessionData.load(projectId)` estático | Baja | Modelo existente |
+| 2 | Agregar `RecordingManager.loadOrCreate(projectId)` factory | Baja | #1 |
+| 3 | Implementar validación de `approvedClips` al cargar | Media | #2 |
+| 4 | Integrar carga en `recording_page.dart` | Media | #2 |
+| 5 | Test de recovery: reopen proyecto con sesión abierta | Baja | #4 |
 
 ---
 
-## 🔮 Roadmap (NO implementar ahora)
+## 6. Roadmap (NO implementar ahora)
 
-1. **Export múltiples:** Batch export de todas las tomas a zip
-2. **Export a nube personal:** iCloud, Google Drive, Dropbox
-3. **Compresión configurable:**Antes de guardar, permitir reducir calidad/size
-4. **Auto-export post-stitch:** Opción de auto-exportar al completar stitch
-5. **Metadata EXIF:** Inyectar tags (title, description) en el video guardado
-6. **Historial de exports:** Ver qué se ha exportado y cuándo
-
-**Decisiones tomadas para no bloquear roadmap:**
-- ExportService separado de RecordingManager (facilita extensión)
-- ExportResult incluye galleryPath para tracking futuro
-- SessionData extensible con campo `exportRecords[]`
-
----
-
-**Idioma:** Español 🇪🇸  
-**Documento generado:** 2026-04-09
+- **Persistencia de proyectos múltiples:** Lista de proyectos en Dashboard desde `vrm_data/projects/`.
+- **Versionado de schema:** Si cambia estructura `session_data.json`, migrar automáticamente.
+- **Backup automático:** Copia de seguridad antes de cada save.
+- **Sincronización Cloud:** iCloud/Google Drive para cross-device resume.
+- **Sesiones abandonadas自動detect:** Limpiar proyectos sin actividad > 30 días.
