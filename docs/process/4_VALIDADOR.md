@@ -1,3 +1,7 @@
+> [!CAUTION]
+> **IMPORTANTE:** El único archivo que puedes modificar es: **`D:\Develop\Personal\vrm\docs\validacion.md`**
+
+
 # 🛡️ PROCESO DE VALIDACIÓN (VALIDADOR) v2
 
 ## Perfil del Rol

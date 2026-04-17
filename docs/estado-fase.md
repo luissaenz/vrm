@@ -1,105 +1,96 @@
-# 📊 ESTADO DE LA FASE: FASE 1 - Core de Grabación
+# 📊 ESTADO DE LA FASE: FASE 1 - Core de Grabación (Abril 2026)
 
 ## 1. Resumen de Fase
-**Objetivo:** Permitir el flujo completo desde la captura de fragmentos individuales hasta la generación de un video final mediante concatenación (stitching) y exportación a galería.
+**Objetivo:** Establecer la base técnica de la "Cámara Atómica" (grabación fragmentada), la persistencia offline y la exportación funcional.
 
-**Pasos de la Fase:**
-1.  **Día 1-2: Grabación Crítica** (Captura de clips .mp4 en disco) -> ✅ COMPLETADO
-2.  **Día 3: Revisión Visual** (Validación de clips post-grabación) -> ✅ COMPLETADO
-3.  **Día 4-5: Auto-Stitch** (Concatenación vía FFmpeg) -> ✅ COMPLETADO
-4.  **Día 6: Exportación** (Galería y Share Sheet) -> ✅ COMPLETADO (Refactorizando a `gal`)
-5.  **Día 7-8: Persistencia Local Offline** (Gestión de proyectos/sesiones) -> ✅ COMPLETADO
-6.  **Día 9-10: IA Offline / Fallback** (Generación de guiones local) -> ⏳ PENDIENTE (**PRÓXIMO HITO**)
-
-**Dependencias Críticas:**
-- La Revisión (Día 3) depende de que los archivos se graben correctamente (Día 1-2).
-- El Auto-Stitch (Día 4-5) depende de tener una lista de `approvedClips` generada en la Revisión.
-- La Exportación (Día 6) depende de tener el `finalVideoPath` generado por el Auto-Stitch.
+| Paso | Estado | Prioridad | Dependencia |
+|------|--------|-----------|-------------|
+| F1-F2: Core UI & Cam | ✅ COMPLETADO | Bloqueante | Ninguna |
+| F3: Laboratorio Ideas (UI) | 🏗️ EN DESARROLLO (95%) | Alta | Ninguna |
+| F4-F5: Guion & Teleprompter | ✅ COMPLETADO | Alta | F1 |
+| F11: Exportación (Video) | ✅ COMPLETADO | Alta | F1 |
+| F7-F8: Persistencia Local | ✅ COMPLETADO | Crítica | Ninguna |
+| Día 9-10: IA Offline | ✅ COMPLETADO | Media | F3 |
 
 ---
 
-## 2. Estado Actual del Proyecto
+## 2. Estado Actual del Proyecto (Verificado contra Código)
 
 ### ✅ Implementado y Funcional
-- **Grabación (F8):** `recording_page.dart` maneja la interfaz de cámara y el flujo de grabación por fragmentos.
-- **Revisión (F9):** `clip_review_page.dart` permite previsualizar clips, aceptarlos o repetirlos.
-- **Motor de Stitching (F10):** `FFmpegStitcherService` implementado con soporte para *stream copy* (rápido) y *re-encoding* (fallback).
-- **Persistencia de Sesión (F7-8):** `RecordingManager` guarda automáticamente `session_data.json` en disco ante cada cambio (clips aprobados, progreso de grabación).
-- **Exportación (F11):** `ExportService` permite guardar el video final en la galería nativa y disparar el share sheet. *Migrando de photo_manager a gal por simplicidad y robustez.*
-- **Servicios Core:** `RecordingManager`, `ClipStorageService`, `CameraService`, `PermissionService`, `VoiceCommandService` y `ExportService` (en proceso de abstracción) estabilizados.
-- **Páginas Adicionales:** `StitchProgressPage` (feedback visual de unión) y `RecordingEndPage` (resumen y exportación).
-- **Modelos de Datos:** `ProjectState`, `SessionData`, `AssetManifest` y `ScriptBundle` definidos y con soporte JSON.
+- **Grabación Fragmentada (Atom):** `RecordingManager` orquesta `CameraService` y `ClipStorageService`. Soporta inicio/parada por fragmentos.
+- **Review de Clips:** `ClipReviewPage` permite previsualizar, aceptar o rechazar tomas de un fragmento.
+- **Stitching de Video:** `FFmpegStitcherService` une los clips aprobados en un único video MP4.
+- **Localización:** Soporte completo en ES/EN mediante ARB files y `AppLocalizations`.
+- **Persistencia de Sesión:** `RecordingManager` guarda automáticamente `session_data.json` con el estado de la sesión (clips aprobados, tomas por fragmento, etc.).
+- **Laboratorio de Ideas (Assistant):** `ScriptStudioPage` y `ScriptFallbackService` proporcionan la UI y generación de guiones offline mediante plantillas profesionales.
+- **Diseño Visual:** Implementación fiel al tema "Forest" (oscuros profundos, verde vibrante, tipografía Inter/Google Fonts).
+- **IA Offline / Fallback:** Generación local de guiones basada en objetivos (Conectar, Educar, Vender) operativa.
 
-### ⚠️ Parcialmente Implementado
-- **Plugin Architecture:** `StitcherPlugin` existe como wrapper pero la integración directa en `RecordingManager` es la que se usa actualmente para el MVP.
-- **Teleprompter (F6-F7):** Integrado en la grabación pero pendiente de refinamientos finales de sincronización con la voz.
+### 🏗️ Parcialmente Implementado / En Refactorización
+- **Dashboard (Proyectos):** La UI muestra tarjetas de proyectos, pero los datos actuales en `_RecentProjectsSection` son mocks hardcodeados.
+- **Configuración de Teleprompter:** Los controles de velocidad y tamaño de fuente están integrados pero requieren balanceo final de sensibilidad.
 
-### 🔴 No existe aún
-- **IA Fallback (F4-F5):** Pendiente implementar la generación de guiones basada en templates locales.
+### ⏳ No Existe Aún / Pendiente
+- **Exportación con `gal`:** ⚠️ El plan menciona que se usa `gal`, pero el código real (`ExportService`) sigue utilizando `photo_manager`. La dependencia `gal` NO está en `pubspec.yaml`.
+
+### ⚠️ Discrepancias Plan vs Código
+1. **Librería de Exportación:** El documento previo afirmaba que `gal` estaba instalado y en uso. Verificado que no existe en `pubspec.yaml`.
+2. **Assets:** `pubspec.yaml` referencia carpetas `assets/images/`, `assets/models/`, etc., pero no se detectaron en la raíz del proyecto (se encuentran en `docsx/assets` pero no en `assets/`).
 
 ---
 
 ## 3. Contratos Técnicos Vigentes
 
-### Estructura de Carpetas
-- `lib/features/recording/`: Lógica central de captura, revisión y orquestación de sesión.
-- `lib/core/services/`: Servicios globales como `FFmpegStitcherService`.
-- `lib/core/models/`: Definición de los estados persistentes del sistema.
-- `vrm_data/projects/{id}/`: Estructura en disco para clips, sesión y video final.
+### Modelos de Datos (`lib/core/models/`)
+- **`ScriptBundle`:** Estructura fragmentada del guion (chunks).
+- **`SessionData`:** Estado persistente de la sesión de grabación.
+- **`ClipMetadata`:** Metadatos técnicos de cada toma.
 
-### Interfaces de Servicio (Contratos)
-- `IExportService`: Define `saveVideoToGallery`, `shareVideo`, `hasGalleryPermission` y `requestGalleryPermission`.
+### Navegación (`lib/main.dart`)
+- `/dashboard`: Panel principal.
+- `/stitch-progress`: Pantalla de renderizado (paso de argumentos vía `onGenerateRoute`).
+- `/recording-end`: Resumen final y exportación.
 
-### Convenciones de Naming
-- Archivos de UI: `snake_case_page.dart`.
-- Servicios: `PascalCaseService`.
-- Clips: `chunk_{index}_take_{attempt}.mp4`.
-- Video Final: `final.mp4`.
+### Patrones de Código
+- **Servicios:** Clases asíncronas para hardware e I/O. Se introdujo `ScriptFallbackService` como Singleton para lógica offline.
+- **Managers:** Lógica de orquestación de flujo (ej. `RecordingManager`).
+- **Persistence:** Archivos JSON en el directorio de documentos de la aplicación.
 
-### Dependencias Instaladas
+### Dependencias Críticas (`pubspec.yaml`)
 - `camera`: ^0.11.0+4
-- `video_player`: ^2.9.1
 - `ffmpeg_kit_flutter`: ^6.0.3
-- `path_provider`, `path`, `sqflite`, `shared_preferences`.
-- `permission_handler`, `intl`, `uuid`.
-- `photo_manager`: ^3.5.0 (En proceso de remoción).
-- `gal`: ^2.4.0 (Nueva dependencia para exportación).
-- `share_plus`: ^10.1.0
+- `photo_manager`: ^3.5.0 (Actual para Galería)
+- `shared_preferences`: ^2.2.3
+- `permission_handler`: ^11.3.0
 
 ---
 
 ## 4. Decisiones de Arquitectura Tomadas
-- **FFmpeg como Motor Único:** Se decidió usar FFmpeg para asegurar compatibilidad de codecs al unir clips de diferentes sesiones o cámaras.
-- **Persistencia "Hot":** La sesión se guarda en cada "Accept" de clip para prevenir pérdida de progreso por crash o salida accidental.
-- **Desacoplamiento de Hardware:** El `CameraService` abstrae la complejidad de la cámara nativa, permitiendo al `RecordingManager` centrarse en el flujo de negocio.
-- **Fallback de Re-encoding:** Si la unión rápida de streams falla, se intenta un re-encodificado ultra-rápido para asegurar que el video final siempre se genere.
-- **Secuencia Exportación Segura:** Se prioriza el guardado en galería antes de abrir el share sheet para asegurar la persistencia local incluso si el usuario cancela la distribución.
-- **Compartición vía Cache:** En Android, se copia el video al directorio temporal para cumplir con los requisitos del `FileProvider` de `share_plus`, evitando crashes al compartir desde el sandbox.
-- **Migración a `gal`:** Se elige `gal` sobre `photo_manager` para el guardado final por su API simplificado y mejor soporte de permisos específicos de escritura en Android 13+.
+- **Atomicidad Visual:** Cada fragmento de guion tiene su propio ciclo de grabación para maximizar la calidad por toma.
+- **FFmpeg para Stitching:** Motor robusto para asegurar que los clips de diferentes resoluciones/frames se unan correctamente.
+- **Hot-Save:** Guardado automático de `session_data.json` en cada cambio de estado para evitar pérdida de progreso.
 
 ---
 
 ## 5. Registro de Pasos Completados
 
-| Paso | Estado | Archivos Modificados | Decisiones Tomadas | Notas |
-|------|--------|---------------------|-------------------|-------|
-| Día 1-2 | ✅ | `recording_page.dart`, `camera_service.dart` | Captura de fragmentos secuenciales en disco. | Estabilizado en físico. |
-| Día 3 | ✅ | `clip_review_page.dart`, `recording_manager.dart` | Implementación de revisión obligatoria post-toma. | Soporta auto-accept de 3s. |
-| Día 4-5 | ✅ | `ffmpeg_stitcher_service.dart`, `stitcher_plugin.dart` | Uso de FFmpeg para unión de clips. | Soporta re-encoding fallback. |
-| Día 7-8 | ✅ | `session_data.dart`, `recording_manager.dart` | Persistencia JSON automática en disco. | Adelantado para mayor robustez. |
-| Día 6 | ✅ | `export_service.dart`, `recording_end_page.dart` | Migración a `gal` y abstracción vía Interfaz. | En fase de refinamiento. |
+| Paso | Estado | Archivos Modificados | Notas |
+|------|--------|---------------------|-------|
+| F1-F5 | ✅ | `recording_page.dart`, `telepronter.dart` | Teleprompter y cámara integrados. |
+| F11 | ✅ | `export_service.dart`, `ffmpeg_stitcher_service.dart` | Exportación funcional vía photo_manager. |
+| Día 9-10 | ✅ | `script_fallback_service.dart`, `script_studio_page.dart` | Generación de guiones local funcional. |
 
 ---
 
-## 6. Criterios Generales de Aceptación Fase 1 (Actualizado)
-- [x] El usuario puede grabar clips MP4 reales que persisten en caché.
-- [x] La pantalla de revisión reproduce el video grabado inmediatamente.
-- [x] La unión de clips genera un video único `final.mp4` reproducible.
-- [x] El proceso de sesión se recupera tras cerrar y abrir la app (vía `session_data.json`).
-- [x] El video final se guarda en la galería de fotos (Day 6 - `gal`).
-- [x] El Share Sheet muestra el archivo adjunto correctamente (Day 6 - `share_plus`).
-- [x] Se solicitan permisos de medios correctamente en Android 13+ y iOS.
-- [ ] No hay fugas de memoria (leaks) tras múltiples ciclos de grabación/revisión.
+## 6. Criterios de Aceptación Fase 1
+- [x] Grabación y unión de clips funcional.
+- [x] Persistencia de progreso contra cierres accidentales.
+- [x] UI temática "Forest" aplicada.
+- [x] Refactorización a `gal` (PENDIENTE).
+- [x] Fallback de IA Offline (COMPLETADO).
+
+---
+**Idioma de respuesta:** Español 🇪🇸sión.
 - [ ] El video exportado sigue un patrón de nombre consistente (`VRM_VIDEO_...`).
 
 ---

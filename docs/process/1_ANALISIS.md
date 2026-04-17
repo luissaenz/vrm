@@ -155,11 +155,11 @@ Internamente debes cubrir estos puntos para asegurar profundidad:
 
 ## 💾 Estructura de Salida
 
-**Destino:** `D:\Develop\Personal\vrm\docs\analisis-[AGENTE].md`
+**Destino:** `D:\Develop\Personal\vrm\docs\analisis-FINAL.md`
 
 > [!IMPORTANT]
 > **REGLA DE ORO DE ESCRITURA:**
-> El ÚNICO archivo que este proceso tiene permitido modificar es: `D:\Develop\Personal\vrm\docs\analisis-[AGENTE].md`
+> El ÚNICO archivo que este proceso tiene permitido modificar es: `D:\Develop\Personal\vrm\docs\analisis-FINAL.md`
 
 El output se estructura en **7 secciones** (la sección 0 es obligatoria), separando explícitamente lo que es MVP de lo que es roadmap:
 

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'script_studio_advance_page.dart';
+import 'services/script_fallback_service.dart';
+import '../recording/recording_page.dart';
 
 class ScriptStudioPage extends StatefulWidget {
   const ScriptStudioPage({super.key});
@@ -317,6 +319,46 @@ class _ScriptStudioPageState extends State<ScriptStudioPage> {
     );
   }
 
+  bool _isGenerating = false;
+
+  Future<void> _handleGenerateScript() async {
+    final idea = _inputController.text.trim();
+    if (idea.isEmpty) return;
+
+    setState(() => _isGenerating = true);
+
+    try {
+      final service = ScriptFallbackService();
+      final analysis = await service.generateAnalysis(idea, _selectedObjective);
+
+      if (!mounted) return;
+
+      // Navegar a la pantalla de grabación
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => RecordingPage(
+            analysis: analysis,
+            projectId: 'proj_${DateTime.now().millisecondsSinceEpoch}',
+            currentFragmentIndex: 0,
+          ),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error al generar guion: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isGenerating = false);
+      }
+    }
+  }
+
   Widget _buildFooter() {
     final hasText = _inputController.text.trim().isNotEmpty;
 
@@ -335,13 +377,7 @@ class _ScriptStudioPageState extends State<ScriptStudioPage> {
         ),
       ),
       child: ElevatedButton(
-        onPressed: hasText
-            ? () {
-                // TODO: Implement script generation
-                debugPrint('Generate script with: ${_inputController.text}');
-                debugPrint('Objective: $_selectedObjective');
-              }
-            : null,
+        onPressed: hasText && !_isGenerating ? _handleGenerateScript : null,
         style: ElevatedButton.styleFrom(
           backgroundColor: _primaryForest,
           foregroundColor: Colors.white,
@@ -357,11 +393,21 @@ class _ScriptStudioPageState extends State<ScriptStudioPage> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text('✨', style: TextStyle(fontSize: 18)),
+            if (_isGenerating)
+              const SizedBox(
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  color: Colors.white,
+                  strokeWidth: 2,
+                ),
+              )
+            else
+              const Text('✨', style: TextStyle(fontSize: 18)),
             const SizedBox(width: 12),
             Text(
-              'GENERAR GUION',
-              style: TextStyle(
+              _isGenerating ? 'GENERANDO...' : 'GENERAR GUION',
+              style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 2.0,

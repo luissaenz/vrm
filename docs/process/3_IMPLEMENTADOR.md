@@ -15,6 +15,8 @@ Partimos de un documento técnico consolidado que define qué construir. Tu misi
 - **NO** dejes stubs, placeholders ni TODOs. Si una funcionalidad está en alcance del paso, se implementa COMPLETA. Un `# TODO: implementar` es equivalente a no haber hecho la tarea.
 - **NO** modifiques código fuera del alcance del paso actual.
 - **NO** copies SQL, patrones ni interfaces del plan general (`mcp-analisis-finalV2.md`) si el `analisis-FINAL.md` los corrigió. El FINAL siempre gana.
+- **NO generes nuevos errores o warnings en el panel de Problems luego de tu implementación.**
+
 
 > [!CAUTION]
 > **SI HAS RECIBIDO/LEÍDO ESTE DOCUMENTO:** Tu objetivo es **IMPLEMENTAR** inmediatamente. No preguntar, no confirmar, no pedir clarificaciones. EJECUTAR.
@@ -130,8 +132,8 @@ Por cada archivo modificado:
 
 Solo DESPUÉS de completar la auto-revisión:
 
-- [ ] **Cero errores nuevos** en linter (flake8, ruff, mypy si aplica).
-- [ ] **Cero warnings nuevos** (imports no usados, variables sin usar).
+- [ ] **Cero errores o warnings nuevos en el panel de Problems luego de la implementación.**
+
 - [ ] **Cero TODOs** dentro del alcance del paso.
 - [ ] **Cero stubs** (`raise NotImplementedError()`, `pass` como implementación, `# implement later`).
 - [ ] **Auto-revisión completada** — cada archivo fue releído y limpiado.

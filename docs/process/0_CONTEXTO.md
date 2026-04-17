@@ -163,6 +163,9 @@ Definición explícita de qué significa "listo" para esta fase:
 > **REGLA DE ORO DE ESCRITURA:**
 > El ÚNICO archivo que este proceso tiene permitido crear/modificar es:
 > `D:\Develop\Personal\vrm\docs\estado-fase.md`
+> Luego, Si existen estos archivos, elimínalos:
+> `D:\Develop\Personal\vrm\docs\analisis-FINAL.md`
+> `D:\Develop\Personal\vrm\docs\validacion.md`
 
 ---
 
