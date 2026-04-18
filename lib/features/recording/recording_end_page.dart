@@ -9,6 +9,8 @@ import 'package:video_player/video_player.dart';
 import '../../core/theme.dart';
 import 'package:vrm_app/l10n/app_localizations.dart';
 import '../../core/services/export_service.dart';
+import '../../shared/widgets/vrm_button.dart';
+import '../../shared/utils/vrm_notifications.dart';
 
 class RecordingEndPage extends StatefulWidget {
   final String? finalVideoPath;
@@ -142,13 +144,11 @@ class _RecordingEndPageState extends State<RecordingEndPage> {
   }
 
   void _showSnackBar(String message, {bool isError = false}) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: isError ? Colors.red : Colors.green,
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
+    if (isError) {
+      VRMNotifications.showError(context, message);
+    } else {
+      VRMNotifications.showSuccess(context, message);
+    }
   }
 
   Future<bool> _showPermissionDeniedDialog() async {
@@ -453,6 +453,7 @@ class _RecordingEndPageState extends State<RecordingEndPage> {
 
   Widget _buildBottomAction(BuildContext context, AppLocalizations l10n) {
     final hasVideo = widget.finalVideoPath != null;
+    final canExport = _isVideoInitialized && hasVideo && !_isExporting && !_exportDone;
 
     return Positioned(
       bottom: 0,
@@ -466,53 +467,27 @@ class _RecordingEndPageState extends State<RecordingEndPage> {
             end: Alignment.topCenter,
             colors: [
               context.colorScheme.surface,
-              context.colorScheme.surface.withValues(alpha: 0.9),
+              context.colorScheme.surface.withValues(alpha: 0.94),
               context.colorScheme.surface.withValues(alpha: 0.0),
             ],
-            stops: const [0.0, 0.6, 1.0],
+            stops: const [0.0, 0.7, 1.0],
           ),
         ),
-        child: ElevatedButton(
-          onPressed: (_isExporting || _exportDone || !hasVideo) ? null : _exportVideo,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: context.appColors.forest,
-            foregroundColor: Colors.white,
-            disabledBackgroundColor: _exportDone
-                ? Colors.green
-                : context.appColors.forest.withValues(alpha: 0.5),
-            minimumSize: const Size(double.infinity, 56),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(28),
-            ),
-            elevation: 10,
-            shadowColor: context.appColors.forest.withValues(alpha: 0.1),
-          ),
-          child: _isExporting
-              ? const SizedBox(
-                  width: 24,
-                  height: 24,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                  ),
-                )
-              : Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      _exportDone ? l10n.exported : (hasVideo ? l10n.exportVideo : l10n.videoNotAvailable),
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 17,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Icon(
-                      _exportDone ? Icons.check_rounded : Icons.ios_share_rounded,
-                      size: 20,
-                    ),
-                  ],
-                ),
+        child: VRMButton(
+          label: _exportDone
+              ? l10n.exported
+              : (hasVideo
+                  ? l10n.exportVideo
+                  : l10n.videoNotAvailable),
+          onPressed: canExport
+              ? () {
+                  _showSnackBar(l10n.preparingExport);
+                  _exportVideo();
+                }
+              : null,
+          isLoading: _isExporting,
+          icon: _exportDone ? Icons.check_circle_outline : Icons.ios_share_rounded,
+          color: _exportDone ? const Color(0xFF2DD4BF) : context.appColors.forest,
         ),
       ),
     );

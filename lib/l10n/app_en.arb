@@ -1,5 +1,9 @@
 {
   "@@locale": "en",
+  "back": "Back",
+  "@back": {
+    "description": "Label for back button"
+  },
   "appTitle": "VRM App",
   "@appTitle": {
     "description": "The title of the application"
@@ -637,6 +641,42 @@
   "voiceStatusActive": "WHAT'S THE PLAN?",
   "@voiceStatusActive": {
     "description": "Status message when voice system is active and ready for commands"
+  },
+  "stitchingTitle": "Consolidating your Story",
+  "@stitchingTitle": {
+    "description": "Title for the stitching progress screen"
+  },
+  "stitchingDescription": "The system is merging the approved clips into a final video.",
+  "@stitchingDescription": {
+    "description": "Description for the stitching process"
+  },
+  "stitchingStatusStarting": "Starting stitch...",
+  "@stitchingStatusStarting": {
+    "description": "Status message when starting FFmpeg stitch"
+  },
+  "stitchingStatusReencoding": "Re-encoding for compatibility...",
+  "@stitchingStatusReencoding": {
+    "description": "Status message when falling back to re-encoding"
+  },
+  "stitchingStatusProcessing": "Processing segments...",
+  "@stitchingStatusProcessing": {
+    "description": "Status message during active processing"
+  },
+  "stitchingStatusCompleted": "Completed! Finalizing...",
+  "@stitchingStatusCompleted": {
+    "description": "Status message when process is done"
+  },
+  "emptyScriptTitle": "No Script, No Story",
+  "@emptyScriptTitle": {
+    "description": "Title for empty script state"
+  },
+  "emptyScriptDescription": "Return to the editor and generate or paste your content to start recording.",
+  "@emptyScriptDescription": {
+    "description": "Description for empty script state"
+  },
+  "preparingExport": "Preparing file for gallery...",
+  "@preparingExport": {
+    "description": "Message shown before saving to gallery"
   },
   "accountProfile": "Account Profile",
   "@accountProfile": {

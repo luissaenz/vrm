@@ -1,5 +1,9 @@
 {
   "@@locale": "es",
+  "back": "Volver",
+  "@back": {
+    "description": "Etiqueta para el botón de volver"
+  },
   "appTitle": "VRM App",
   "@appTitle": {
     "description": "The title of the application"
@@ -637,6 +641,42 @@
   "voiceStatusActive": "¿QUÉ HACEMOS?",
   "@voiceStatusActive": {
     "description": "Status when voice assistant is actively prompting"
+  },
+  "stitchingTitle": "Consolidando tu Historia",
+  "@stitchingTitle": {
+    "description": "Title for the stitching progress screen"
+  },
+  "stitchingDescription": "El sistema está uniendo los fragmentos aprobados en un video final.",
+  "@stitchingDescription": {
+    "description": "Description for the stitching process"
+  },
+  "stitchingStatusStarting": "Iniciando unión...",
+  "@stitchingStatusStarting": {
+    "description": "Status message when starting FFmpeg stitch"
+  },
+  "stitchingStatusReencoding": "Recodificando para compatibilidad...",
+  "@stitchingStatusReencoding": {
+    "description": "Status message when falling back to re-encoding"
+  },
+  "stitchingStatusProcessing": "Procesando segmentos...",
+  "@stitchingStatusProcessing": {
+    "description": "Status message during active processing"
+  },
+  "stitchingStatusCompleted": "¡Completado! Finalizando...",
+  "@stitchingStatusCompleted": {
+    "description": "Status message when process is done"
+  },
+  "emptyScriptTitle": "Sin guion no hay historia",
+  "@emptyScriptTitle": {
+    "description": "Title for empty script state"
+  },
+  "emptyScriptDescription": "Vuelve al editor y genera o pega tu contenido para empezar a grabar.",
+  "@emptyScriptDescription": {
+    "description": "Description for empty script state"
+  },
+  "preparingExport": "Preparando archivo para la galería...",
+  "@preparingExport": {
+    "description": "Message shown before saving to gallery"
   },
   "accountProfile": "Perfil de Cuenta",
   "@accountProfile": {

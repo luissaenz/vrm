@@ -98,6 +98,12 @@ abstract class AppLocalizations {
     Locale('es'),
   ];
 
+  /// Label for back button
+  ///
+  /// In en, this message translates to:
+  /// **'Back'**
+  String get back;
+
   /// The title of the application
   ///
   /// In en, this message translates to:
@@ -955,6 +961,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'WHAT\'S THE PLAN?'**
   String get voiceStatusActive;
+
+  /// Title for the stitching progress screen
+  ///
+  /// In en, this message translates to:
+  /// **'Consolidating your Story'**
+  String get stitchingTitle;
+
+  /// Description for the stitching process
+  ///
+  /// In en, this message translates to:
+  /// **'The system is merging the approved clips into a final video.'**
+  String get stitchingDescription;
+
+  /// Status message when starting FFmpeg stitch
+  ///
+  /// In en, this message translates to:
+  /// **'Starting stitch...'**
+  String get stitchingStatusStarting;
+
+  /// Status message when falling back to re-encoding
+  ///
+  /// In en, this message translates to:
+  /// **'Re-encoding for compatibility...'**
+  String get stitchingStatusReencoding;
+
+  /// Status message during active processing
+  ///
+  /// In en, this message translates to:
+  /// **'Processing segments...'**
+  String get stitchingStatusProcessing;
+
+  /// Status message when process is done
+  ///
+  /// In en, this message translates to:
+  /// **'Completed! Finalizing...'**
+  String get stitchingStatusCompleted;
+
+  /// Title for empty script state
+  ///
+  /// In en, this message translates to:
+  /// **'No Script, No Story'**
+  String get emptyScriptTitle;
+
+  /// Description for empty script state
+  ///
+  /// In en, this message translates to:
+  /// **'Return to the editor and generate or paste your content to start recording.'**
+  String get emptyScriptDescription;
+
+  /// Message shown before saving to gallery
+  ///
+  /// In en, this message translates to:
+  /// **'Preparing file for gallery...'**
+  String get preparingExport;
 
   /// Title for account profile page
   ///

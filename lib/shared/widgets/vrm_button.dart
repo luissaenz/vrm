@@ -123,12 +123,12 @@ class _VRMButtonState extends State<VRMButton> with SingleTickerProviderStateMix
                     const SizedBox(width: 10),
                   ],
                   Text(
-                    widget.label,
+                    widget.label.toUpperCase(),
                     style: TextStyle(
                       color: widget.isSecondary ? primaryColor : Colors.white,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 15,
-                      letterSpacing: 0.5,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 14,
+                      letterSpacing: 1.2,
                     ),
                   ),
                 ],

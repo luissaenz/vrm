@@ -9,6 +9,9 @@ class AppLocalizationsEs extends AppLocalizations {
   AppLocalizationsEs([String locale = 'es']) : super(locale);
 
   @override
+  String get back => 'Volver';
+
+  @override
   String get appTitle => 'VRM App';
 
   @override
@@ -477,6 +480,36 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get voiceStatusActive => '¿QUÉ HACEMOS?';
+
+  @override
+  String get stitchingTitle => 'Consolidando tu Historia';
+
+  @override
+  String get stitchingDescription =>
+      'El sistema está uniendo los fragmentos aprobados en un video final.';
+
+  @override
+  String get stitchingStatusStarting => 'Iniciando unión...';
+
+  @override
+  String get stitchingStatusReencoding =>
+      'Recodificando para compatibilidad...';
+
+  @override
+  String get stitchingStatusProcessing => 'Procesando segmentos...';
+
+  @override
+  String get stitchingStatusCompleted => '¡Completado! Finalizando...';
+
+  @override
+  String get emptyScriptTitle => 'Sin guion no hay historia';
+
+  @override
+  String get emptyScriptDescription =>
+      'Vuelve al editor y genera o pega tu contenido para empezar a grabar.';
+
+  @override
+  String get preparingExport => 'Preparando archivo para la galería...';
 
   @override
   String get accountProfile => 'Perfil de Cuenta';

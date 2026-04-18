@@ -9,6 +9,9 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
+  String get back => 'Back';
+
+  @override
   String get appTitle => 'VRM App';
 
   @override
@@ -473,6 +476,35 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get voiceStatusActive => 'WHAT\'S THE PLAN?';
+
+  @override
+  String get stitchingTitle => 'Consolidating your Story';
+
+  @override
+  String get stitchingDescription =>
+      'The system is merging the approved clips into a final video.';
+
+  @override
+  String get stitchingStatusStarting => 'Starting stitch...';
+
+  @override
+  String get stitchingStatusReencoding => 'Re-encoding for compatibility...';
+
+  @override
+  String get stitchingStatusProcessing => 'Processing segments...';
+
+  @override
+  String get stitchingStatusCompleted => 'Completed! Finalizing...';
+
+  @override
+  String get emptyScriptTitle => 'No Script, No Story';
+
+  @override
+  String get emptyScriptDescription =>
+      'Return to the editor and generate or paste your content to start recording.';
+
+  @override
+  String get preparingExport => 'Preparing file for gallery...';
 
   @override
   String get accountProfile => 'Account Profile';

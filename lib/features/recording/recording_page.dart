@@ -11,6 +11,8 @@ import 'models/session_data.dart';
 import 'widgets/voice_indicator.dart';
 import 'widgets/telepronter.dart';
 import 'recording_end_page.dart';
+import '../../shared/widgets/vrm_empty_state.dart';
+import 'package:vrm_app/l10n/app_localizations.dart';
 import 'clip_review_page.dart';
 import 'services/voice_command_service.dart';
 import 'services/permission_service.dart';
@@ -723,6 +725,20 @@ class _RecordingPageState extends State<RecordingPage>
     final totalFragments = widget.analysis.segments.length;
     final currentFragment = _activeFragmentIndex + 1;
     final isCountingDown = _recordingState == RecordingState.countdown;
+    final l10n = AppLocalizations.of(context)!;
+
+    // Guard: Empty Script
+    if (widget.analysis.segments.isEmpty) {
+      return Scaffold(
+        backgroundColor: context.colorScheme.surface,
+        body: VRMEmptyState(
+          title: l10n.emptyScriptTitle,
+          description: l10n.emptyScriptDescription,
+          onAction: () => Navigator.of(context).pop(),
+          actionLabel: l10n.back,
+        ),
+      );
+    }
 
     if (_recordingState == RecordingState.finished) {
       return const RecordingEndPage();
