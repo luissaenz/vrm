@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:vrm_app/l10n/app_localizations.dart';
-import '../../../core/services/ffmpeg_stitcher_service.dart';
+import '../../../core/services/native_stitcher_service.dart';
 import '../../../shared/widgets/widget_progress.dart';
 
 class StitchProgressPage extends StatefulWidget {
@@ -18,7 +18,7 @@ class StitchProgressPage extends StatefulWidget {
 }
 
 class _StitchProgressPageState extends State<StitchProgressPage> {
-  final FFmpegStitcherService _stitcherService = FFmpegStitcherService();
+  final NativeStitcherService _stitcherService = NativeStitcherService();
   double _progress = 0.0;
   String _status = 'Starting stitch...';
   String? _errorMessage;

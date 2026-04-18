@@ -65,11 +65,10 @@ dependencies:
   # Plugin Architecture
   uuid: ^4.0.0
   json_schema: ^5.2.2
-  disk_space: ^0.2.1
+  storage_space: ^1.0.1
 
   # Video Processing
-  ffmpeg_kit_flutter: ^6.0.3
-
+  # ffmpeg_kit_flutter has been removed to switch to a native alternative
 dev_dependencies:
   flutter_test:
     sdk: flutter

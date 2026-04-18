@@ -185,14 +185,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.7.12"
-  disk_space:
-    dependency: "direct main"
-    description:
-      name: disk_space
-      sha256: fb27eb2d09ac04784f45b95b1355538b2355c76a081eeaa8439d1a5cfa263888
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.2.1"
   fake_async:
     dependency: transitive
     description:
@@ -209,22 +201,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.2.0"
-  ffmpeg_kit_flutter:
-    dependency: "direct main"
-    description:
-      name: ffmpeg_kit_flutter
-      sha256: "843aae41823ca94a0988d975b4b6cdc6948744b9b7e2707d81a3a9cd237b0100"
-      url: "https://pub.dev"
-    source: hosted
-    version: "6.0.3"
-  ffmpeg_kit_flutter_platform_interface:
-    dependency: transitive
-    description:
-      name: ffmpeg_kit_flutter_platform_interface
-      sha256: addf046ae44e190ad0101b2fde2ad909a3cd08a2a109f6106d2f7048b7abedee
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.2.1"
   file:
     dependency: transitive
     description:
@@ -826,6 +802,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.12.1"
+  storage_space:
+    dependency: "direct main"
+    description:
+      name: storage_space
+      sha256: "8a3fbc61c20ce3b926b663b4ae77064e2bc5351a49756a41fa415e302f4063cd"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.2.0"
   stream_channel:
     dependency: transitive
     description:

@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
-import '../../../core/services/ffmpeg_stitcher_service.dart';
+import '../../../core/services/native_stitcher_service.dart';
 import '../models/clip_metadata.dart';
 import '../models/session_data.dart';
 import '../config/camera_config.dart';
@@ -271,7 +271,7 @@ class RecordingManager {
       throw StateError('No approved clips to stitch');
     }
 
-    final stitcherService = FFmpegStitcherService();
+    final stitcherService = NativeStitcherService();
     final finalVideoPath = await stitcherService.stitchVideos(
       projectId: sessionData.projectId,
       clipPaths: approvedClips,

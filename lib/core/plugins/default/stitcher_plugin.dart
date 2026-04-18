@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import '../../plugins/i_post_processor.dart';
 import '../../models/asset_manifest.dart';
-import '../../services/ffmpeg_stitcher_service.dart';
+import '../../services/native_stitcher_service.dart';
 
 /// Plugin Default: FFmpeg Stitcher
 /// Usa FFmpeg para concatenar clips de video en un archivo final
@@ -11,7 +11,7 @@ import '../../services/ffmpeg_stitcher_service.dart';
 /// Este plugin se mantiene para futura integración con el pipeline VRM
 /// si se requiere extensibilidad por parte de otros plugins.
 class StitcherPlugin implements IPostProcessor {
-  final FFmpegStitcherService _stitcherService = FFmpegStitcherService();
+  final NativeStitcherService _stitcherService = NativeStitcherService();
 
   @override
   String get pluginId => 'ffmpeg_stitcher_v1';

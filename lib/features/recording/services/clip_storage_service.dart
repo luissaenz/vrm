@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:camera/camera.dart';
-import 'package:disk_space/disk_space.dart';
+import 'package:storage_space/storage_space.dart';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
@@ -190,18 +190,15 @@ class ClipStorageService {
   /// Retorna los MB disponibles en el volumen donde se almacenan los datos.
   Future<int> getFreeSpaceMB() async {
     try {
-      // DiskSpace.getFreeDiskSpace returns free disk space in bytes (nullable)
-      final freeBytes = await DiskSpace.getFreeDiskSpace;
-      if (freeBytes == null) {
-        debugPrint('[ClipStorage] getFreeDiskSpace returned null');
-        return minFreeSpaceMB;
-      }
-      final freeMB = freeBytes ~/ (1024 * 1024);
+      final storageSpace = await getStorageSpace(
+        lowOnSpaceThreshold: minFreeSpaceMB * 1024 * 1024,
+        fractionDigits: 2,
+      );
+      final freeMB = storageSpace.free ~/ (1024 * 1024);
       debugPrint('[ClipStorage] Real free space: ${freeMB}MB');
       return freeMB;
     } catch (e) {
       debugPrint('[ClipStorage] Could not determine real free space: $e');
-      // Fallback to conservative default
       return minFreeSpaceMB;
     }
   }
