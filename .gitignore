@@ -13,6 +13,9 @@
 **/android/**/release/
 /android/app/src/main/res/drawable-*/
 /android/app/src/main/res/mipmap-*/
+*.jks
+*.keystore
+/android/key.properties
 
 # iOS related
 **/ios/Flutter/.last_build_id

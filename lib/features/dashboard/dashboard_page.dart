@@ -5,7 +5,6 @@ import 'package:vrm_app/l10n/app_localizations.dart';
 import 'package:vrm_app/shared/widgets/section_header.dart';
 import 'package:vrm_app/shared/widgets/action_card.dart';
 import 'package:vrm_app/shared/widgets/project_card.dart';
-import 'package:vrm_app/shared/widgets/calendar_day.dart';
 import 'package:vrm_app/features/new_project/new_project_page.dart';
 import 'package:vrm_app/features/influencer_profile/influencer_profile_page.dart';
 import 'package:vrm_app/features/account/account_profile_page.dart';
@@ -26,7 +25,6 @@ class DashboardPage extends StatefulWidget {
 class _DashboardPageState extends State<DashboardPage> {
   UserProfile _profile = UserProfile.empty();
   final _repository = OnboardingRepository();
-  DateTime _selectedDate = DateTime.now();
 
   @override
   void initState() {
@@ -99,8 +97,6 @@ class _DashboardPageState extends State<DashboardPage> {
                 ),
               ),
               const _RecentProjectsSection(),
-              const SizedBox(height: 40),
-              _buildCalendarSection(l10n),
             ],
           ),
         ),
@@ -272,59 +268,6 @@ class _DashboardPageState extends State<DashboardPage> {
       default:
         return 'Captura tus ideas y dales vida hoy.';
     }
-  }
-
-  Widget _buildCalendarSection(AppLocalizations l10n) {
-    // Generate 5 days starting from today
-    final today = DateTime.now();
-    final calendarDays = List.generate(5, (index) {
-      return today.add(Duration(days: index));
-    });
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          VRMSectionHeader(title: l10n.calendar, icon: Icons.calendar_month),
-          const SizedBox(height: 20),
-          Row(
-            children: calendarDays.map((date) {
-              final isSelected = DateUtils.isSameDay(date, _selectedDate);
-              final isToday = DateUtils.isSameDay(date, today);
-
-              // Use 'HOY'/'TODAY' for the current date
-              final locale = Localizations.localeOf(context).languageCode;
-              String dayName;
-              if (isToday) {
-                dayName = locale == 'es' ? 'HOY' : 'TODAY';
-              } else {
-                dayName = DateFormat.E(locale).format(date).toUpperCase();
-              }
-
-              return Expanded(
-                child: Padding(
-                  padding: EdgeInsets.only(
-                    right: date == calendarDays.last ? 0 : 8,
-                  ),
-                  child: VRMCalendarDay(
-                    day: dayName,
-                    date: date.day.toString(),
-                    isSelected: isSelected,
-                    isToday: isToday,
-                    onTap: () {
-                      setState(() {
-                        _selectedDate = date;
-                      });
-                    },
-                  ),
-                ),
-              );
-            }).toList(),
-          ),
-        ],
-      ),
-    );
   }
 
   Widget _buildBottomNav(BuildContext context, AppLocalizations l10n) {
