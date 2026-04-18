@@ -1,28 +1,27 @@
-# 📊 ESTADO DE LA FASE: FASE 3 - Estabilidad y Pulimento Físico (Abril 2026)
+# 📊 ESTADO DE LA FASE: FASE 4 - Puerta de Tiendas y Valla Legal (Abril 2026)
 
 ## 1. Resumen de Fase
-**Objetivo:** Blindar la aplicación contra fallos críticos, optimizar el rendimiento en hardware real y elevar la experiencia de usuario mediante interfaces de procesamiento premium.
+**Objetivo:** Cumplir con todos los requisitos legales y de marca para el despliegue en App Store y Google Play, incluyendo el empaquetado criptográfico final.
 
 | Paso | Estado | Prioridad | Dependencia |
 |------|--------|-----------|-------------|
-| F1-F12: Fase 1 (Core) | ✅ COMPLETADO | Bloqueante | Ninguna |
-| Día 11-13: Fase 2 (Interfaz) | ✅ COMPLETADO | Crítica | F1-F12 |
-| Día 14-15: Manejo de Críticos | ✅ COMPLETADO | Alta | Todas |
-| Día 16-17: Performance de Fuego | ✅ COMPLETADO | Alta | Todas |
-| Día 18: Carga e Interfaces UX | ✅ COMPLETADO | Media | Todas |
+| F1-F18: Fases Core | ✅ COMPLETADO | Bloqueante | Ninguna |
+| Día 19: Tienda & Legal | ✅ COMPLETADO | Crítica | F1-F18 |
+| Día 20: Branding | ⏳ PENDIENTE | Alta | Día 19 |
+| Día 21: Despliegue | ⏳ PENDIENTE | Alta | Día 20 |
 
 ---
 
 ## 2. Estado Actual del Proyecto (Verificado contra Código)
 
 ### ✅ Implementado y Funcional
-- **Procesamiento Visual Premium:** Widget `WidgetProgress` (`lib/shared/widgets/widget_progress.dart`) con animaciones de opacidad y escala para estados de stitching.
-- **Notificaciones Forest Design:** Utilidad `VRMNotifications` (`lib/shared/utils/vrm_notifications.dart`) para SnackBars con iconos y paleta Forest.
-- **Manejo de Estados Vacíos:** `VRMEmptyState` (`lib/shared/widgets/vrm_empty_state.dart`) para proyectos o guiones sin fragmentos.
-- **Optimización de Performance (Android):** Habilitado R8 (Minify) y Resource Shrinking en `build.gradle.kts`. Reglas de Proguard configuradas.
-- **UI Premium (Micro-animaciones):** Widget `VRMButton` implementado con soporte nativo de `isLoading` y capitalización automática.
-- **Stitching con Feedback:** `StitchProgressPage` integrado con `WidgetProgress` y mapeo de estados de FFmpeg a strings localizados.
-- **Exportación Segura:** Lógica de deshabilitación de exportación en `RecordingEndPage` hasta inicialización del video.
+- **Base Legal (Privacy):** Archivo `PRIVACY_POLICY.md` con enfoque en almacenamiento local y transparencia de hardware.
+- **Configuración Store Ready (iOS):** Descripciones de permisos en `Info.plist` profesionalizadas y corregidas (UTF-8).
+- **Compatibilidad Android (Release):** Soporte para `requestLegacyExternalStorage` y permisos granulares de medios.
+- **Procesamiento Visual Premium:** Widget `WidgetProgress` con animaciones de opacidad y escala.
+- **Notificaciones Forest Design:** Utilidad `VRMNotifications` para SnackBars temáticos.
+- **Manejo de Estados Vacíos:** `VRMEmptyState` implementado para guiones y proyectos.
+- **Optimización de Performance:** R8/Minify habilitado y validado.
 
 ### ⏳ No Existe Aún / Pendiente
 - **Pulido Final de Assets:** Inyección de logos y tipografías definitivas (actualmente usa placeholders de sistema).
@@ -77,18 +76,19 @@
 | Día 14-15| ✅ | `vrm_exceptions.dart`, `recording_manager.dart` | Estabilidad e integrid de sesión. |
 | 3B_LIMPIEZA | ✅ | - | Linting completo. |
 | Día 16-17 | ✅ | `build.gradle.kts`, `telepronter.dart`, `vrm_button.dart` | Performance de Fuego. |
-| Día 18 | ✅ | `stitch_progress_page.dart`, `vrm_notifications.dart`, `widget_progress.dart` | Carga e Interfaces UX (Forest Design). |
+| Día 18 | ✅ | `stitch_progress_page.dart`, `widget_progress.dart` | Carga e Interfaces UX. |
+| Día 19 | ✅ | `Info.plist`, `AndroidManifest.xml`, `PRIVACY_POLICY.md` | Gestión de Tienda & Legal (Ready for Review). |
 
 ---
 
-## 6. Criterios de Aceptación Fase 3 (Estabilidad y UX)
-- [x] Aplicación de R8/Minify funcional.
-- [x] Mapeo de estados de stitching (FFmpeg) a UI localizada.
-- [x] Animaciones de carga premium mediante `WidgetProgress`.
-- [x] Sistema de notificaciones Forest (`VRMNotifications`).
-- [x] Botones con micro-animaciones y capitalización automática (`VRMButton`).
-- [x] Manejo de estados vacíos (`VRMEmptyState`).
-- [x] Blindaje básico (Try/Catches) en procesos de exportación.
+## 6. Criterios de Aceptación Fase 4 (Tiendas y Legal)
+- [x] `PRIVACY_POLICY.md` oficial y alojable.
+- [x] Configuración de permisos en `Info.plist` validada por UX.
+- [x] `AndroidManifest` optimizado para compatibilidad y release.
+- [ ] Iconos de App generados en todas las resoluciones.
+- [ ] Splash Screen (LaunchScreen) nativa configurada.
+- [ ] Assets de marketing (screenshots) generados.
+- [ ] Firma de Release (.keystore / certs) generada.
 
 ---
 **Idioma de respuesta:** Español 🇪🇸

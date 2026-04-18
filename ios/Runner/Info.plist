@@ -46,14 +46,14 @@
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>NSMicrophoneUsageDescription</key>
-	<string>Esta aplicación requiere acceso al micrófono para escuchar los comandos de voz.</string>
+	<string>VRM requiere acceso al micrófono para capturar audio nítido en tus videos y procesar comandos de voz que controlan el teleprompter automáticamente.</string>
 	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>Esta aplicación requiere acceso al reconocimiento de voz para ejecutar comandos por voz.</string>
+	<string>Utilizamos el reconocimiento de voz para sincronizar el desplazamiento del texto con tu habla, permitiendo una lectura natural y fluida.</string>
 	<key>NSCameraUsageDescription</key>
-	<string>Esta aplicación requiere acceso a la cámara para grabar videos.</string>
+	<string>VRM necesita acceso a la cámara para grabar videos de alta calidad directamente desde el prompter integrado.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Esta aplicación necesita acceso a la biblioteca de fotos para guardar y seleccionar videos.</string>
+	<string>VRM necesita acceso a tu biblioteca para que puedas seleccionar y gestionar los videos de tus proyectos.</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>VRM necesita acceso a tu galería para guardar el video final de tu proyecto.</string>
+	<string>VRM guardará tus videos finales directamente en tu galería para que puedas compartirlos fácilmente en redes sociales.</string>
 </dict>
 </plist>
