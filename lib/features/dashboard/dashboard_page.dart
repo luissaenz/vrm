@@ -12,6 +12,8 @@ import 'package:vrm_app/features/account/account_profile_page.dart';
 import 'package:vrm_app/features/settings/settings_page.dart';
 import 'package:vrm_app/features/onboarding/data/onboarding_repository.dart';
 import 'package:vrm_app/features/onboarding/data/user_profile.dart';
+import 'package:vrm_app/core/data/project_repository.dart';
+import 'package:vrm_app/core/models/project_state.dart';
 import '../../core/theme.dart';
 
 class DashboardPage extends StatefulWidget {
@@ -443,10 +445,25 @@ class _DashboardPageState extends State<DashboardPage> {
 class _RecentProjectsSection extends StatelessWidget {
   const _RecentProjectsSection();
 
+  String _getTimeAgo(BuildContext context, DateTime date) {
+    final l10n = AppLocalizations.of(context)!;
+    final diff = DateTime.now().difference(date);
+
+    if (diff.inDays >= 1) {
+      if (diff.inDays == 1) return l10n.editedYesterday;
+      return 'Editado hace ${diff.inDays} días';
+    } else if (diff.inHours >= 1) {
+      return l10n.editedHoursAgo(diff.inHours.toString());
+    } else {
+      return 'Editado hace poco';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final isDark = context.isDarkMode;
+    final repository = ProjectRepository();
 
     return Padding(
       padding: const EdgeInsets.only(top: 32),
@@ -462,42 +479,102 @@ class _RecentProjectsSection extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Column(
-              children: [
-                VRMProjectCard(
-                  title: 'Reseña Tech: iPhone 15',
-                  time: l10n.editedHoursAgo('2'),
-                  progress: 0.3,
-                  statusText: l10n.fragmentCount('3', '10'),
-                  badgeText: l10n.draft,
-                  progressLabel: l10n.progressLabel,
-                  icon: Icons.smartphone_rounded,
-                  badgeBg: isDark
-                      ? Colors.orange.withValues(alpha: 0.1)
-                      : const Color(0xFFFFF7ED),
-                  badgeTextCol: isDark
-                      ? const Color(0xFFF97316)
-                      : const Color(0xFFC2410C),
+          FutureBuilder<List<ProjectState>>(
+            future: repository.listProjects(),
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
+
+              if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                return _buildEmptyState(context, l10n);
+              }
+
+              final projects = snapshot.data!.take(5).toList();
+
+              return Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  children: projects.map((project) {
+                    return FutureBuilder<Map<String, dynamic>?>(
+                      future: repository.getSessionData(project.projectId),
+                      builder: (context, sessionSnapshot) {
+                        final session = sessionSnapshot.data;
+                        final approvedCount = (session?['approvedClips'] as Map?)?.length ?? 0;
+                        final totalChunks = project.script?.totalChunks ?? 0;
+                        final progress = totalChunks > 0 ? approvedCount / totalChunks : 0.0;
+                        final isCompleted = progress >= 1.0;
+
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 12),
+                          child: VRMProjectCard(
+                            title: project.input?.rawTopic ?? 'Sin título',
+                            time: _getTimeAgo(context, project.updatedAt),
+                            progress: progress,
+                            statusText: l10n.fragmentCount(
+                              approvedCount.toString(),
+                              totalChunks.toString(),
+                            ),
+                            badgeText: isCompleted ? l10n.ready : l10n.draft,
+                            progressLabel: l10n.progressLabel,
+                            icon: isCompleted ? Icons.check_circle_rounded : Icons.create_rounded,
+                            badgeBg: isCompleted
+                                ? (isDark
+                                    ? const Color(0xFF10B981).withValues(alpha: 0.1)
+                                    : const Color(0xFFECFDF5))
+                                : (isDark
+                                    ? Colors.orange.withValues(alpha: 0.1)
+                                    : const Color(0xFFFFF7ED)),
+                            badgeTextCol: isCompleted
+                                ? (isDark ? const Color(0xFF10B981) : const Color(0xFF047857))
+                                : (isDark ? const Color(0xFFF97316) : const Color(0xFFC2410C)),
+                          ),
+                        );
+                      },
+                    );
+                  }).toList(),
                 ),
-                const SizedBox(height: 4),
-                VRMProjectCard(
-                  title: 'Vlog Japón: Día 1',
-                  time: l10n.editedYesterday,
-                  progress: 1.0,
-                  statusText: l10n.fragmentCount('12', '12'),
-                  badgeText: l10n.ready,
-                  progressLabel: l10n.progressLabel,
-                  icon: Icons.flight_rounded,
-                  badgeBg: isDark
-                      ? const Color(0xFF10B981).withValues(alpha: 0.1)
-                      : const Color(0xFFECFDF5),
-                  badgeTextCol: isDark
-                      ? const Color(0xFF10B981)
-                      : const Color(0xFF047857),
-                ),
-              ],
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEmptyState(BuildContext context, AppLocalizations l10n) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(32),
+      margin: const EdgeInsets.symmetric(horizontal: 20),
+      decoration: BoxDecoration(
+        color: context.appColors.cardBackground,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: context.appColors.cardBorder.withValues(alpha: 0.5)),
+      ),
+      child: Column(
+        children: [
+          Icon(
+            Icons.video_collection_outlined,
+            size: 48,
+            color: context.appColors.textSecondary.withValues(alpha: 0.5),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            l10n.readyToCreate,
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: context.appColors.textPrimary,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            l10n.captureIdeas,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 14,
+              color: context.appColors.textSecondary,
             ),
           ),
         ],

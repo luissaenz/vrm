@@ -7,7 +7,7 @@ import '../exceptions/pipeline_exceptions.dart';
 
 /// Repository for managing project persistence as JSON files
 class ProjectRepository {
-  static const _projectsFolder = 'projects';
+  static const _projectsFolder = 'vrm_data/projects';
 
   /// Get the projects directory path
   Future<String> _getProjectsPath() async {
@@ -25,7 +25,12 @@ class ProjectRepository {
   /// Get the file path for a specific project
   Future<String> _getProjectFilePath(String projectId) async {
     final projectsPath = await _getProjectsPath();
-    return '$projectsPath/$projectId.json';
+    // Adjusted: Each project gets its own folder to store session_data, project.json and clips
+    final projectFolder = Directory('$projectsPath/$projectId');
+    if (!await projectFolder.exists()) {
+      await projectFolder.create(recursive: true);
+    }
+    return '${projectFolder.path}/project.json';
   }
 
   /// Save a project to disk as JSON
@@ -80,20 +85,22 @@ class ProjectRepository {
         return [];
       }
 
-      final files = projectsDir.listSync().whereType<File>().where(
-        (file) => file.path.endsWith('.json'),
-      );
-
       final projects = <ProjectState>[];
 
-      for (final file in files) {
+      // List subdirectories and look for project.json in each
+      final projectFolders = await projectsDir.list().where((entity) => entity is Directory).cast<Directory>().toList();
+
+      for (final folder in projectFolders) {
         try {
-          final jsonString = await file.readAsString();
-          final jsonData = jsonDecode(jsonString) as Map<String, dynamic>;
-          projects.add(ProjectState.fromJson(jsonData));
+          final projectFile = File('${folder.path}/project.json');
+          if (await projectFile.exists()) {
+            final jsonString = await projectFile.readAsString();
+            final jsonData = jsonDecode(jsonString) as Map<String, dynamic>;
+            projects.add(ProjectState.fromJson(jsonData));
+          }
         } catch (e) {
           // Log error but continue with other files
-          debugPrint('Warning: Failed to load project from ${file.path}: $e');
+          debugPrint('Warning: Failed to load project from ${folder.path}: $e');
           continue;
         }
       }
@@ -111,17 +118,17 @@ class ProjectRepository {
     }
   }
 
-  /// Delete a project by ID
+  /// Delete a project by ID (removes the entire folder)
   Future<bool> deleteProject(String projectId) async {
     try {
-      final filePath = await _getProjectFilePath(projectId);
-      final file = File(filePath);
+      final projectsPath = await _getProjectsPath();
+      final projectDir = Directory('$projectsPath/$projectId');
 
-      if (!await file.exists()) {
+      if (!await projectDir.exists()) {
         return false;
       }
 
-      await file.delete();
+      await projectDir.delete(recursive: true);
       return true;
     } catch (e) {
       throw PersistenceException(
@@ -158,5 +165,23 @@ class ProjectRepository {
       final topic = project.input?.rawTopic.toLowerCase() ?? '';
       return topic.contains(lowercaseQuery);
     }).toList();
+  }
+
+  /// Load session data for a specific project
+  Future<Map<String, dynamic>?> getSessionData(String projectId) async {
+    try {
+      final projectsPath = await _getProjectsPath();
+      final sessionFile = File('$projectsPath/$projectId/session_data.json');
+
+      if (!await sessionFile.exists()) {
+        return null;
+      }
+
+      final jsonString = await sessionFile.readAsString();
+      return jsonDecode(jsonString) as Map<String, dynamic>;
+    } catch (e) {
+      debugPrint('Error loading session data for $projectId: $e');
+      return null;
+    }
   }
 }

@@ -1,4 +1,6 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:vrm_app/l10n/app_localizations.dart';
 import 'package:vrm_app/core/theme.dart';
 
@@ -310,12 +312,33 @@ class AccountProfilePage extends StatelessWidget {
             child: Text(l10n.cancel),
           ),
           TextButton(
-            onPressed: () {
-              // Clear all data logic
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(l10n.dataCleared)),
-              );
+            onPressed: () async {
+              try {
+                // Clear all data logic
+                final appDir = await getApplicationDocumentsDirectory();
+                final vrmDataDir = Directory('${appDir.path}/vrm_data');
+
+                if (await vrmDataDir.exists()) {
+                  await vrmDataDir.delete(recursive: true);
+                }
+
+                if (context.mounted) {
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text(l10n.dataCleared)),
+                  );
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Error: $e'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              }
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
             child: Text(l10n.clear),

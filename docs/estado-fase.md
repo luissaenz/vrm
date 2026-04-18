@@ -7,7 +7,7 @@
 |------|--------|-----------|-------------|
 | F1-F12: Fase 1 (Core) | ✅ COMPLETADO | Bloqueante | Ninguna |
 | Día 11-12: Cámara Atómica | ✅ COMPLETADO | Crítica | F1-F2 |
-| Día 13: Proyectos & Dashboard | 🏗️ EN DESARROLLO | Alta | F7-F8 |
+| Día 13: Proyectos & Dashboard | ✅ COMPLETADO | Alta | F7-F8 |
 | 3B_LIMPIEZA: Calidad | ✅ COMPLETADO | Media | Todas |
 
 ---
@@ -26,8 +26,9 @@
 - **Cámara Atómica (Hardware & Modos):** Control manual de foco, exposición bloqueada (**Street Mode**) y flash (Torch) funcional en `CameraService`.
 - **Teleprompter Avanzado:** Sistema de scroll fluido basado en PPM (Palabras Por Minuto) integrado en `RecordingPage`.
 - **Efecto Fantasma (Ghost Mode):** Superposición de video (opacidad 0.2) para alineación de tomas consecutivas.
-
-- **Dashboard (Proyectos):** 🏗️ EN DESARROLLO. Se ha iniciado la conexión con `ProjectRepository` para reemplazar los mocks por proyectos reales persistidos en disco.
+- **Dashboard & Proyectos Reales:** Panel principal dinámico conectado a `ProjectRepository`. Muestra progreso real basado en la sesión de grabación (`approvedClips`).
+- **Gestión de Datos:** Borrado físico recursivo de la carpeta `vrm_data` desde el perfil de cuenta. Unificación de rutas en el sistema de archivos (`vrm_data/projects/`).
+- **Empty State:** Interfaz premium para estados sin proyectos, guiando al usuario a la creación.
 - **Limpieza de Código (Linting):** Proceso 3B finalizado. Código libre de warnings `avoid_print` y otros diagnósticos menores.
 
 ### ⏳ No Existe Aún / Pendiente
@@ -84,6 +85,7 @@
 | Día 9-10 | ✅ | `script_fallback_service.dart`, `script_studio_page.dart` | Generación de guiones local funcional. |
 | Día 11-12 | ✅ | `camera_service.dart`, `recording_page.dart` | Atomic Camera: Modos Street, Ghost Mode y Teleprompter Pro. |
 | 3B_LIMPIEZA | ✅ | `camera_service.dart`, `telepronter.dart` | Eliminación de prints y lints en el flujo de grabación. |
+| Día 13 | ✅ | `dashboard_page.dart`, `project_repository.dart` | Dashboard dinámico, unificación de rutas y borrado físico. |
 
 ---
 
