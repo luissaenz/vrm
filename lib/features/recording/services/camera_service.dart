@@ -1,4 +1,5 @@
 import 'package:camera/camera.dart';
+import 'package:flutter/foundation.dart';
 import '../config/camera_config.dart';
 
 /// Wrapper del plugin `camera` que aisla la lÃ³gica de hardware.
@@ -79,6 +80,38 @@ class CameraService {
 
     await dispose();
     await initialize(direction: newDirection);
+  }
+
+  /// Configura el modo de flash.
+  Future<void> setFlashMode(FlashMode mode) async {
+    if (_controller == null || !isInitialized) return;
+    try {
+      await _controller!.setFlashMode(mode);
+    } catch (e) {
+      // SUPUESTO: Si el modo no es soportado por el hardware, ignoramos silenciosamente
+      // para evitar crashes en la pÃ¡gina de grabaciÃ³n.
+      debugPrint('CameraService Error: setFlashMode($mode) failing: $e');
+    }
+  }
+
+  /// Configura el modo de enfoque.
+  Future<void> setFocusMode(FocusMode mode) async {
+    if (_controller == null || !isInitialized) return;
+    try {
+      await _controller!.setFocusMode(mode);
+    } catch (e) {
+      debugPrint('CameraService Error: setFocusMode($mode) failing: $e');
+    }
+  }
+
+  /// Configura el modo de exposiciÃ³n.
+  Future<void> setExposureMode(ExposureMode mode) async {
+    if (_controller == null || !isInitialized) return;
+    try {
+      await _controller!.setExposureMode(mode);
+    } catch (e) {
+      debugPrint('CameraService Error: setExposureMode($mode) failing: $e');
+    }
   }
 
   /// Libera todos los recursos de la cÃ¡mara.

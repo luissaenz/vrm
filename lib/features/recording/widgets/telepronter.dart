@@ -1,13 +1,16 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'dart:ui';
 import '../../../core/theme.dart';
 import '../../new_project/models/script_analysis.dart';
 
-class Telepronter extends StatelessWidget {
+class Telepronter extends StatefulWidget {
   final ScriptAnalysis analysis;
   final int activeFragmentIndex;
   final int currentWordIndex;
   final double fontSize;
+  final double readingSpeed; // Palabras Por Minuto (PPM)
+  final bool isScrolling;
 
   const Telepronter({
     super.key,
@@ -15,7 +18,73 @@ class Telepronter extends StatelessWidget {
     required this.activeFragmentIndex,
     this.currentWordIndex = 0,
     this.fontSize = 24.0,
+    this.readingSpeed = 180.0,
+    this.isScrolling = false,
   });
+
+  @override
+  State<Telepronter> createState() => _TelepronterState();
+}
+
+class _TelepronterState extends State<Telepronter> {
+  late ScrollController _scrollController;
+  Timer? _scrollTimer;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController = ScrollController();
+    if (widget.isScrolling) {
+      _startScrolling();
+    }
+  }
+
+  @override
+  void didUpdateWidget(Telepronter oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isScrolling != oldWidget.isScrolling) {
+      if (widget.isScrolling) {
+        _startScrolling();
+      } else {
+        _scrollTimer?.cancel();
+      }
+    }
+    if (widget.activeFragmentIndex != oldWidget.activeFragmentIndex) {
+      _scrollController.jumpTo(0);
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollTimer?.cancel();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _startScrolling() {
+    _scrollTimer?.cancel();
+    _scrollTimer = Timer.periodic(const Duration(milliseconds: 50), (timer) {
+      if (!mounted || !widget.isScrolling) {
+        timer.cancel();
+        return;
+      }
+
+      if (_scrollController.hasClients) {
+        // SUPUESTO: Estimamos el avance de píxeles basado en PPM.
+        // A 180 PPM (3 palabras/seg), el scroll debe ser fluido.
+        // Factor 0.45 ajustado empíricamente para fontSize estándar.
+        final pixelsPerSecond = (widget.readingSpeed / 60.0) * (widget.fontSize * 0.45);
+        final delta = pixelsPerSecond * 0.05; // tick de 50ms
+        
+        final maxScroll = _scrollController.position.maxScrollExtent;
+        final currentScroll = _scrollController.offset;
+        
+        if (currentScroll < maxScroll) {
+          _scrollController.jumpTo(currentScroll + delta);
+        }
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,6 +95,7 @@ class Telepronter extends StatelessWidget {
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
           child: Container(
+            height: 200, // Altura fija para permitir el scroll interno
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               color: context.isDarkMode
@@ -39,15 +109,19 @@ class Telepronter extends StatelessWidget {
                 width: 1,
               ),
             ),
-            child: RichText(
-              textAlign: TextAlign.center,
-              text: TextSpan(
-                children: _buildTextSpans(context),
-                style: TextStyle(
-                  fontSize: fontSize,
-                  fontWeight: FontWeight.w500,
-                  height: 1.625,
-                  letterSpacing: -0.5,
+            child: SingleChildScrollView(
+              controller: _scrollController,
+              physics: const NeverScrollableScrollPhysics(), // Controlamos el scroll por Timer
+              child: RichText(
+                textAlign: TextAlign.center,
+                text: TextSpan(
+                  children: _buildTextSpans(context),
+                  style: TextStyle(
+                    fontSize: widget.fontSize,
+                    fontWeight: FontWeight.w500,
+                    height: 1.625,
+                    letterSpacing: -0.5,
+                  ),
                 ),
               ),
             ),
@@ -58,12 +132,11 @@ class Telepronter extends StatelessWidget {
   }
 
   List<InlineSpan> _buildTextSpans(BuildContext context) {
-    final segment = analysis.segments[activeFragmentIndex];
+    final segment = widget.analysis.segments[widget.activeFragmentIndex];
     final text = segment.text;
     final emphasisRefs = _parseReferences(segment.direction.emphasis);
     final pauseRefs = _parseReferences(segment.direction.pauses);
 
-    // Identificar rangos de énfasis (negrita)
     List<RangeValues> emphasisRanges = [];
     for (var ref in emphasisRefs) {
       int start = 0;
@@ -75,7 +148,6 @@ class Telepronter extends StatelessWidget {
       }
     }
 
-    // Identificar puntos de pausa
     List<int> pausePoints = [];
     final punctuationRegex = RegExp(r'[.,;:!?]');
     for (var ref in pauseRefs) {
@@ -93,7 +165,6 @@ class Telepronter extends StatelessWidget {
     }
     pausePoints = pausePoints.toSet().toList()..sort();
 
-    // Construir los marcadores
     final Set<int> markers = {0, text.length};
     for (var r in emphasisRanges) {
       markers.add(r.start.toInt());
@@ -106,8 +177,7 @@ class Telepronter extends StatelessWidget {
     final List<int> sortedMarkers = markers.toList()..sort();
     final List<InlineSpan> spans = [];
 
-    // Lógica de progreso de lectura (simular palabra actual)
-    int charsToShow = currentWordIndex * 10; // Aproximación simple
+    int charsToShow = widget.currentWordIndex * 10;
 
     for (int i = 0; i < sortedMarkers.length - 1; i++) {
       int start = sortedMarkers[i];
@@ -123,9 +193,7 @@ class Telepronter extends StatelessWidget {
           (r) => start >= r.start && end <= r.end,
         );
 
-        // Determinar si este chunk ya fue "leído"
         bool isRead = start < charsToShow;
-
         final colors = context.appColors;
 
         Color textColor;

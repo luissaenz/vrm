@@ -19,6 +19,8 @@ import 'services/clip_storage_service.dart';
 import 'services/recording_manager.dart';
 import 'package:permission_handler/permission_handler.dart'
     show openAppSettings;
+import 'package:video_player/video_player.dart';
+import 'dart:io';
 
 class RecordingPage extends StatefulWidget {
   final ScriptAnalysis analysis;
@@ -78,6 +80,9 @@ class _RecordingPageState extends State<RecordingPage>
   late ClipStorageService _clipStorageService;
   RecordingManager? _recordingManager;
   SessionData? _sessionData;
+
+  // Ghost Mode State
+  VideoPlayerController? _ghostController;
 
   bool _isCameraInitialized = false;
   bool _isProcessingRecording = false;
@@ -164,6 +169,7 @@ class _RecordingPageState extends State<RecordingPage>
           _isCameraInitialized = true;
           _cameraInitError = null;
         });
+        _applyHardwareSettings(); // Aplicar ajustes iniciales
       }
     } catch (e) {
       if (mounted) {
@@ -192,6 +198,7 @@ class _RecordingPageState extends State<RecordingPage>
     _pulseController.dispose();
     _countdownController.dispose();
     _menuController.dispose();
+    _ghostController?.dispose();
     super.dispose();
   }
 
@@ -300,6 +307,7 @@ class _RecordingPageState extends State<RecordingPage>
         setState(() {
           _activeFragmentIndex++;
         });
+        _updateGhostController();
       }
     } else if (cmd.contains('grilla') || cmd.contains('cuadrícula')) {
       setState(() => _isGridActive = !_isGridActive);
@@ -310,14 +318,18 @@ class _RecordingPageState extends State<RecordingPage>
       }
     } else if (cmd.contains('calle') || cmd.contains('ruido')) {
       setState(() => _isStreetModeActive = !_isStreetModeActive);
+      _applyHardwareSettings();
     } else if (cmd.contains('fantasma') || cmd.contains('ghost')) {
       setState(() => _isGhostActive = !_isGhostActive);
+      _updateGhostController();
     } else if (cmd.contains('luz') || cmd.contains('flash')) {
       setState(() => _isLightActive = !_isLightActive);
+      _applyHardwareSettings();
     } else if (cmd.contains('espejo') || cmd.contains('mirror')) {
       setState(() => _isMirrorActive = !_isMirrorActive);
     } else if (cmd.contains('enfoque') || cmd.contains('foco')) {
       setState(() => _isFocusLocked = !_isFocusLocked);
+      _applyHardwareSettings();
     } else if (cmd.contains('monitor') || cmd.contains('audio')) {
       setState(() => _isMonitorActive = !_isMonitorActive);
     } else if (cmd.contains('teleprompter') ||
@@ -486,6 +498,75 @@ class _RecordingPageState extends State<RecordingPage>
           ),
         );
       }
+    }
+  }
+
+  /// Aplica los ajustes de hardware (luz, enfoque, exposiciÃ³n) segÃºn el estado actual.
+  Future<void> _applyHardwareSettings() async {
+    if (!_isCameraInitialized) return;
+
+    try {
+      // 1. Flash / Luz (Modo Torch para video)
+      await _cameraService.setFlashMode(
+        _isLightActive ? FlashMode.torch : FlashMode.off,
+      );
+
+      // 2. Street Mode logic (Lockers)
+      if (_isStreetModeActive) {
+        // Bloqueamos ambos para evitar cambios bruscos en exteriores
+        await _cameraService.setExposureMode(ExposureMode.locked);
+        await _cameraService.setFocusMode(FocusMode.locked);
+      } else {
+        // 3. Enfoque Manual / Auto
+        await _cameraService.setFocusMode(
+          _isFocusLocked ? FocusMode.locked : FocusMode.auto,
+        );
+        // Si no es calle, permitimos exposiciÃ³n automÃ¡tica
+        await _cameraService.setExposureMode(ExposureMode.auto);
+      }
+    } catch (e) {
+      debugPrint('[RecordingPage] Error aplicando ajustes de hardware: $e');
+    }
+  }
+
+  /// Actualiza el controlador de Ghost Mode cargando el clip aprobado del fragmento.
+  Future<void> _updateGhostController() async {
+    if (!mounted) return;
+
+    // Detener y liberar anterior
+    if (_ghostController != null) {
+      final oldController = _ghostController!;
+      _ghostController = null;
+      setState(() {}); // UI Update to hide ghost
+      await oldController.dispose();
+    }
+
+    if (!_isGhostActive || _sessionData == null) return;
+
+    final path = _sessionData!.approvedClips[_activeFragmentIndex];
+    if (path == null) return;
+
+    final file = File(path);
+    if (!await file.exists()) {
+      debugPrint('[RecordingPage] Ghost file not found: $path');
+      return;
+    }
+
+    try {
+      final controller = VideoPlayerController.file(file);
+      await controller.initialize();
+      await controller.setVolume(0);
+      await controller.setLooping(false); // Ver primer frame
+      
+      if (mounted && _isGhostActive) {
+        setState(() {
+          _ghostController = controller;
+        });
+      } else {
+        await controller.dispose();
+      }
+    } catch (e) {
+      debugPrint('[RecordingPage] Error initializing ghost controller: $e');
     }
   }
 
@@ -696,6 +777,8 @@ class _RecordingPageState extends State<RecordingPage>
                     activeFragmentIndex: _activeFragmentIndex,
                     currentWordIndex: _currentWordIndex,
                     fontSize: _teleprompterFontSize,
+                    readingSpeed: _readingSpeed,
+                    isScrolling: _recordingState == RecordingState.recording,
                   ),
 
                   // Spacer
@@ -744,8 +827,22 @@ class _RecordingPageState extends State<RecordingPage>
             if (_isCameraInitialized && _cameraService.controller != null)
               Positioned.fill(
                 child: RepaintBoundary(
-                  child: Center(
-                    child: CameraPreview(_cameraService.controller!),
+                  child: Stack(
+                    children: [
+                      Center(child: CameraPreview(_cameraService.controller!)),
+                      if (_isGhostActive &&
+                          _ghostController != null &&
+                          _ghostController!.value.isInitialized)
+                        Positioned.fill(
+                          child: Opacity(
+                            opacity: 0.2, // SUPUESTO: 0.2 opacidad para efecto fantasma
+                            child: AspectRatio(
+                              aspectRatio: _ghostController!.value.aspectRatio,
+                              child: VideoPlayer(_ghostController!),
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                 ),
               )
@@ -1227,9 +1324,11 @@ class _RecordingPageState extends State<RecordingPage>
                                       icon: Icons.grid_view,
                                       label: 'GRILLA',
                                       isActive: _isGridActive,
-                                      onTap: () => setState(
-                                        () => _isGridActive = !_isGridActive,
-                                      ),
+                                      onTap: () {
+                                        setState(
+                                          () => _isGridActive = !_isGridActive,
+                                        );
+                                      },
                                     ),
                                     _buildMenuFeature(
                                       icon: Icons.text_snippet,
@@ -1248,26 +1347,35 @@ class _RecordingPageState extends State<RecordingPage>
                                       icon: Icons.directions_run,
                                       label: 'CALLE',
                                       isActive: _isStreetModeActive,
-                                      onTap: () => setState(
-                                        () => _isStreetModeActive =
-                                            !_isStreetModeActive,
-                                      ),
+                                      onTap: () {
+                                        setState(
+                                          () => _isStreetModeActive =
+                                              !_isStreetModeActive,
+                                        );
+                                        _applyHardwareSettings();
+                                      },
                                     ),
                                     _buildMenuFeature(
                                       icon: Icons.copy,
                                       label: 'FANTASMA',
                                       isActive: _isGhostActive,
-                                      onTap: () => setState(
-                                        () => _isGhostActive = !_isGhostActive,
-                                      ),
+                                      onTap: () {
+                                        setState(
+                                          () => _isGhostActive = !_isGhostActive,
+                                        );
+                                        _updateGhostController();
+                                      },
                                     ),
                                     _buildMenuFeature(
                                       icon: Icons.flashlight_on,
                                       label: 'LUZ',
                                       isActive: _isLightActive,
-                                      onTap: () => setState(
-                                        () => _isLightActive = !_isLightActive,
-                                      ),
+                                      onTap: () {
+                                        setState(
+                                          () => _isLightActive = !_isLightActive,
+                                        );
+                                        _applyHardwareSettings();
+                                      },
                                     ),
                                     _buildMenuFeature(
                                       icon: Icons.flip,
@@ -1296,9 +1404,12 @@ class _RecordingPageState extends State<RecordingPage>
                                       icon: Icons.filter_center_focus,
                                       label: 'ENFOQUE',
                                       isActive: _isFocusLocked,
-                                      onTap: () => setState(
-                                        () => _isFocusLocked = !_isFocusLocked,
-                                      ),
+                                      onTap: () {
+                                        setState(
+                                          () => _isFocusLocked = !_isFocusLocked,
+                                        );
+                                        _applyHardwareSettings();
+                                      },
                                     ),
                                     _buildMenuFeature(
                                       icon: Icons.headphones,

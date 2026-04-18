@@ -1,16 +1,14 @@
-# 📊 ESTADO DE LA FASE: FASE 1 - Core de Grabación (Abril 2026)
+# 📊 ESTADO DE LA FASE: FASE 2 - Interfaz y Refinamiento (Abril 2026)
 
 ## 1. Resumen de Fase
-**Objetivo:** Establecer la base técnica de la "Cámara Atómica" (grabación fragmentada), la persistencia offline y la exportación funcional.
+**Objetivo:** Completar la interfaz reactiva (Día 13) y refinamiento local (Días 14-18) para asegurar la estabilidad del MVP.
 
 | Paso | Estado | Prioridad | Dependencia |
 |------|--------|-----------|-------------|
-| F1-F2: Core UI & Cam | ✅ COMPLETADO | Bloqueante | Ninguna |
-| F3: Laboratorio Ideas (UI) | 🏗️ EN DESARROLLO (95%) | Alta | Ninguna |
-| F4-F5: Guion & Teleprompter | ✅ COMPLETADO | Alta | F1 |
-| F11: Exportación (Video) | ✅ COMPLETADO | Alta | F1 |
-| F7-F8: Persistencia Local | ✅ COMPLETADO | Crítica | Ninguna |
-| Día 9-10: IA Offline | ✅ COMPLETADO | Media | F3 |
+| F1-F12: Fase 1 (Core) | ✅ COMPLETADO | Bloqueante | Ninguna |
+| Día 11-12: Cámara Atómica | ✅ COMPLETADO | Crítica | F1-F2 |
+| Día 13: Proyectos & Dashboard | 🏗️ EN DESARROLLO | Alta | F7-F8 |
+| 3B_LIMPIEZA: Calidad | ✅ COMPLETADO | Media | Todas |
 
 ---
 
@@ -25,10 +23,12 @@
 - **Laboratorio de Ideas (Assistant):** `ScriptStudioPage` y `ScriptFallbackService` proporcionan la UI y generación de guiones offline mediante plantillas profesionales.
 - **Diseño Visual:** Implementación fiel al tema "Forest" (oscuros profundos, verde vibrante, tipografía Inter/Google Fonts).
 - **IA Offline / Fallback:** Generación local de guiones basada en objetivos (Conectar, Educar, Vender) operativa.
+- **Cámara Atómica (Hardware & Modos):** Control manual de foco, exposición bloqueada (**Street Mode**) y flash (Torch) funcional en `CameraService`.
+- **Teleprompter Avanzado:** Sistema de scroll fluido basado en PPM (Palabras Por Minuto) integrado en `RecordingPage`.
+- **Efecto Fantasma (Ghost Mode):** Superposición de video (opacidad 0.2) para alineación de tomas consecutivas.
 
-### 🏗️ Parcialmente Implementado / En Refactorización
-- **Dashboard (Proyectos):** La UI muestra tarjetas de proyectos, pero los datos actuales en `_RecentProjectsSection` son mocks hardcodeados.
-- **Configuración de Teleprompter:** Los controles de velocidad y tamaño de fuente están integrados pero requieren balanceo final de sensibilidad.
+- **Dashboard (Proyectos):** 🏗️ EN DESARROLLO. Se ha iniciado la conexión con `ProjectRepository` para reemplazar los mocks por proyectos reales persistidos en disco.
+- **Limpieza de Código (Linting):** Proceso 3B finalizado. Código libre de warnings `avoid_print` y otros diagnósticos menores.
 
 ### ⏳ No Existe Aún / Pendiente
 - **Exportación con `gal`:** ⚠️ El plan menciona que se usa `gal`, pero el código real (`ExportService`) sigue utilizando `photo_manager`. La dependencia `gal` NO está en `pubspec.yaml`.
@@ -55,6 +55,7 @@
 - **Servicios:** Clases asíncronas para hardware e I/O. Se introdujo `ScriptFallbackService` como Singleton para lógica offline.
 - **Managers:** Lógica de orquestación de flujo (ej. `RecordingManager`).
 - **Persistence:** Archivos JSON en el directorio de documentos de la aplicación.
+- **Hardware Abstraction:** `CameraService` expone métodos para mutar parámetros de hardware (`setFlashMode`, `setFocusMode`, `setExposureMode`) de forma segura.
 
 ### Dependencias Críticas (`pubspec.yaml`)
 - `camera`: ^0.11.0+4
@@ -69,6 +70,8 @@
 - **Atomicidad Visual:** Cada fragmento de guion tiene su propio ciclo de grabación para maximizar la calidad por toma.
 - **FFmpeg para Stitching:** Motor robusto para asegurar que los clips de diferentes resoluciones/frames se unan correctamente.
 - **Hot-Save:** Guardado automático de `session_data.json` en cada cambio de estado para evitar pérdida de progreso.
+- **Protocolo de Exteriores:** Bloqueo de exposición y foco para evitar "hunting" visual en modo CALLE.
+- **Sincronización de Prompter:** Scroll basado en tiempo (`Timer.periodic`) para evitar lag visual independientemente del framerate de la cámara.
 
 ---
 
@@ -79,6 +82,8 @@
 | F1-F5 | ✅ | `recording_page.dart`, `telepronter.dart` | Teleprompter y cámara integrados. |
 | F11 | ✅ | `export_service.dart`, `ffmpeg_stitcher_service.dart` | Exportación funcional vía photo_manager. |
 | Día 9-10 | ✅ | `script_fallback_service.dart`, `script_studio_page.dart` | Generación de guiones local funcional. |
+| Día 11-12 | ✅ | `camera_service.dart`, `recording_page.dart` | Atomic Camera: Modos Street, Ghost Mode y Teleprompter Pro. |
+| 3B_LIMPIEZA | ✅ | `camera_service.dart`, `telepronter.dart` | Eliminación de prints y lints en el flujo de grabación. |
 
 ---
 
@@ -88,6 +93,7 @@
 - [x] UI temática "Forest" aplicada.
 - [x] Refactorización a `gal` (PENDIENTE).
 - [x] Fallback de IA Offline (COMPLETADO).
+- [x] Cámara Atómica: Modos Calle, Enfoque y Fantasma (COMPLETADO).
 
 ---
 **Idioma de respuesta:** Español 🇪🇸sión.
