@@ -944,13 +944,13 @@ abstract class AppLocalizations {
   /// **'Open Settings'**
   String get openSettings;
 
-  /// No description provided for @voiceStatusPassive.
+  /// Status message when voice system is in passive listening mode
   ///
   /// In en, this message translates to:
   /// **'LUMIS LISTENING...'**
   String get voiceStatusPassive;
 
-  /// No description provided for @voiceStatusActive.
+  /// Status message when voice system is active and ready for commands
   ///
   /// In en, this message translates to:
   /// **'WHAT\'S THE PLAN?'**

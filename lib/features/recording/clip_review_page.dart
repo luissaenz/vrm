@@ -8,6 +8,7 @@ import 'services/recording_manager.dart';
 import 'widgets/auto_accept_bar.dart';
 import 'widgets/clip_video_area.dart';
 import 'widgets/review_overlay.dart';
+import '../../shared/widgets/vrm_button.dart';
 
 /// Página de revisión de clips grabados.
 /// Permite al usuario validar el clip antes de proceder al siguiente fragmento.
@@ -248,65 +249,27 @@ class _ClipReviewPageState extends State<ClipReviewPage>
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          // Reject button
-          _buildControlButton(
-            icon: Icons.close,
-            label: AppLocalizations.of(context)!.repeat,
-            color: Colors.redAccent,
-            onPressed: _rejectClip,
+          // Repeat button
+          Expanded(
+            child: VRMButton(
+              label: AppLocalizations.of(context)!.repeat,
+              icon: Icons.replay,
+              isSecondary: true,
+              color: Colors.white70,
+              onPressed: _isProcessing ? null : _rejectClip,
+            ),
           ),
-
+          const SizedBox(width: 16),
           // Accept button
-          _buildControlButton(
-            icon: Icons.check,
-            label: AppLocalizations.of(context)!.next,
-            color: const Color(0xFF2DD4BF),
-            onPressed: _acceptClip,
+          Expanded(
+            child: VRMButton(
+              label: AppLocalizations.of(context)!.next,
+              icon: Icons.check_circle_outline,
+              isLoading: _isProcessing,
+              onPressed: _isProcessing ? null : _acceptClip,
+            ),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _buildControlButton({
-    required IconData icon,
-    required String label,
-    required Color color,
-    required VoidCallback onPressed,
-  }) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: _isProcessing ? null : onPressed,
-        borderRadius: BorderRadius.circular(16),
-        child: AnimatedOpacity(
-          opacity: _isProcessing ? 0.5 : 1.0,
-          duration: const Duration(milliseconds: 200),
-          child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
-              border: Border.all(color: color.withValues(alpha: 0.3), width: 1),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(icon, color: color, size: 32),
-                const SizedBox(height: 8),
-                Text(
-                  label,
-                  style: TextStyle(
-                    color: color,
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
       ),
     );
   }

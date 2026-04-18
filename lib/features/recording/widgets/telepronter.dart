@@ -80,7 +80,11 @@ class _TelepronterState extends State<Telepronter> {
         final currentScroll = _scrollController.offset;
         
         if (currentScroll < maxScroll) {
-          _scrollController.jumpTo(currentScroll + delta);
+          _scrollController.animateTo(
+            currentScroll + delta,
+            duration: const Duration(milliseconds: 50),
+            curve: Curves.linear,
+          );
         }
       }
     });
@@ -93,14 +97,14 @@ class _TelepronterState extends State<Telepronter> {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(32),
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 40, sigmaY: 40),
+          filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15), // Optimizado para performance
           child: Container(
             height: 200, // Altura fija para permitir el scroll interno
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: context.isDarkMode
-                  ? context.colorScheme.surface.withValues(alpha: 0.4)
-                  : Colors.black.withValues(alpha: 0.4),
+              color: (context.isDarkMode
+                  ? context.colorScheme.surface
+                  : Colors.black).withValues(alpha: 0.4),
               borderRadius: BorderRadius.circular(32),
               border: Border.all(
                 color: context.isDarkMode
