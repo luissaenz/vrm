@@ -38,6 +38,7 @@ dependencies:
   # Core Hardware
   camera: ^0.11.0+4
   video_player: ^2.9.1
+  battery_plus: ^6.1.0
   
   # Storage & Files
   path_provider: ^2.1.3

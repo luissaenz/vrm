@@ -6,6 +6,7 @@ import '../../../core/services/ffmpeg_stitcher_service.dart';
 import '../models/clip_metadata.dart';
 import '../models/session_data.dart';
 import '../config/camera_config.dart';
+import '../../../core/exceptions/vrm_exceptions.dart';
 import 'camera_service.dart';
 import 'clip_storage_service.dart';
 
@@ -55,6 +56,14 @@ class RecordingManager {
     _currentChunkIndex = chunkIndex;
 
     try {
+      // Día 15: Verificación proactiva de espacio en disco
+      final hasSpace = await _storage.hasFreeSpace();
+      if (!hasSpace) {
+        throw StorageFullException(
+          'Insufficient disk space to start recording. At least ${ClipStorageService.minFreeSpaceMB}MB required.',
+        );
+      }
+
       await _camera.startRecording();
       _isRecording = true;
       _recordingStartedAt = DateTime.now();
@@ -311,5 +320,56 @@ class RecordingManager {
       debugPrint('[RecordingManager] Temp cleanup error: $e');
     }
     debugPrint('[RecordingManager] Disposed successfully');
+  }
+
+  /// Día 14: Verifica que todos los clips aprobados existan físicamente en disco.
+  /// Lanza [SessionIntegrityException] si faltan archivos críticos.
+  /// Devuelve una versión actualizada de [SessionData] si hubo cambios.
+  static Future<SessionData> verifyIntegrityStatic(SessionData data) async {
+    final missingClips = <int>[];
+
+    for (final entry in data.approvedClips.entries) {
+      final chunkIndex = entry.key;
+      final clipPath = entry.value;
+      final file = File(clipPath);
+
+      if (!await file.exists()) {
+        missingClips.add(chunkIndex);
+      }
+    }
+
+    if (missingClips.isNotEmpty) {
+      // Acción de recuperación: eliminamos las referencias a clips faltantes
+      final updatedApproved = Map<int, String>.from(data.approvedClips);
+      for (final chunk in missingClips) {
+        updatedApproved.remove(chunk);
+      }
+
+      final newData = data.copyWith(
+        approvedClips: updatedApproved,
+        lastUpdatedAt: DateTime.now(),
+      );
+
+      // Notificamos al usuario mediante una excepción informativa
+      throw SessionIntegrityException(
+        'Some approved clips are missing from storage. Chunks affected: ${missingClips.join(", ")}. '
+        'These fragments have been reset for re-recording.',
+        code: 'missing_files',
+        originalError: newData, // Pasamos la data corregida en el error para que la UI la use
+      );
+    }
+
+    debugPrint('[RecordingManager] Session integrity verified successfully');
+    return data;
+  }
+
+  /// Instanced version for convenience
+  Future<void> verifySessionIntegrity() async {
+    try {
+      sessionData = await verifyIntegrityStatic(sessionData);
+    } on SessionIntegrityException catch (e) {
+      sessionData = e.originalError as SessionData;
+      rethrow;
+    }
   }
 }

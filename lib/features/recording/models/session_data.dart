@@ -6,7 +6,7 @@ enum ClipStatus {
   rejected,
 }
 
-/// InformaciÃ³n de takes por chunk dentro de una sesiÃ³n de grabaciÃ³n.
+/// Información de takes por chunk dentro de una sesión de grabación.
 class ChunkTakeInfo {
   final int total;
   final int selectedTake;
@@ -29,8 +29,8 @@ class ChunkTakeInfo {
   );
 }
 
-/// Estado de la sesiÃ³n de grabaciÃ³n actual.
-/// Persiste en memoria durante DÃ­a 1-2. Se escribe a disco en DÃ­a 7-8.
+/// Estado de la sesión de grabación actual.
+/// Persiste en memoria durante Día 1-2. Se escribe a disco en Día 7-8.
 class SessionData {
   final String projectId;
   final List<int> chunksRecorded;

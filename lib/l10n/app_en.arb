@@ -631,7 +631,13 @@
     "description": "Button to open app settings"
   },
   "voiceStatusPassive": "LUMIS LISTENING...",
+  "@voiceStatusPassive": {
+    "description": "Status message when voice system is in passive listening mode"
+  },
   "voiceStatusActive": "WHAT'S THE PLAN?",
+  "@voiceStatusActive": {
+    "description": "Status message when voice system is active and ready for commands"
+  },
   "accountProfile": "Account Profile",
   "@accountProfile": {
     "description": "Title for account profile page"

@@ -6,7 +6,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import '../models/clip_metadata.dart';
 
-/// Servicio de gestiÃ³n de almacenamiento para clips de video.
+/// Servicio de gestión de almacenamiento para clips de video.
 class ClipStorageService {
   final String projectId;
 
@@ -14,7 +14,7 @@ class ClipStorageService {
   static const _dataDirName = 'vrm_data';
   static const _projectsDirName = 'projects';
 
-  /// Espacio mÃ­nimo requerido en MB para permitir una grabaciÃ³n.
+  /// Espacio mínimo requerido en MB para permitir una grabación.
   static const int minFreeSpaceMB = 500;
 
   ClipStorageService({required this.projectId});
@@ -41,7 +41,7 @@ class ClipStorageService {
     return clipsDir;
   }
 
-  /// Genera la ruta canÃ³nica para un clip.
+  /// Genera la ruta canónica para un clip.
   String clipPath({required int chunkIndex, required int takeNumber}) {
     return p.join(
       _dataDirName,
@@ -64,7 +64,7 @@ class ClipStorageService {
     );
   }
 
-  /// Escanea el directorio de clips y retorna el siguiente nÃºmero de take.
+  /// Escanea el directorio de clips y retorna el siguiente número de take.
   /// Si no existen takes para este chunk, retorna 1.
   Future<int> getNextTakeNumber(int chunkIndex) async {
     final clipsDir = await ensureClipsDirectory();
@@ -93,7 +93,7 @@ class ClipStorageService {
     return maxTake + 1;
   }
 
-  /// Copia un XFile del cache de la cÃ¡mara al directorio de clips.
+  /// Copia un XFile del cache de la cámara al directorio de clips.
   /// Retorna la ruta absoluta del clip guardado.
   Future<String> saveClip({
     required XFile sourceFile,
@@ -169,7 +169,7 @@ class ClipStorageService {
     }
   }
 
-  /// Elimina un clip especÃ­fico.
+  /// Elimina un clip específico.
   Future<void> deleteClip({
     required int chunkIndex,
     required int takeNumber,
@@ -212,7 +212,7 @@ class ClipStorageService {
     return freeMB >= requiredMB;
   }
 
-  /// Limpia archivos temporales del cache de la cÃ¡mara.
+  /// Limpia archivos temporales del cache de la cámara.
   Future<void> cleanupTemp() async {
     try {
       final tempDir = await getTemporaryDirectory();

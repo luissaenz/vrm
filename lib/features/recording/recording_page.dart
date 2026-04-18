@@ -21,6 +21,7 @@ import 'package:permission_handler/permission_handler.dart'
     show openAppSettings;
 import 'package:video_player/video_player.dart';
 import 'dart:io';
+import '../../../core/exceptions/vrm_exceptions.dart';
 
 class RecordingPage extends StatefulWidget {
   final ScriptAnalysis analysis;
@@ -139,9 +140,41 @@ class _RecordingPageState extends State<RecordingPage>
     WidgetsBinding.instance.addObserver(this);
 
     // Check permissions first
-    _checkPermissionsAndInitCamera();
+    _checkPermissionsAndInitCamera().then((_) {
+      // Día 14: Verificar integridad de la sesión al inicio
+      _verifyIntegrity();
+    });
 
     _initVoiceCommands();
+  }
+
+  /// Día 14: Verifica que los archivos de la sesión existan.
+  Future<void> _verifyIntegrity() async {
+    if (_sessionData == null) return;
+
+    try {
+      final updatedData = await RecordingManager.verifyIntegrityStatic(_sessionData!);
+      if (mounted) {
+        setState(() {
+          _sessionData = updatedData;
+        });
+      }
+    } on SessionIntegrityException catch (e) {
+      if (mounted) {
+        setState(() {
+          _sessionData = e.originalError as SessionData?;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.message),
+            backgroundColor: Colors.orange,
+            duration: const Duration(seconds: 5),
+          ),
+        );
+      }
+    } catch (e) {
+      debugPrint('[RecordingPage] Integrity check failed: $e');
+    }
   }
 
   /// Check permissions and initialize camera.
@@ -171,10 +204,16 @@ class _RecordingPageState extends State<RecordingPage>
         });
         _applyHardwareSettings(); // Aplicar ajustes iniciales
       }
+    } on CameraHardwareException catch (e) {
+      if (mounted) {
+        setState(() {
+          _cameraInitError = e.message;
+        });
+      }
     } catch (e) {
       if (mounted) {
         setState(() {
-          _cameraInitError = e.toString();
+          _cameraInitError = 'Error inesperado al acceder a la cámara.';
         });
       }
     }
@@ -432,6 +471,30 @@ class _RecordingPageState extends State<RecordingPage>
       setState(() {
         _isProcessingRecording = _recordingManager!.isProcessing;
       });
+    } on StorageFullException catch (e) {
+      if (mounted) {
+        setState(() {
+          _recordingState = RecordingState.idle;
+          _isProcessingRecording = false;
+        });
+        _showRecoveryDialog(
+          title: 'Disco Lleno',
+          message: e.message,
+          icon: Icons.storage,
+        );
+      }
+    } on CameraHardwareException catch (e) {
+      if (mounted) {
+        setState(() {
+          _recordingState = RecordingState.idle;
+          _isProcessingRecording = false;
+        });
+        _showRecoveryDialog(
+          title: 'Error de Grabación',
+          message: 'La cámara encontró un error: ${e.message}',
+          icon: Icons.videocam_off,
+        );
+      }
     } catch (e) {
       debugPrint('[RecordingPage] Failed to start recording: $e');
       if (mounted) {
@@ -441,12 +504,45 @@ class _RecordingPageState extends State<RecordingPage>
         });
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error al iniciar grabación: $e'),
+            content: Text('Error inesperado: $e'),
             backgroundColor: Colors.red,
           ),
         );
       }
     }
+  }
+
+  /// Muestra un diálogo de recuperación para errores críticos.
+  void _showRecoveryDialog({
+    required String title,
+    required String message,
+    required IconData icon,
+  }) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.grey[900],
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Row(
+          children: [
+            Icon(icon, color: Colors.orangeAccent),
+            const SizedBox(width: 12),
+            Text(title, style: const TextStyle(color: Colors.white)),
+          ],
+        ),
+        content: Text(
+          message,
+          style: const TextStyle(color: Colors.white70),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Entendido', style: TextStyle(color: Colors.orangeAccent)),
+          ),
+        ],
+      ),
+    );
   }
 
   void _stopRecording() async {
@@ -501,7 +597,7 @@ class _RecordingPageState extends State<RecordingPage>
     }
   }
 
-  /// Aplica los ajustes de hardware (luz, enfoque, exposiciÃ³n) segÃºn el estado actual.
+  /// Aplica los ajustes de hardware (luz, enfoque, exposición) según el estado actual.
   Future<void> _applyHardwareSettings() async {
     if (!_isCameraInitialized) return;
 

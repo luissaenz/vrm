@@ -7,6 +7,8 @@ import 'package:ffmpeg_kit_flutter/return_code.dart';
 import 'package:ffmpeg_kit_flutter/statistics.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
+import 'package:battery_plus/battery_plus.dart';
+import '../exceptions/vrm_exceptions.dart';
 
 class StitchingProgress {
   final double progress; // 0.0 to 1.0
@@ -33,6 +35,19 @@ class FFmpegStitcherService {
   }) async {
     if (clipPaths.isEmpty) {
       throw ArgumentError('At least one clip path is required');
+    }
+
+    // Día 14: Blindaje de batería antes de iniciar stitching (D3)
+    final battery = Battery();
+    final batteryLevel = await battery.batteryLevel;
+    final batteryState = await battery.batteryState;
+    
+    // Si la batería es baja (< 15%) y no está cargando, bloqueamos la operación
+    if (batteryLevel < 15 && batteryState != BatteryState.charging) {
+      throw VideoProcessingException(
+        'Batería muy baja para procesar video ($batteryLevel%). Conecta el cargador para continuar.',
+        code: 'low_battery_stitching',
+      );
     }
 
     if (clipPaths.length == 1) {
@@ -169,7 +184,10 @@ class FFmpegStitcherService {
           onProgress(StitchingProgress(progress: 1.0, status: 'Completed'));
         } else {
           final failStackTrace = await session.getFailStackTrace();
-          onError('FFmpeg re-encoding failed: $failStackTrace');
+          throw VideoProcessingException(
+            'FFmpeg re-encoding failed: $failStackTrace',
+            code: 'ffmpeg_fallback_failure',
+          );
         }
       },
       (log) {
