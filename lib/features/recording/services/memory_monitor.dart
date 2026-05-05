@@ -69,7 +69,7 @@ class MemoryMonitor {
 
     if (_sampleCount < 2) {
       warnings.add(
-        'Insufficient samples (${_sampleCount}): run monitoring longer',
+        'Insufficient samples ($_sampleCount): run monitoring longer',
       );
     }
 
@@ -93,7 +93,6 @@ class MemoryMonitor {
       'Report generated',
       error: report.toJson().toString(),
     );
-
     return report;
   }
 

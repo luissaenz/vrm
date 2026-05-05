@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'dart:convert';
 import 'dart:io';
 
@@ -187,9 +189,12 @@ Future<void> _runValidate(bool device) async {
         '// SUPUESTO: Si el modo no es soportado',
       );
       results['camera_service'] = hasInitialize && hasStart && hasStop;
-      if (hasFallback) print('  ✅ CameraService: fallback resolución presente');
-      if (hasErrorPropagation)
+      if (hasFallback) {
+        print('  ✅ CameraService: fallback resolución presente');
+      }
+      if (hasErrorPropagation) {
         print('  ✅ CameraService: errores propagados (sin try silencioso)');
+      }
       final camOk = results["camera_service"] == true;
       print(
         '  ${camOk ? "✅" : "❌"} CameraService: ${camOk ? "OK" : "estructura incompleta"}',
@@ -214,9 +219,12 @@ Future<void> _runValidate(bool device) async {
       final hasIntegrityCheck = content.contains('verifySessionIntegrity');
       final hasLogger = content.contains('LoggerService');
       results['recording_manager'] = true;
-      if (hasIntegrityCheck)
+      if (hasIntegrityCheck) {
         print('  ✅ RecordingManager: verifyIntegrity presente');
-      if (hasLogger) print('  ✅ RecordingManager: LoggerService integrado');
+      }
+      if (hasLogger) {
+        print('  ✅ RecordingManager: LoggerService integrado');
+      }
       print('  ✅ RecordingManager: OK');
     } else {
       results['recording_manager'] = false;
@@ -289,9 +297,12 @@ Future<void> _runValidate(bool device) async {
     final pageContent = await pageFile.readAsString();
     final hasMemoryPressure = pageContent.contains('didHaveMemoryPressure');
     results['memory_handling'] = memExists && hasMemoryPressure;
-    if (memExists) print('  ✅ MemoryMonitor: presente');
-    if (hasMemoryPressure)
+    if (memExists) {
+      print('  ✅ MemoryMonitor: presente');
+    }
+    if (hasMemoryPressure) {
       print('  ✅ RecordingPage: didHaveMemoryPressure implementado');
+    }
     final memOk = results["memory_handling"] == true;
     print(
       '  ${memOk ? "✅" : "❌"} Memory handling: ${memOk ? "OK" : "incompleto"}',

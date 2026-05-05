@@ -107,7 +107,7 @@ class NativeStitcherService {
       if (whichResult.exitCode != 0) return null;
 
       // Create concat file list
-      final concatFile = File('${outputPath}.concat.txt');
+      final concatFile = File('$outputPath.concat.txt');
       final concatContent = clipPaths
           .map((p) => "file '${p.replaceAll("'", "'\\''")}'")
           .join('\n'); // ignore: unnecessary_brace_in_string_interps
