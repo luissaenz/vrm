@@ -26,7 +26,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
   final OnboardingRepository _repository = OnboardingRepository();
   final PermissionService _permissionService = PermissionService();
   final SpeechToText _speech = SpeechToText();
-  
+
   bool _isLoading = false;
   bool _isListening = false;
 
@@ -283,7 +283,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
                 _scriptController.text = currentText.isEmpty
                     ? result.recognizedWords
                     : '$currentText ${result.recognizedWords}';
-                
+
                 // Cursor to end
                 _scriptController.selection = TextSelection.fromPosition(
                   TextPosition(offset: _scriptController.text.length),
@@ -292,9 +292,7 @@ class _NewProjectPageState extends State<NewProjectPage> {
             });
           },
           localeId: 'es-ES',
-          listenOptions: SpeechListenOptions(
-            listenMode: ListenMode.dictation,
-          ),
+          listenOptions: SpeechListenOptions(listenMode: ListenMode.dictation),
         );
       }
     } else {

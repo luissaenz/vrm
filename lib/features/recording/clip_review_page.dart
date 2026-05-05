@@ -70,7 +70,8 @@ class _ClipReviewPageState extends State<ClipReviewPage>
       _videoController = VideoPlayerController.file(File(widget.clipPath));
       await _videoController!.initialize().timeout(
         const Duration(seconds: 5),
-        onTimeout: () => throw TimeoutException('Video initialization exceeded 5s'),
+        onTimeout: () =>
+            throw TimeoutException('Video initialization exceeded 5s'),
       );
 
       if (!mounted) return;
@@ -144,7 +145,12 @@ class _ClipReviewPageState extends State<ClipReviewPage>
           '/stitch-progress',
           arguments: {
             'projectId': widget.projectId,
-            'approvedClips': widget.recordingManager.sessionData.approvedClips.values.toList(),
+            'approvedClips': widget
+                .recordingManager
+                .sessionData
+                .approvedClips
+                .values
+                .toList(),
           },
         );
       }
@@ -154,7 +160,9 @@ class _ClipReviewPageState extends State<ClipReviewPage>
         setState(() => _isProcessing = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context)!.acceptClipError(e.toString())),
+            content: Text(
+              AppLocalizations.of(context)!.acceptClipError(e.toString()),
+            ),
             backgroundColor: Colors.red,
           ),
         );
@@ -190,7 +198,9 @@ class _ClipReviewPageState extends State<ClipReviewPage>
         setState(() => _isProcessing = false);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(AppLocalizations.of(context)!.rejectClipError(e.toString())),
+            content: Text(
+              AppLocalizations.of(context)!.rejectClipError(e.toString()),
+            ),
             backgroundColor: Colors.red,
           ),
         );
@@ -203,43 +213,38 @@ class _ClipReviewPageState extends State<ClipReviewPage>
     return PopScope(
       canPop: _isVideoInitialized && !_isProcessing,
       child: Scaffold(
-      backgroundColor: Colors.black,
-      body: Stack(
-        children: [
-          // Video background
-          ClipVideoArea(
-            videoController: _videoController,
-            isVideoInitialized: _isVideoInitialized,
-          ),
+        backgroundColor: Colors.black,
+        body: Stack(
+          children: [
+            // Video background
+            ClipVideoArea(
+              videoController: _videoController,
+              isVideoInitialized: _isVideoInitialized,
+            ),
 
-          // Overlays
-          ReviewOverlay(
-            analysis: widget.analysis,
-            currentFragmentIndex: widget.currentFragmentIndex,
-            recordingManager: widget.recordingManager,
-          ),
+            // Overlays
+            ReviewOverlay(
+              analysis: widget.analysis,
+              currentFragmentIndex: widget.currentFragmentIndex,
+              recordingManager: widget.recordingManager,
+            ),
 
-          // Auto-accept progress bar
-          AutoAcceptBar(
-            progressAnimation: _progressAnimation,
-          ),
+            // Auto-accept progress bar
+            AutoAcceptBar(progressAnimation: _progressAnimation),
 
-          // Control buttons
-          _buildControlButtons(),
+            // Control buttons
+            _buildControlButtons(),
 
-          // Loading indicator
-          if (!_isVideoInitialized) _buildLoadingIndicator(),
+            // Loading indicator
+            if (!_isVideoInitialized) _buildLoadingIndicator(),
 
-          // Error screen
-          if (!_isVideoInitialized)
-            _buildErrorScreen(),
-        ],
+            // Error screen
+            if (!_isVideoInitialized) _buildErrorScreen(),
+          ],
+        ),
       ),
-    ),
     );
   }
-
-
 
   Widget _buildControlButtons() {
     return Positioned(
@@ -275,9 +280,7 @@ class _ClipReviewPageState extends State<ClipReviewPage>
   }
 
   Widget _buildLoadingIndicator() {
-    return const Center(
-      child: CircularProgressIndicator(color: Colors.white),
-    );
+    return const Center(child: CircularProgressIndicator(color: Colors.white));
   }
 
   Widget _buildErrorScreen() {
@@ -287,33 +290,27 @@ class _ClipReviewPageState extends State<ClipReviewPage>
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
-              Icons.error_outline,
-              size: 64,
-              color: Colors.redAccent,
-            ),
+            const Icon(Icons.error_outline, size: 64, color: Colors.redAccent),
             const SizedBox(height: 24),
-             Text(
-               AppLocalizations.of(context)!.videoLoadError,
-               style: TextStyle(
-                 fontSize: 20,
-                 fontWeight: FontWeight.bold,
-                 color: Colors.white,
-               ),
-             ),
+            Text(
+              AppLocalizations.of(context)!.videoLoadError,
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
             const SizedBox(height: 12),
-             Text(
-               AppLocalizations.of(context)!.videoLoadErrorDesc,
-               textAlign: TextAlign.center,
-               style: TextStyle(fontSize: 14, color: Colors.white70),
-             ),
+            Text(
+              AppLocalizations.of(context)!.videoLoadErrorDesc,
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 14, color: Colors.white70),
+            ),
             const SizedBox(height: 24),
             FilledButton(
               onPressed: _rejectClip,
-              style: FilledButton.styleFrom(
-                backgroundColor: Colors.redAccent,
-              ),
-               child: Text(AppLocalizations.of(context)!.reRecord),
+              style: FilledButton.styleFrom(backgroundColor: Colors.redAccent),
+              child: Text(AppLocalizations.of(context)!.reRecord),
             ),
           ],
         ),

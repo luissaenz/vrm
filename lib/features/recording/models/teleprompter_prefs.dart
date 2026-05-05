@@ -9,11 +9,8 @@ class TeleprompterPrefs {
     required this.brightness,
   });
 
-  factory TeleprompterPrefs.defaults() => TeleprompterPrefs(
-        fontSize: 24.0,
-        readingSpeed: 150.0,
-        brightness: 0.8,
-      );
+  factory TeleprompterPrefs.defaults() =>
+      TeleprompterPrefs(fontSize: 24.0, readingSpeed: 150.0, brightness: 0.8);
 
   factory TeleprompterPrefs.fromMap(Map<String, dynamic> map) {
     return TeleprompterPrefs(
@@ -24,8 +21,8 @@ class TeleprompterPrefs {
   }
 
   Map<String, dynamic> toMap() => {
-        'fontSize': fontSize,
-        'readingSpeed': readingSpeed,
-        'brightness': brightness,
-      };
+    'fontSize': fontSize,
+    'readingSpeed': readingSpeed,
+    'brightness': brightness,
+  };
 }

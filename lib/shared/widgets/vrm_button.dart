@@ -24,7 +24,8 @@ class VRMButton extends StatefulWidget {
   State<VRMButton> createState() => _VRMButtonState();
 }
 
-class _VRMButtonState extends State<VRMButton> with SingleTickerProviderStateMixin {
+class _VRMButtonState extends State<VRMButton>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
   bool _isHovered = false;
@@ -36,9 +37,10 @@ class _VRMButtonState extends State<VRMButton> with SingleTickerProviderStateMix
       duration: const Duration(milliseconds: 150),
       vsync: this,
     );
-    _scaleAnimation = Tween<double>(begin: 1.0, end: 0.96).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
-    );
+    _scaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: 0.96,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
   }
 
   @override
@@ -67,7 +69,7 @@ class _VRMButtonState extends State<VRMButton> with SingleTickerProviderStateMix
   Widget build(BuildContext context) {
     final theme = context.appColors;
     final primaryColor = widget.color ?? theme.forestVibrant;
-    
+
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
@@ -82,17 +84,22 @@ class _VRMButtonState extends State<VRMButton> with SingleTickerProviderStateMix
             duration: const Duration(milliseconds: 200),
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
             decoration: BoxDecoration(
-              color: widget.isSecondary 
-                  ? Colors.transparent 
+              color: widget.isSecondary
+                  ? Colors.transparent
                   : (widget.onPressed == null ? Colors.grey : primaryColor),
               borderRadius: BorderRadius.circular(16),
-              border: widget.isSecondary 
-                  ? Border.all(color: primaryColor.withValues(alpha: 0.5), width: 1.5)
+              border: widget.isSecondary
+                  ? Border.all(
+                      color: primaryColor.withValues(alpha: 0.5),
+                      width: 1.5,
+                    )
                   : null,
               boxShadow: [
                 if (!widget.isSecondary && widget.onPressed != null)
                   BoxShadow(
-                    color: primaryColor.withValues(alpha: _isHovered ? 0.4 : 0.2),
+                    color: primaryColor.withValues(
+                      alpha: _isHovered ? 0.4 : 0.2,
+                    ),
                     blurRadius: _isHovered ? 20 : 12,
                     offset: const Offset(0, 4),
                   ),

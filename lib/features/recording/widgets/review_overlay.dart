@@ -34,7 +34,10 @@ class ReviewOverlay extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    l10n.fragmentDisplay(currentFragment.toString(), totalFragments.toString()),
+                    l10n.fragmentDisplay(
+                      currentFragment.toString(),
+                      totalFragments.toString(),
+                    ),
                     style: const TextStyle(
                       color: Colors.white,
                       fontSize: 12,
@@ -44,10 +47,7 @@ class ReviewOverlay extends StatelessWidget {
                   ),
                   Text(
                     '${l10n.takeLabel} ${recordingManager.sessionData.takesPerChunk[currentFragmentIndex]?.total ?? 1}',
-                    style: const TextStyle(
-                      color: Colors.white70,
-                      fontSize: 12,
-                    ),
+                    style: const TextStyle(color: Colors.white70, fontSize: 12),
                   ),
                 ],
               ),

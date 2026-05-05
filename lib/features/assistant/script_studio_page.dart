@@ -333,7 +333,34 @@ class _ScriptStudioPageState extends State<ScriptStudioPage> {
 
       if (!mounted) return;
 
-      // Navegar a la pantalla de grabación
+      final summary = analysis.viability?.summary.toLowerCase() ?? '';
+      if (summary.contains('localmente') || summary.contains('fallback')) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Row(
+              children: [
+                Icon(Icons.info_outline, color: Colors.white, size: 20),
+                SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Guion generado localmente (fallback). '
+                    'Conecta el backend para generación IA.',
+                    style: TextStyle(color: Colors.white, fontSize: 13),
+                  ),
+                ),
+              ],
+            ),
+            backgroundColor: Colors.orange.shade700,
+            behavior: SnackBarBehavior.floating,
+            duration: const Duration(seconds: 5),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            margin: const EdgeInsets.all(16),
+          ),
+        );
+      }
+
       Navigator.push(
         context,
         MaterialPageRoute(

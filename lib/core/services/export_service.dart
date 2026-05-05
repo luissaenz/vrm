@@ -1,9 +1,10 @@
+import 'dart:async';
 import 'dart:io';
-import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:share_plus/share_plus.dart';
+import 'logger_service.dart';
 
 /// Resultado de la operación de guardado en galería.
 typedef ExportResult = ({bool success, String? assetId, String? error});
@@ -15,6 +16,16 @@ class ExportService {
   factory ExportService() => _instance;
   ExportService._internal();
 
+  final StreamController<double> _progressController =
+      StreamController<double>.broadcast();
+
+  /// Stream de progreso para la operación saveToGallery (0.0 a 1.0).
+  Stream<double> get progressStream => _progressController.stream;
+
+  void _emitProgress(double progress) {
+    _progressController.add(progress.clamp(0.0, 1.0));
+  }
+
   /// Guarda un video en la galería nativa del dispositivo.
   ///
   /// Flujo:
@@ -22,38 +33,50 @@ class ExportService {
   /// 2. Verifica/solicita permisos de fotos via permission_handler.
   /// 3. Si permiso permanentemente denegado, retorna error.
   /// 4. Usa photo_manager para guardar el video.
+  ///
+  /// El progreso se emite via [progressStream].
   Future<ExportResult> saveToGallery(String filePath) async {
+    _emitProgress(0.0);
+
     // 1. Verificar existencia del archivo
     final file = File(filePath);
     if (!file.existsSync()) {
+      _emitProgress(1.0);
       return (success: false, assetId: null, error: 'file_not_found');
     }
+    _emitProgress(0.2);
 
     // 2. Verificar permisos via permission_handler
     final photosStatus = await Permission.photos.status;
     if (photosStatus.isPermanentlyDenied) {
+      _emitProgress(1.0);
       return (success: false, assetId: null, error: 'permanently_denied');
     }
+    _emitProgress(0.4);
 
     if (!photosStatus.isGranted) {
       final result = await Permission.photos.request();
       if (!result.isGranted) {
+        _emitProgress(1.0);
         final isPermanentlyDenied = result.isPermanentlyDenied;
         return (
           success: false,
           assetId: null,
-          error: isPermanentlyDenied ? 'permanently_denied' : 'denied'
+          error: isPermanentlyDenied ? 'permanently_denied' : 'denied',
         );
       }
     }
+    _emitProgress(0.6);
 
     // 3. Guardar en galería usando photo_manager
     try {
-      // En iOS 14+ con acceso limitado, agregar directamente al álbum
+      _emitProgress(0.8);
       final result = await PhotoManager.editor.saveVideo(file);
+      _emitProgress(1.0);
       return (success: true, assetId: result.id, error: null);
     } catch (e) {
-      debugPrint('[ExportService] Error saving to gallery: $e');
+      _emitProgress(1.0);
+      LoggerService.log('ExportService', 'Error saving to gallery', error: e);
       return (success: false, assetId: null, error: 'exception');
     }
   }
@@ -67,7 +90,10 @@ class ExportService {
   Future<void> shareVideo(String filePath, {String? subject}) async {
     final file = File(filePath);
     if (!file.existsSync()) {
-      debugPrint('[ExportService] shareVideo: file not found at $filePath');
+      LoggerService.log(
+        'ExportService',
+        'shareVideo: file not found at $filePath',
+      );
       return;
     }
 
@@ -79,10 +105,7 @@ class ExportService {
       await file.copy(tempFilePath);
       final xFile = XFile(tempFilePath);
 
-      await Share.shareXFiles(
-        [xFile],
-        subject: subject,
-      );
+      await Share.shareXFiles([xFile], subject: subject);
     } finally {
       // Limpiar archivo temporal
       try {
@@ -91,8 +114,17 @@ class ExportService {
           await tempFile.delete();
         }
       } catch (e) {
-        debugPrint('[ExportService] Failed to delete temp file: $e');
+        LoggerService.log(
+          'ExportService',
+          'Failed to delete temp file',
+          error: e,
+        );
       }
     }
+  }
+
+  /// Libera recursos del StreamController.
+  void dispose() {
+    _progressController.close();
   }
 }

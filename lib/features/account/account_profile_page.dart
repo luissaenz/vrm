@@ -89,26 +89,22 @@ class _AccountProfilePageState extends State<AccountProfilePage> {
                 width: 2,
               ),
             ),
-            child: Icon(
-              Icons.person_rounded,
-              size: 50,
-              color: colors.forest,
-            ),
+            child: Icon(Icons.person_rounded, size: 50, color: colors.forest),
           ),
           const SizedBox(height: 16),
           Text(
             AppLocalizations.of(context)!.anonymousUser,
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  color: colors.forest,
-                  fontWeight: FontWeight.w700,
-                ),
+              color: colors.forest,
+              fontWeight: FontWeight.w700,
+            ),
           ),
           const SizedBox(height: 4),
           Text(
             AppLocalizations.of(context)!.upgradeYourAccount,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: colors.forest.withValues(alpha: 0.6),
-                ),
+              color: colors.forest.withValues(alpha: 0.6),
+            ),
           ),
         ],
       ),
@@ -125,9 +121,7 @@ class _AccountProfilePageState extends State<AccountProfilePage> {
       decoration: BoxDecoration(
         color: isDark ? colors.cardBackground : Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: colors.forest.withValues(alpha: 0.05),
-        ),
+        border: Border.all(color: colors.forest.withValues(alpha: 0.05)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -135,9 +129,9 @@ class _AccountProfilePageState extends State<AccountProfilePage> {
           Text(
             AppLocalizations.of(context)!.accountInformation,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: colors.forest,
-                  fontWeight: FontWeight.w700,
-                ),
+              color: colors.forest,
+              fontWeight: FontWeight.w700,
+            ),
           ),
           const SizedBox(height: 16),
           _buildInfoRow(
@@ -158,9 +152,11 @@ class _AccountProfilePageState extends State<AccountProfilePage> {
             context,
             icon: Icons.calendar_today,
             label: AppLocalizations.of(context)!.memberSince,
-            value: _isLoading ? '...' : (_memberSince != null
-                ? '${_memberSince!.day}/${_memberSince!.month}/${_memberSince!.year}'
-                : 'N/A'),
+            value: _isLoading
+                ? '...'
+                : (_memberSince != null
+                      ? '${_memberSince!.day}/${_memberSince!.month}/${_memberSince!.year}'
+                      : 'N/A'),
           ),
         ],
       ),
@@ -194,15 +190,15 @@ class _AccountProfilePageState extends State<AccountProfilePage> {
               Text(
                 label,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: colors.forest.withValues(alpha: 0.6),
-                    ),
+                  color: colors.forest.withValues(alpha: 0.6),
+                ),
               ),
               Text(
                 value,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: colors.forest,
-                      fontWeight: FontWeight.w500,
-                    ),
+                  color: colors.forest,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ],
           ),
@@ -211,10 +207,7 @@ class _AccountProfilePageState extends State<AccountProfilePage> {
     );
   }
 
-  Widget _buildSettingsSection(
-    BuildContext context,
-    AppColors colors,
-  ) {
+  Widget _buildSettingsSection(BuildContext context, AppColors colors) {
     final l10n = AppLocalizations.of(context)!;
 
     return Container(
@@ -265,9 +258,7 @@ class _AccountProfilePageState extends State<AccountProfilePage> {
       decoration: BoxDecoration(
         color: context.isDarkMode ? colors.cardBackground : Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.red.withValues(alpha: 0.2),
-        ),
+        border: Border.all(color: Colors.red.withValues(alpha: 0.2)),
       ),
       child: Column(
         children: [
@@ -303,9 +294,9 @@ class _AccountProfilePageState extends State<AccountProfilePage> {
       title: Text(
         title,
         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              color: textColor ?? context.appColors.forest,
-              fontWeight: FontWeight.w500,
-            ),
+          color: textColor ?? context.appColors.forest,
+          fontWeight: FontWeight.w500,
+        ),
       ),
       trailing: const Icon(Icons.chevron_right),
       onTap: onTap,
@@ -346,9 +337,9 @@ class _AccountProfilePageState extends State<AccountProfilePage> {
 
                 if (context.mounted) {
                   Navigator.pop(context);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(l10n.dataCleared)),
-                  );
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text(l10n.dataCleared)));
                 }
               } catch (e) {
                 if (context.mounted) {
@@ -386,9 +377,9 @@ class _AccountProfilePageState extends State<AccountProfilePage> {
           TextButton(
             onPressed: () {
               Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(l10n.signedOut)),
-              );
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text(l10n.signedOut)));
             },
             child: Text(l10n.signOut),
           ),

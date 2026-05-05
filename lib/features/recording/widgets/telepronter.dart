@@ -73,12 +73,13 @@ class _TelepronterState extends State<Telepronter> {
         // SUPUESTO: Estimamos el avance de píxeles basado en PPM.
         // A 180 PPM (3 palabras/seg), el scroll debe ser fluido.
         // Factor 0.45 ajustado empíricamente para fontSize estándar.
-        final pixelsPerSecond = (widget.readingSpeed / 60.0) * (widget.fontSize * 0.45);
+        final pixelsPerSecond =
+            (widget.readingSpeed / 60.0) * (widget.fontSize * 0.45);
         final delta = pixelsPerSecond * 0.05; // tick de 50ms
-        
+
         final maxScroll = _scrollController.position.maxScrollExtent;
         final currentScroll = _scrollController.offset;
-        
+
         if (currentScroll < maxScroll) {
           _scrollController.animateTo(
             currentScroll + delta,
@@ -97,14 +98,19 @@ class _TelepronterState extends State<Telepronter> {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(32),
         child: BackdropFilter(
-          filter: ImageFilter.blur(sigmaX: 15, sigmaY: 15), // Optimizado para performance
+          filter: ImageFilter.blur(
+            sigmaX: 15,
+            sigmaY: 15,
+          ), // Optimizado para performance
           child: Container(
             height: 200, // Altura fija para permitir el scroll interno
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: (context.isDarkMode
-                  ? context.colorScheme.surface
-                  : Colors.black).withValues(alpha: 0.4),
+              color:
+                  (context.isDarkMode
+                          ? context.colorScheme.surface
+                          : Colors.black)
+                      .withValues(alpha: 0.4),
               borderRadius: BorderRadius.circular(32),
               border: Border.all(
                 color: context.isDarkMode
@@ -115,7 +121,8 @@ class _TelepronterState extends State<Telepronter> {
             ),
             child: SingleChildScrollView(
               controller: _scrollController,
-              physics: const NeverScrollableScrollPhysics(), // Controlamos el scroll por Timer
+              physics:
+                  const NeverScrollableScrollPhysics(), // Controlamos el scroll por Timer
               child: RichText(
                 textAlign: TextAlign.center,
                 text: TextSpan(

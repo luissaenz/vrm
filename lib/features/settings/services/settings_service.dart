@@ -19,7 +19,10 @@ class SettingsService {
 
   Future<void> setTeleprompterPrefs(TeleprompterPrefs teleprompterPrefs) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_keyTeleprompterPrefs, jsonEncode(teleprompterPrefs.toMap()));
+    await prefs.setString(
+      _keyTeleprompterPrefs,
+      jsonEncode(teleprompterPrefs.toMap()),
+    );
   }
 
   Future<TeleprompterPrefs> getTeleprompterPrefs() async {

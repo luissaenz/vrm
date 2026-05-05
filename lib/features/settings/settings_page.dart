@@ -145,9 +145,7 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     if (_isLoading) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     final colors = context.appColors;
@@ -170,9 +168,7 @@ class _SettingsPageState extends State<SettingsPage> {
             _buildSection(
               context,
               title: l10n.appearance,
-              children: [
-                _buildThemeSwitcher(context),
-              ],
+              children: [_buildThemeSwitcher(context)],
             ),
             _buildSection(
               context,
@@ -224,7 +220,9 @@ class _SettingsPageState extends State<SettingsPage> {
                   context,
                   icon: Icons.cloud_outlined,
                   title: l10n.cloudSync,
-                  subtitle: _cloudSyncEnabled ? 'Enabled' : l10n.cloudSyncDisabled,
+                  subtitle: _cloudSyncEnabled
+                      ? 'Enabled'
+                      : l10n.cloudSyncDisabled,
                   trailing: Switch(
                     value: _cloudSyncEnabled,
                     onChanged: _onCloudSyncChanged,
@@ -299,10 +297,10 @@ class _SettingsPageState extends State<SettingsPage> {
             child: Text(
               title.toUpperCase(),
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: colors.forest.withValues(alpha: 0.6),
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 1.2,
-                  ),
+                color: colors.forest.withValues(alpha: 0.6),
+                fontWeight: FontWeight.w700,
+                letterSpacing: 1.2,
+              ),
             ),
           ),
           Container(
@@ -310,9 +308,7 @@ class _SettingsPageState extends State<SettingsPage> {
               color: context.isDarkMode ? colors.cardBackground : Colors.white,
               borderRadius: BorderRadius.circular(16),
             ),
-            child: Column(
-              children: children,
-            ),
+            child: Column(children: children),
           ),
         ],
       ),
@@ -345,7 +341,8 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
         ],
         selected: {_themeMode},
-        onSelectionChanged: (newSelection) => _onThemeChanged(newSelection.first),
+        onSelectionChanged: (newSelection) =>
+            _onThemeChanged(newSelection.first),
         showSelectedIcon: false,
       ),
     );
@@ -374,16 +371,16 @@ class _SettingsPageState extends State<SettingsPage> {
       title: Text(
         title,
         style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-              color: colors.forest,
-              fontWeight: FontWeight.w500,
-            ),
+          color: colors.forest,
+          fontWeight: FontWeight.w500,
+        ),
       ),
       subtitle: subtitle != null
           ? Text(
               subtitle,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: colors.forest.withValues(alpha: 0.6),
-                  ),
+                color: colors.forest.withValues(alpha: 0.6),
+              ),
             )
           : null,
       trailing: trailing ?? const Icon(Icons.chevron_right),

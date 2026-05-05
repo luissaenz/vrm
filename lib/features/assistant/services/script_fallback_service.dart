@@ -37,10 +37,10 @@ class ScriptFallbackService {
 
     final templateList =
         _templates[objective.toLowerCase()] ?? _templates['educar']!;
-    
+
     // Selección aleatoria de plantilla
     final template = (List<String>.from(templateList)..shuffle()).first;
-    
+
     final fullText = template.replaceAll('{{idea}}', idea);
     final segments = _segmentToAnalysis(fullText);
 
@@ -49,7 +49,9 @@ class ScriptFallbackService {
         language: 'es',
         totalSegments: segments.length,
         estimatedDurationSeconds: segments.fold(
-            0.0, (sum, item) => sum + item.editMetadata.durationSeconds),
+          0.0,
+          (sum, item) => sum + item.editMetadata.durationSeconds,
+        ),
       ),
       segments: segments,
       viability: Viability(
@@ -64,7 +66,7 @@ class ScriptFallbackService {
   List<ScriptSegment> _segmentToAnalysis(String text) {
     final regex = RegExp(r'(?<=[.!?])\s+');
     final rawSegments = text.split(regex);
-    
+
     final List<ScriptSegment> finalSegments = [];
     int currentId = 0;
 
@@ -91,11 +93,7 @@ class ScriptFallbackService {
       id: id,
       type: 'content',
       text: text,
-      direction: SegmentDirection(
-        tone: 'Neutral',
-        pauses: '',
-        emphasis: '',
-      ),
+      direction: SegmentDirection(tone: 'Neutral', pauses: '', emphasis: ''),
       subtitles: text,
       editMetadata: EditMetadata(
         durationSeconds: duration,
@@ -111,10 +109,7 @@ class ScriptFallbackService {
     }
     final words = text.split(' ');
     final mid = (words.length / 2).floor();
-    return [
-      words.sublist(0, mid).join(' '),
-      words.sublist(mid).join(' '),
-    ];
+    return [words.sublist(0, mid).join(' '), words.sublist(mid).join(' ')];
   }
 
   double _estimateDuration(String text) {

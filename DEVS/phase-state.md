@@ -1,6 +1,7 @@
 # 🗺️ Phase State: mvp
 
 > Generado: 2026-05-05 vía 6_CONTEXTO.md
+> Actualizado: 2026-05-05 vía 6_CONTEXTO.md (Post-Paso 03)
 
 ---
 
@@ -13,9 +14,9 @@
 **Pasos en orden:**
 | # | Paso | Status |
 |---|------|--------|
-| 01 | Core de Grabación | pending |
-| 02 | Interfaz Reactiva y Refinamiento Local | pending |
-| 03 | Estabilidad y Pulimento Físico | pending |
+| 01 | Core de Grabación | 🟡 inherited (features exist via step 02/03, never formalized) |
+| 02 | Interfaz Reactiva y Refinamiento Local | ✅ completed |
+| 03 | Estabilidad y Pulimento Físico | ✅ completed |
 | 04 | Puerta de Tiendas y Valla Legal | pending |
 
 **Dependencias entre pasos:**
@@ -40,14 +41,25 @@
 | **Director's Card** | `lib/features/recording/directors_card_page.dart` (L540) | Vista detalle de segmentos con emphasis/pauses. Navegación entre segmentos. |
 | **Pipeline Architecture** | `lib/core/pipeline/` | `VRMPipeline.execute(params)` con 3 stages (fetchIdea → process → enhance). `PipelineFactory.createDefaultPipeline()` y `createBackendPipeline()`. Validación con `SchemaValidator`. |
 | **Exception Hierarchy** | `lib/core/exceptions/` | `CameraHardwareException`, `PersistenceException`, `PluginException` con metadata. Catch en todos los services. |
+| **LoggerService persistente** | `lib/core/services/logger_service.dart` (L53) | Escribe errores críticos a `{getApplicationDocumentsDirectory()}/vrm_data/logs/app.log`. Rotación automática a 512KB. Singleton. Usado en CameraService, RecordingManager, ExportService. |
+| **CameraService fallback resolución** | `lib/features/recording/services/camera_service.dart` (L16-20, L44-61) | Fallback automático `high→medium→low` en initialize() si CameraException. Loggea via LoggerService. |
+| **CameraService propagación errores hardware** | `lib/features/recording/services/camera_service.dart` (L143-184) | `setFlashMode/setFocusMode/setExposureMode` lanzan `CameraHardwareException` en vez de try-catch silencioso. UI captura y muestra SnackBar. |
+| **ExportService progreso Stream** | `lib/core/services/export_service.dart` (L19-26) | `StreamController<double>.broadcast()` con `_emitProgress()`. Progreso 0.0→1.0. Consumido por `RecordingEndPage`. |
+| **RecordingEndPage overlay exportación** | `lib/features/recording/recording_end_page.dart` (L202-210) | `_isSavingOverlay` + `WidgetProgress` con título "Guardando en galería..." y `CircularProgressIndicator`. |
+| **RecordingPage didHaveMemoryPressure** | `lib/features/recording/recording_page.dart` (L283-290) | Override `didHaveMemoryPressure()` → `ClipStorageService.cleanupTemp()` + `VRMNotifications.showWarning('Memoria baja — limpiando caché')`. |
+| **MemoryMonitor singleton** | `lib/features/recording/services/memory_monitor.dart` (L105) | Timer periódico (30s). Genera `LeakReport` con warnings de leak. Patrón singleton. Integrado con LoggerService. |
+| **SessionIntegrityException recovery** | `lib/features/recording/services/recording_manager.dart` (L330-366) | `verifyIntegrityStatic()` remueve referencias a clips faltantes sin perder proyecto. Datos corregidos pasados en `originalError`. |
+| **ScriptStudio fallback notification** | `lib/features/assistant/script_studio_page.dart` (L337-361) | SnackBar flotante naranja cuando `viability.summary` contiene "localmente" o "fallback". |
+| **ProGuard limpio** | `android/app/proguard-rules.pro` (L1-12) | Reglas ffmpegkit muertas removidas (L9-12). Solo Flutter wrapper + JNI. |
+| **Integridad al iniciar grabación** | `lib/features/recording/services/recording_manager.dart` (L60) | `verifySessionIntegrity()` llamado al inicio de `startRecording()`. Alerta si clips faltantes. |
 
 ### ⚠️ Parcialmente implementado
 
 | Componente | Archivo(s) | Qué falta |
 |---|---|---|
-| **F3 Idea Lab** | `script_studio_page.dart`, `script_fallback_service.dart` | Script generation usa 6 templates hardcodeados en español con `{{idea}}` placeholder. No hay IA real conectada. |
+| **F3 Idea Lab** | `script_studio_page.dart`, `script_fallback_service.dart` | Script generation usa 6 templates hardcodeados en español con `{{idea}}` placeholder. No hay IA real conectada. ✅ Notificación fallback implementada (SnackBar informativo cuando se usa generación local). |
 | **F4-F5 Generación IA** | `new_project_page.dart` (L68-226), `backend_script_plugin.dart` | `NewProjectPage` tiene API call comentado (L68-101), usa mock inline de 200 líneas con 8 segmentos hardcodeados. `BackendScriptPlugin` apunta a `localhost:8000` sin servidor. |
-| **F11 Exportación** | `lib/core/services/export_service.dart` (L98), `recording_end_page.dart` | `ExportService.saveToGallery()` usa `PhotoManager.editor.saveVideo()` + `Share.shareXFiles()`. NO probado en dispositivo real. Permisos (`Permission.photos`) pueden tener edge cases en iOS 14+ / Android 13+. `RecordingEndPage` muestra métricas hardcodeadas ("42m"). |
+| **F11 Exportación** | `lib/core/services/export_service.dart` (L125), `recording_end_page.dart` | ✅ ExportService con `Stream<double>` progreso. ✅ Overlay "Guardando en galería..." con `WidgetProgress`. NO probado en dispositivo real. Permisos (`Permission.photos`) pueden tener edge cases en iOS 14+ / Android 13+. `RecordingEndPage` muestra métricas hardcodeadas ("42m"). |
 | **Tests** | `test/repository_test.dart` (L156), `pipeline_test.dart` (L78), `error_handling_test.dart` (L76) | 3 tests reales: ProjectRepository (save/load/list/delete/search/count con FakePathProvider), Pipeline factory/execution/validation, PipelineException hierarchy. `widget_test.dart` (L30) está roto (referencia counter que no existe). `social_media_test.dart` usa mocks. |
 
 ### 🟡 No existe aún / stubbed
@@ -55,24 +67,24 @@
 | Componente | Archivo(s) | Problema |
 |---|---|---|
 | **F10 Auto-Stitch** | `lib/core/services/native_stitcher_service.dart` (L52), `lib/core/plugins/default/stitcher_plugin.dart` (L64), `lib/features/recording/pages/stitch_progress_page.dart` (L128) | **ROTO**: `MethodChannel('com.vrm.vrm_app/stitcher')` definido en Dart pero SIN handler nativo en Android (Java/Kotlin) ni iOS (Swift). `stitchVideos()` siempre lanza `MissingPluginException`. UI de progreso y orquestación (RecordingManager.startStitching) están completas. `pubspec.yaml` L71: `# ffmpeg_kit_flutter has been removed`. |
-| **Mi Cuenta** | `account_profile_page.dart` | UI shell: email = "Not configured", device ID = "Android Device", member since = "April 2026". Toggles Settings sin onTap. Solo "Clear All Data" funciona (borra vrm_data). "Sign Out" es no-op. |
-| **Settings** | `settings_page.dart` | Appearance (theme switcher sin toggle real), Recording (sliders no-op), Teleprompter (sliders no-op), Data & Storage (Cloud Sync toggle no-op). |
-| **Perfil Influencer** | `influencer_profile_page.dart` (L631) | Formulario 3-pasos completo pero datos NO persisten. Finalize solo hace `Navigator.pop()`. |
+| **Mi Cuenta** | `account_profile_page.dart` | ✅ IMPLEMENTADO: DeviceInfoService con device_info_plus. Muestra modelo real, memberSince desde primer launch. |
+| **Settings** | `settings_page.dart` | ✅ IMPLEMENTADO: SettingsService conecta a SharedPreferences. Theme switcher funciona (VRMApp carga desde prefs). Teleprompter sliders persisten prefs. Cloud sync toggle funciona. |
+| **Perfil Influencer** | `influencer_profile_page.dart` (L631) | ✅ IMPLEMENTADO: _saveProfile() persiste en SharedPreferences al hacer finalize. |
 | **Backend IA** | `backend/` (FastAPI), `lib/core/api_service.dart` | Backend FastAPI existe en código (POST `/prompt/{category}/{name}` con OpenAI/Anthropic/Gemini) pero requiere servidor corriendo en `localhost:8000`. Ningún servidor desplegado. |
 
 ### ❌ Discrepancias plan vs código
 
-| # | Plan dice | Código real | Impacto |
-|---|---|---|---|
-| D1 | F8 Grabación: 🔴 50% NO guarda MP4 | ✅ COMPLETE: Escribe MP4 reales con space check + lifecycle | Plan desactualizado ~50% |
-| D2 | F9 Revisión: 🔴 40% sin clips reales | ✅ COMPLETE: `VideoPlayerController.file()` con paths reales | Plan desactualizado ~60% |
-| D3 | F8 Overlay: ⚠️ 50% botones desconectados | ✅ COMPLETE: 9 botones conectados a CameraService | Plan desactualizado ~50% |
-| D4 | Mi Cuenta: ✅ 80% faltan acciones | 🟡 MOCK: Solo UI shells, toggles no-op | Plan sobreestimado ~65% |
-| D5 | F12 Dashboard: ✅ 90% falta reemplazar mocks | ✅ COMPLETE: Proyectos reales desde ProjectRepository | Plan desactualizado ~10% |
-| D6 | Dependencia ffmpeg_kit_flutter: ^6.0.3 | Eliminado (`pubspec.yaml` L71). NativeStitcherService usa MethodChannel sin impl | Arquitectura cambió, stitch nativo sin implementar |
-| D7 | Dependencia sqflite como necesaria | Declarada pero NUNCA importada en ningún .dart | Dependencia muerta |
-| D8 | Dependencia path: ^1.8.0 | `path: ^1.9.0` presente | Versión superior, compatible |
-| D9 | user_profile.json en disco | Perfil guardado en SharedPreferences, no como JSON file | Diferencia de implementación, funcionalmente equivalente |
+| # | Plan dice | Código real | Impacto | Estado |
+|---|---|---|---|---|
+| D1 | F8 Grabación: 🔴 50% NO guarda MP4 | ✅ COMPLETE: Escribe MP4 reales con space check + lifecycle | Plan desactualizado ~50% | ✅ Resuelto |
+| D2 | F9 Revisión: 🔴 40% sin clips reales | ✅ COMPLETE: `VideoPlayerController.file()` con paths reales | Plan desactualizado ~60% | ✅ Resuelto |
+| D3 | F8 Overlay: ⚠️ 50% botones desconectados | ✅ COMPLETE: 9 botones conectados a CameraService | Plan desactualizado ~50% | ✅ Resuelto |
+| D4 | Mi Cuenta: ✅ 80% faltan acciones | 🟡 MOCK: Solo UI shells, toggles no-op | Plan sobreestimado ~65% | ✅ Resuelto (Paso 2) |
+| D5 | F12 Dashboard: ✅ 90% falta reemplazar mocks | ✅ COMPLETE: Proyectos reales desde ProjectRepository | Plan desactualizado ~10% | ✅ Resuelto |
+| D6 | Dependencia ffmpeg_kit_flutter: ^6.0.3 | Eliminado (`pubspec.yaml` L71). NativeStitcherService usa MethodChannel sin impl | Arquitectura cambió, stitch nativo sin implementar. ProGuard dead rules cleaned ✅ | ⏳ Pendiente |
+| D7 | Dependencia sqflite como necesaria | Declarada pero NUNCA importada en ningún .dart | Dependencia muerta. ✅ REMOVIDA de pubspec.yaml en Paso 03 | ✅ Resuelto |
+| D8 | Dependencia path: ^1.8.0 | `path: ^1.9.0` presente | Versión superior, compatible | ✅ Resuelto |
+| D9 | user_profile.json en disco | Perfil guardado en SharedPreferences, no como JSON file | Diferencia de implementación, funcionalmente equivalente | ✅ Resuelto |
 
 ---
 
@@ -90,6 +102,8 @@
 | `SessionData` | `lib/features/recording/models/session_data.dart` | projectId, chunksRecorded, currentChunkIndex, takesPerChunk, approvedClips, stitchingStatus, finalVideoPath |
 | `ClipMetadata` | `lib/features/recording/models/clip_metadata.dart` | chunkIndex, takeIndex, filePath, duration, fileSize, approved, timestamp |
 | `UserProfile` | `lib/features/onboarding/data/user_profile.dart` | identity(UserIdentity enum), onboardingCompleted, segmentMinTime, segmentMaxTime, segmentRateWpm |
+| `LeakReport` | `lib/features/recording/services/memory_monitor.dart` | heapUsageBytes, allocations, leakCandidateCount, warnings, hasLeaks |
+| `LoggerService` | `lib/core/services/logger_service.dart` | static log(tag, message, {error, stack}) — escribe a `vrm_data/logs/app.log` con rotación |
 
 ### Persistencia en disco
 ```
@@ -120,7 +134,7 @@
 
 | Patrón | Ejemplo | Archivo referencia |
 |---|---|---|
-| **Service singleton/stateful** | `CameraService`, `RecordingManager`, `ExportService` | `lib/features/recording/services/camera_service.dart` |
+| **Service singleton/stateful** | `CameraService`, `RecordingManager`, `ExportService`, `LoggerService`, `MemoryMonitor` | `lib/features/recording/services/camera_service.dart` |
 | **Repository** | `ProjectRepository`, `OnboardingRepository` | `lib/core/data/project_repository.dart` |
 | **Plugin + Factory** | `TemplateScriptPlugin`, `BackendScriptPlugin`, `PipelineFactory` | `lib/core/pipeline/` |
 | **Model with fromJson/toJson** | `ProjectState`, `ScriptBundle`, `SessionData` | `lib/core/models/project_state.dart` |
@@ -152,8 +166,8 @@
 - `flutter_tts: ^4.2.5` — text-to-speech
 - `uuid: ^4.0.0` — IDs únicos
 - `storage_space: ^1.0.1` — verificación espacio disco
-- `sqflite: ^2.3.3+1` — **NO USADA**
-- `battery_plus: ^6.1.0` — **NO USADA**
+- `device_info_plus: ^11.0.0` — información del dispositivo (modelo, brand, ID)
+- *(sqflite and battery_plus removed in Paso 03)*
 
 **Dev:**
 - `flutter_lints: ^6.0.0`
@@ -178,8 +192,31 @@
 - **Plan dice F8 Grabación 50% → Realidad 100%**: El plan asume que `_cameraController` no escribe disco. `CameraService` + `ClipStorageService` ya escriben MP4 reales con manejo de espacio y lifecycle.
 - **Plan dice F9 Revisión 40% → Realidad 100%**: `ClipReviewPage` ya reproduce clips reales con accept/reject.
 - **Plan dice F8 Overlay 50% → Realidad 100%**: Todos los botones del overlay conectados a hardware.
-- **Plan dice Mi Cuenta 80% → Realidad <20%**: Solo UI shell. Toggles, datos de perfil, persistencia de settings no existen.
+- **Plan dice Mi Cuenta 80% → Realidad <20%**: Solo UI shell. Toggles, datos de perfil, persistencia de settings no existen. → **IMPLEMENTADO EN P2**
 - **Plan asume ffmpeg_kit_flutter → Realidad MethodChannel**: Arquitectura de stitch cambió. Plan debe actualizarse.
+- **Plan dice Perfil Influencer no persiste → IMPLEMENTADO EN P2**: `SettingsService.setInfluencerProfile()` guarda en SharedPreferences.
+- **Plan dice Settings stubs → IMPLEMENTADO EN P2**: Theme switcher funciona, teleprompter persisten, cloud sync toggle funciona.
+
+### Decisiones de Paso 2 (Interfaz Reactiva)
+
+| Decisión | Detalle | Justificación |
+|---|---|---|
+| **SettingsService singleton** | Wrapper de SharedPreferences para teleprompter, theme, cloud sync, influencer profile | Mantiene consistencia con CameraService y OnboardingRepository. Simplicidad MVP. |
+| **DeviceInfoService singleton** | Wrapper de device_info_plus para model/brand/id | Información real del dispositivo en AccountProfile. Try/catch con fallback Unknown. |
+| **TeleprompterPrefs value object** | fromMap/toMap para serialización JSON | Consistencia con UserProfile, ProjectState. |
+| **VRMApp StatefulWidget** | Carga ThemeMode desde SettingsService en initState | Theme switcher en Settings ahora afecta tema global. Criterio #11 MVP cumplido. |
+| **validador_hardware.dart DX** | Script CLI que prueba focus lock, flash, exposure en dispositivo real | Automatiza QA de toggles de cámara. Requiere dispositivo físico. |
+
+### Decisiones de Paso 3 (Estabilidad y Pulimento Físico)
+
+| Decisión | Detalle | Justificación |
+|---|---|---|
+| **LoggerService a archivo persistente** | Logger escribe a `vrm_data/logs/app.log` con rotación. Reemplaza `debugPrint` en servicios críticos. | `debugPrint` es no-op en Release. Logger garantiza diagnóstico en producción. Sigue patrón async de `RecordingManager._saveSessionDataToDisk()`. |
+| **VRM Health Check CLI unificado** | Fusión de VRM System Check + Validador de Resiliencia + Memory Leak Detector + vrm_data_scaffold en 1 CLI con subcomandos. | Evita proliferación de scripts independientes. Sigue convención `scripts/` del proyecto. |
+| **Fallback resolución en CameraService** | `ResolutionPreset.high → medium → low` sin intervención de usuario. | Sigue patrón existente de 3 fallbacks en `NativeStitcherService`. |
+| **MemoryMonitor singleton** | Timer periódico (30s) para muestreo de memoria. Genera `LeakReport`. Solo debug/profile mode. | Sigue patrón singleton de `CameraService`. No requiere dependencias externas para MVP. |
+| **ProGuard ya configurado, solo limpiar reglas muertas** | `isMinifyEnabled=true`, `isShrinkResources=true`, `proguard-rules.pro` existe. Solo remover reglas ffmpegkit (L9-12). | Confirmado en análisis de código. No requiere configuración adicional. |
+| **Stream<double> para progreso exportación** | `ExportService` emite progreso via `StreamController.broadcast()` en vez de callback `onProgress`. | Permite múltiples suscriptores. Desacopla UI de lógica de exportación. |
 
 ---
 
@@ -188,6 +225,8 @@
 | Paso | Estado | Archivos Archivados En | Commit | Decisiones Tomadas | Notas |
 |---|---|---|---|---|---|
 | — | — | — | — | — | Primer paso de fase mvp. IN_PROGRESS vacío. |
+| 02-Interfaz-Reactiva-y-Refinamiento-Local | ✅ completed | `DEVS/IMPLEMENTED/mvp/02-Interfaz-Reactiva-y-Refinamiento-Local/` | 34949d7 | Corrections applied: CR-001 (theme switcher), IMP-002 (stubs removed), IMP-003 (memberSince), IMP-004 (file naming). 12/13 criteria passed. | Paso 2 completado y validado. Theme persistence now works (VRMApp loads from SettingsService). |
+| 03-Estabilidad-y-Pulimento-Fisico | ✅ completed | `DEVS/IMPLEMENTED/mvp/03-Estabilidad-y-Pulimento-Fisico/` | 10cad57 | LoggerService persistente, CameraService fallback resolución + error propagation, ExportService Stream progreso + overlay, MemoryMonitor + didHaveMemoryPressure, ScriptStudio fallback notification, ProGuard limpio, VRM Health Check CLI. 14/14 criteria passed. | Paso 3 completado y validado. 0 críticos, 3 importantes, 4 mejoras. |
 
 ---
 
@@ -202,13 +241,13 @@
 - [ ] Errores: Cámara no disponible, disco lleno, stitch fallido → mensaje visible al usuario, no crash
 - [ ] Toggles hardware: Modo calle, fantasma, enfoque, flash ejecutan parámetros reales en cámara
 - [ ] Tests existentes pasan (repository_test, pipeline_test, error_handling_test)
-- [ ] Dependencias muertas (sqflite, battery_plus) removidas antes de release
+- [x] Dependencias muertas (sqflite, battery_plus) removidas en Paso 03
 
 ### NO requerido para MVP
 - Retry con backoff — conexiones fallidas muestran error, no reintentan
 - Caching avanzado — datos se leen de disco cada vez
 - Rate limiting — no aplica (single-user offline)
-- Observabilidad — solo debugPrint
+- Observabilidad avanzada — LoggerService implementado para errores críticos (MVP suficiente). No hay APM/monitoring.
 - Optimización de performance extrema — aceptable para dispositivo de gama media
 - Publicación directa a redes sociales — share sheet nativo es suficiente
 - Gamificación / Métricas de desempeño — excluidas del alcance MVP
@@ -218,4 +257,6 @@
 | Herramienta | Descripción | Impacto usuario final |
 |---|---|---|
 | **Validador de pipeline end-to-end** | Script que ejecuta flujo completo en dispositivo real y reporta etapa a etapa ✅/❌ | Detecta MissingPluginException, permisos faltantes y errores filesystem antes de release |
+| **validador_hardware.dart (Paso 2)** | Script CLI que prueba focus lock, flash torch, exposure lock en dispositivo real. Reporta compatibilidad JSON. | QA automatizado de toggles de cámara. Elimina prueba manual por modelo. |
+| **VRM Health Check (Paso 3)** | `scripts/vrm_health_check.dart` (415L) | CLI unificado: `check` (pre-flight permisos/espacio/cámara), `validate` (recovery paths), `memory` (leak detection), `scaffold` (estructura datos). Reduce diagnóstico de 30min a ~2s. Verifica LoggerService, MemoryMonitor, ProGuard, pipeline files. |
 | **Scripts Python existentes** | `scripts/fragmentation_test.py`, `scripts/verify_backend.py` | Útiles para validación backend, pero no cubren frontend |

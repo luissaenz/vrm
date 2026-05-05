@@ -39,11 +39,7 @@ class VRMEmptyState extends StatelessWidget {
                   width: 2,
                 ),
               ),
-              child: Icon(
-                icon,
-                size: 64,
-                color: colors.forest,
-              ),
+              child: Icon(icon, size: 64, color: colors.forest),
             ),
             const SizedBox(height: 32),
             // Title

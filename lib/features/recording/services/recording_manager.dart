@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import '../../../core/services/native_stitcher_service.dart';
+import '../../../core/services/logger_service.dart';
 import '../models/clip_metadata.dart';
 import '../models/session_data.dart';
 import '../config/camera_config.dart';
@@ -56,6 +56,9 @@ class RecordingManager {
     _currentChunkIndex = chunkIndex;
 
     try {
+      // Verificar integridad de clips aprobados antes de grabar
+      await verifySessionIntegrity();
+
       // Día 15: Verificación proactiva de espacio en disco
       final hasSpace = await _storage.hasFreeSpace();
       if (!hasSpace) {
@@ -67,7 +70,10 @@ class RecordingManager {
       await _camera.startRecording();
       _isRecording = true;
       _recordingStartedAt = DateTime.now();
-      debugPrint('[RecordingManager] Recording started for chunk $chunkIndex');
+      LoggerService.log(
+        'RecordingManager',
+        'Recording started for chunk $chunkIndex',
+      );
     } catch (e) {
       // Reset state on failure so caller can retry
       _isRecording = false;
@@ -148,9 +154,10 @@ class RecordingManager {
         lastUpdatedAt: DateTime.now(),
       );
 
-      debugPrint(
-        '[RecordingManager] Clip saved: chunk=$chunkIndex, take=$takeNumber, '
-        'duration=$durationMs ms, size=$fileSize bytes',
+      LoggerService.log(
+        'RecordingManager',
+        'Clip saved: chunk=$chunkIndex, take=$takeNumber, '
+            'duration=$durationMs ms, size=$fileSize bytes',
       );
 
       return savedPath;
@@ -181,7 +188,11 @@ class RecordingManager {
       final path = await stopRecording();
       return (clipPath: path, error: null);
     } catch (e) {
-      debugPrint('[RecordingManager] Partial clip save failed: $e');
+      LoggerService.log(
+        'RecordingManager',
+        'Partial clip save failed',
+        error: e,
+      );
       // Force stop camera as last resort
       try {
         if (_camera.isRecording) {
@@ -217,23 +228,35 @@ class RecordingManager {
     // Persistir cambios en disco
     await _saveSessionDataToDisk();
 
-    debugPrint('[RecordingManager] Clip accepted for chunk $currentChunk: $clipPath');
+    LoggerService.log(
+      'RecordingManager',
+      'Clip accepted for chunk $currentChunk: $clipPath',
+    );
   }
 
   /// Guarda sessionData en disco como JSON.
   Future<void> _saveSessionDataToDisk() async {
     try {
       final directory = await getApplicationDocumentsDirectory();
-      final projectDir = Directory('${directory.path}/vrm_data/projects/${sessionData.projectId}');
+      final projectDir = Directory(
+        '${directory.path}/vrm_data/projects/${sessionData.projectId}',
+      );
       await projectDir.create(recursive: true);
 
       final sessionFile = File('${projectDir.path}/session_data.json');
       final jsonData = jsonEncode(sessionData.toJson());
       await sessionFile.writeAsString(jsonData);
 
-      debugPrint('[RecordingManager] Session data saved to ${sessionFile.path}');
+      LoggerService.log(
+        'RecordingManager',
+        'Session data saved to ${sessionFile.path}',
+      );
     } catch (e) {
-      debugPrint('[RecordingManager] Failed to save session data: $e');
+      LoggerService.log(
+        'RecordingManager',
+        'Failed to save session data',
+        error: e,
+      );
       // No lanzamos error para no bloquear el flujo de grabación
     }
   }
@@ -245,12 +268,22 @@ class RecordingManager {
       final file = File(clipPath);
       if (await file.exists()) {
         await file.delete();
-        debugPrint('[RecordingManager] Rejected clip deleted: $clipPath');
+        LoggerService.log(
+          'RecordingManager',
+          'Rejected clip deleted: $clipPath',
+        );
       } else {
-        debugPrint('[RecordingManager] Rejected clip not found: $clipPath');
+        LoggerService.log(
+          'RecordingManager',
+          'Rejected clip not found: $clipPath',
+        );
       }
     } catch (e) {
-      debugPrint('[RecordingManager] Failed to delete rejected clip: $e');
+      LoggerService.log(
+        'RecordingManager',
+        'Failed to delete rejected clip',
+        error: e,
+      );
       // No lanzamos error, solo logueamos para no bloquear el flujo
     }
 
@@ -263,10 +296,11 @@ class RecordingManager {
     required void Function(double progress, String status) onProgress,
     required void Function(String error) onError,
   }) async {
-    final approvedClips = (sessionData.approvedClips.entries.toList()
-          ..sort((a, b) => a.key.compareTo(b.key)))
-        .map((e) => e.value)
-        .toList();
+    final approvedClips =
+        (sessionData.approvedClips.entries.toList()
+              ..sort((a, b) => a.key.compareTo(b.key)))
+            .map((e) => e.value)
+            .toList();
     if (approvedClips.isEmpty) {
       throw StateError('No approved clips to stitch');
     }
@@ -292,7 +326,10 @@ class RecordingManager {
     // Persist changes
     await _saveSessionDataToDisk();
 
-    debugPrint('[RecordingManager] Stitching completed: $finalVideoPath');
+    LoggerService.log(
+      'RecordingManager',
+      'Stitching completed: $finalVideoPath',
+    );
 
     return finalVideoPath;
   }
@@ -302,8 +339,9 @@ class RecordingManager {
   Future<void> dispose() async {
     // If recording, wait for partial save to complete atomically
     if (_isRecording) {
-      debugPrint(
-        '[RecordingManager] Disposing while recording — saving partial clip',
+      LoggerService.log(
+        'RecordingManager',
+        'Disposing while recording — saving partial clip',
       );
       await stopAndSavePartial();
     }
@@ -311,15 +349,15 @@ class RecordingManager {
     try {
       await _camera.dispose();
     } catch (e) {
-      debugPrint('[RecordingManager] Camera dispose error: $e');
+      LoggerService.log('RecordingManager', 'Camera dispose error', error: e);
     }
     // Clean up temp files
     try {
       await _storage.cleanupTemp();
     } catch (e) {
-      debugPrint('[RecordingManager] Temp cleanup error: $e');
+      LoggerService.log('RecordingManager', 'Temp cleanup error', error: e);
     }
-    debugPrint('[RecordingManager] Disposed successfully');
+    LoggerService.log('RecordingManager', 'Disposed successfully');
   }
 
   /// Día 14: Verifica que todos los clips aprobados existan físicamente en disco.
@@ -355,11 +393,15 @@ class RecordingManager {
         'Some approved clips are missing from storage. Chunks affected: ${missingClips.join(", ")}. '
         'These fragments have been reset for re-recording.',
         code: 'missing_files',
-        originalError: newData, // Pasamos la data corregida en el error para que la UI la use
+        originalError:
+            newData, // Pasamos la data corregida en el error para que la UI la use
       );
     }
 
-    debugPrint('[RecordingManager] Session integrity verified successfully');
+    LoggerService.log(
+      'RecordingManager',
+      'Session integrity verified successfully',
+    );
     return data;
   }
 

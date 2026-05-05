@@ -21,7 +21,9 @@ void main(List<String> args) async {
   // Stage 1: Check camera_service.dart imports and structure
   print('[1/5] Verifying CameraService...');
   try {
-    final cameraFile = File('lib/features/recording/services/camera_service.dart');
+    final cameraFile = File(
+      'lib/features/recording/services/camera_service.dart',
+    );
     if (await cameraFile.exists()) {
       final content = await cameraFile.readAsString();
       final hasStartRecording = content.contains('startRecording()');
@@ -31,7 +33,8 @@ void main(List<String> args) async {
         print('  ✅ CameraService: start/stop recording methods found');
       } else {
         results['CameraService'] = false;
-        errors['CameraService'] = 'Missing startRecording or stopRecording method';
+        errors['CameraService'] =
+            'Missing startRecording or stopRecording method';
         print('  ❌ CameraService: missing recording methods');
       }
     } else {
@@ -48,7 +51,9 @@ void main(List<String> args) async {
   // Stage 2: Check ClipStorageService
   print('[2/5] Verifying ClipStorageService...');
   try {
-    final clipFile = File('lib/features/recording/services/clip_storage_service.dart');
+    final clipFile = File(
+      'lib/features/recording/services/clip_storage_service.dart',
+    );
     if (await clipFile.exists()) {
       final content = await clipFile.readAsString();
       if (content.contains('saveClip')) {
@@ -103,9 +108,12 @@ void main(List<String> args) async {
       final content = await stitchFile.readAsString();
       final hasSingleClipFallback = content.contains('clipPaths.length == 1');
       results['Stitcher'] = hasSingleClipFallback;
-      print('  ✅ NativeStitcherService: ${hasSingleClipFallback ? "has single-clip fallback" : "found but NO fallback"}');
+      print(
+        '  ✅ NativeStitcherService: ${hasSingleClipFallback ? "has single-clip fallback" : "found but NO fallback"}',
+      );
       if (!hasSingleClipFallback) {
-        errors['Stitcher'] = 'No single-clip fallback, MissingPluginException will crash';
+        errors['Stitcher'] =
+            'No single-clip fallback, MissingPluginException will crash';
       }
     } else {
       results['Stitcher'] = false;

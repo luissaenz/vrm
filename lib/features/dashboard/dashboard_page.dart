@@ -442,9 +442,12 @@ class _RecentProjectsSection extends StatelessWidget {
                       future: repository.getSessionData(project.projectId),
                       builder: (context, sessionSnapshot) {
                         final session = sessionSnapshot.data;
-                        final approvedCount = (session?['approvedClips'] as Map?)?.length ?? 0;
+                        final approvedCount =
+                            (session?['approvedClips'] as Map?)?.length ?? 0;
                         final totalChunks = project.script?.totalChunks ?? 0;
-                        final progress = totalChunks > 0 ? approvedCount / totalChunks : 0.0;
+                        final progress = totalChunks > 0
+                            ? approvedCount / totalChunks
+                            : 0.0;
                         final isCompleted = progress >= 1.0;
 
                         return Padding(
@@ -459,17 +462,25 @@ class _RecentProjectsSection extends StatelessWidget {
                             ),
                             badgeText: isCompleted ? l10n.ready : l10n.draft,
                             progressLabel: l10n.progressLabel,
-                            icon: isCompleted ? Icons.check_circle_rounded : Icons.create_rounded,
+                            icon: isCompleted
+                                ? Icons.check_circle_rounded
+                                : Icons.create_rounded,
                             badgeBg: isCompleted
                                 ? (isDark
-                                    ? const Color(0xFF10B981).withValues(alpha: 0.1)
-                                    : const Color(0xFFECFDF5))
+                                      ? const Color(
+                                          0xFF10B981,
+                                        ).withValues(alpha: 0.1)
+                                      : const Color(0xFFECFDF5))
                                 : (isDark
-                                    ? Colors.orange.withValues(alpha: 0.1)
-                                    : const Color(0xFFFFF7ED)),
+                                      ? Colors.orange.withValues(alpha: 0.1)
+                                      : const Color(0xFFFFF7ED)),
                             badgeTextCol: isCompleted
-                                ? (isDark ? const Color(0xFF10B981) : const Color(0xFF047857))
-                                : (isDark ? const Color(0xFFF97316) : const Color(0xFFC2410C)),
+                                ? (isDark
+                                      ? const Color(0xFF10B981)
+                                      : const Color(0xFF047857))
+                                : (isDark
+                                      ? const Color(0xFFF97316)
+                                      : const Color(0xFFC2410C)),
                           ),
                         );
                       },
@@ -492,7 +503,9 @@ class _RecentProjectsSection extends StatelessWidget {
       decoration: BoxDecoration(
         color: context.appColors.cardBackground,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: context.appColors.cardBorder.withValues(alpha: 0.5)),
+        border: Border.all(
+          color: context.appColors.cardBorder.withValues(alpha: 0.5),
+        ),
       ),
       child: Column(
         children: [

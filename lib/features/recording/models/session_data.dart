@@ -1,10 +1,5 @@
 /// Estados posibles de un clip en el proceso de revisión.
-enum ClipStatus {
-  pending,
-  recorded,
-  approved,
-  rejected,
-}
+enum ClipStatus { pending, recorded, approved, rejected }
 
 /// Información de takes por chunk dentro de una sesión de grabación.
 class ChunkTakeInfo {
@@ -63,9 +58,7 @@ class SessionData {
     'takesPerChunk': takesPerChunk.map(
       (k, v) => MapEntry(k.toString(), v.toJson()),
     ),
-    'approvedClips': approvedClips.map(
-      (k, v) => MapEntry(k.toString(), v),
-    ),
+    'approvedClips': approvedClips.map((k, v) => MapEntry(k.toString(), v)),
     'startedAt': startedAt.toIso8601String(),
     'lastUpdatedAt': lastUpdatedAt.toIso8601String(),
     'stitchingCompleted': stitchingCompleted,
@@ -78,27 +71,27 @@ class SessionData {
     final rawApproved = json['approvedClips'] as Map<String, dynamic>?;
     return SessionData(
       projectId: json['projectId'] as String,
-      chunksRecorded: (json['chunksRecorded'] as List?)
-              ?.map((e) => e as int)
-              .toList() ??
+      chunksRecorded:
+          (json['chunksRecorded'] as List?)?.map((e) => e as int).toList() ??
           [],
       currentChunkIndex: json['currentChunkIndex'] as int? ?? 0,
-      takesPerChunk: rawTakes?.map(
+      takesPerChunk:
+          rawTakes?.map(
             (k, v) => MapEntry(
               int.parse(k),
               ChunkTakeInfo.fromJson(v as Map<String, dynamic>),
             ),
           ) ??
           {},
-      approvedClips: rawApproved?.map(
-            (k, v) => MapEntry(int.parse(k), v as String),
-          ) ??
-          {},
+      approvedClips:
+          rawApproved?.map((k, v) => MapEntry(int.parse(k), v as String)) ?? {},
       startedAt: DateTime.parse(json['startedAt'] as String),
       lastUpdatedAt: DateTime.parse(json['lastUpdatedAt'] as String),
       stitchingCompleted: json['stitchingCompleted'] as bool? ?? false,
       finalVideoPath: json['finalVideoPath'] as String?,
-      stitchedAt: json['stitchedAt'] != null ? DateTime.parse(json['stitchedAt'] as String) : null,
+      stitchedAt: json['stitchedAt'] != null
+          ? DateTime.parse(json['stitchedAt'] as String)
+          : null,
     );
   }
 

@@ -12,6 +12,7 @@ import 'widgets/voice_indicator.dart';
 import 'widgets/telepronter.dart';
 import 'recording_end_page.dart';
 import '../../shared/widgets/vrm_empty_state.dart';
+import '../../shared/utils/vrm_notifications.dart';
 import 'package:vrm_app/l10n/app_localizations.dart';
 import 'clip_review_page.dart';
 import 'services/voice_command_service.dart';
@@ -179,7 +180,9 @@ class _RecordingPageState extends State<RecordingPage>
     if (_sessionData == null) return;
 
     try {
-      final updatedData = await RecordingManager.verifyIntegrityStatic(_sessionData!);
+      final updatedData = await RecordingManager.verifyIntegrityStatic(
+        _sessionData!,
+      );
       if (mounted) {
         setState(() {
           _sessionData = updatedData;
@@ -275,6 +278,18 @@ class _RecordingPageState extends State<RecordingPage>
         state == AppLifecycleState.inactive) {
       // App going to background — stop recording and save partial clip
       _handleBackgroundTransition();
+    }
+  }
+
+  @override
+  void didHaveMemoryPressure() {
+    super.didHaveMemoryPressure();
+    debugPrint(
+      '[RecordingPage] Memory pressure detected — cleaning up temp files',
+    );
+    _clipStorageService.cleanupTemp();
+    if (mounted) {
+      VRMNotifications.showWarning(context, 'Memoria baja — limpiando caché');
     }
   }
 
@@ -557,14 +572,14 @@ class _RecordingPageState extends State<RecordingPage>
             Text(title, style: const TextStyle(color: Colors.white)),
           ],
         ),
-        content: Text(
-          message,
-          style: const TextStyle(color: Colors.white70),
-        ),
+        content: Text(message, style: const TextStyle(color: Colors.white70)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Entendido', style: TextStyle(color: Colors.orangeAccent)),
+            child: const Text(
+              'Entendido',
+              style: TextStyle(color: Colors.orangeAccent),
+            ),
           ),
         ],
       ),
@@ -624,27 +639,28 @@ class _RecordingPageState extends State<RecordingPage>
   }
 
   /// Aplica los ajustes de hardware (luz, enfoque, exposición) según el estado actual.
+  /// Muestra SnackBar si algún modo no es soportado por el hardware.
   Future<void> _applyHardwareSettings() async {
     if (!_isCameraInitialized) return;
 
     try {
-      // 1. Flash / Luz (Modo Torch para video)
       await _cameraService.setFlashMode(
         _isLightActive ? FlashMode.torch : FlashMode.off,
       );
 
-      // 2. Street Mode logic (Lockers)
       if (_isStreetModeActive) {
-        // Bloqueamos ambos para evitar cambios bruscos en exteriores
         await _cameraService.setExposureMode(ExposureMode.locked);
         await _cameraService.setFocusMode(FocusMode.locked);
       } else {
-        // 3. Enfoque Manual / Auto
         await _cameraService.setFocusMode(
           _isFocusLocked ? FocusMode.locked : FocusMode.auto,
         );
-        // Si no es calle, permitimos exposiciÃ³n automÃ¡tica
         await _cameraService.setExposureMode(ExposureMode.auto);
+      }
+    } on CameraHardwareException catch (e) {
+      debugPrint('[RecordingPage] Hardware setting not supported: $e');
+      if (mounted) {
+        VRMNotifications.showWarning(context, e.message);
       }
     } catch (e) {
       debugPrint('[RecordingPage] Error aplicando ajustes de hardware: $e');
@@ -679,7 +695,7 @@ class _RecordingPageState extends State<RecordingPage>
       await controller.initialize();
       await controller.setVolume(0);
       await controller.setLooping(false); // Ver primer frame
-      
+
       if (mounted && _isGhostActive) {
         setState(() {
           _ghostController = controller;
@@ -971,7 +987,8 @@ class _RecordingPageState extends State<RecordingPage>
                           _ghostController!.value.isInitialized)
                         Positioned.fill(
                           child: Opacity(
-                            opacity: 0.2, // SUPUESTO: 0.2 opacidad para efecto fantasma
+                            opacity:
+                                0.2, // SUPUESTO: 0.2 opacidad para efecto fantasma
                             child: AspectRatio(
                               aspectRatio: _ghostController!.value.aspectRatio,
                               child: VideoPlayer(_ghostController!),
@@ -1497,7 +1514,8 @@ class _RecordingPageState extends State<RecordingPage>
                                       isActive: _isGhostActive,
                                       onTap: () {
                                         setState(
-                                          () => _isGhostActive = !_isGhostActive,
+                                          () =>
+                                              _isGhostActive = !_isGhostActive,
                                         );
                                         _updateGhostController();
                                       },
@@ -1508,7 +1526,8 @@ class _RecordingPageState extends State<RecordingPage>
                                       isActive: _isLightActive,
                                       onTap: () {
                                         setState(
-                                          () => _isLightActive = !_isLightActive,
+                                          () =>
+                                              _isLightActive = !_isLightActive,
                                         );
                                         _applyHardwareSettings();
                                       },
@@ -1542,7 +1561,8 @@ class _RecordingPageState extends State<RecordingPage>
                                       isActive: _isFocusLocked,
                                       onTap: () {
                                         setState(
-                                          () => _isFocusLocked = !_isFocusLocked,
+                                          () =>
+                                              _isFocusLocked = !_isFocusLocked,
                                         );
                                         _applyHardwareSettings();
                                       },
@@ -1721,9 +1741,9 @@ class _RecordingPageState extends State<RecordingPage>
                   max: 30,
                   unit: 'PT',
                   onChanged: (val) {
-                      setState(() => _teleprompterFontSize = val);
-                      _saveTeleprompterPrefs();
-                    },
+                    setState(() => _teleprompterFontSize = val);
+                    _saveTeleprompterPrefs();
+                  },
                 ),
                 const SizedBox(height: 36),
 
@@ -1736,9 +1756,9 @@ class _RecordingPageState extends State<RecordingPage>
                   max: 300,
                   unit: 'PPM',
                   onChanged: (val) {
-                      setState(() => _readingSpeed = val);
-                      _saveTeleprompterPrefs();
-                    },
+                    setState(() => _readingSpeed = val);
+                    _saveTeleprompterPrefs();
+                  },
                 ),
                 const SizedBox(height: 36),
 
@@ -1751,9 +1771,9 @@ class _RecordingPageState extends State<RecordingPage>
                   max: 100,
                   unit: '%',
                   onChanged: (val) {
-                      setState(() => _screenBrightness = val / 100);
-                      _saveTeleprompterPrefs();
-                    },
+                    setState(() => _screenBrightness = val / 100);
+                    _saveTeleprompterPrefs();
+                  },
                 ),
                 const SizedBox(height: 48),
 

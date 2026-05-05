@@ -34,7 +34,9 @@ class StitcherPlugin implements IPostProcessor {
         clipPaths: clips,
         onProgress: (progress) {
           // Progress callback - could be exposed to UI if needed
-          debugPrint('Stitching progress: ${progress.progress} - ${progress.status}');
+          debugPrint(
+            'Stitching progress: ${progress.progress} - ${progress.status}',
+          );
         },
         onError: (error) {
           throw Exception('Stitching failed: $error');

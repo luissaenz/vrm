@@ -10,16 +10,27 @@ class VRMNotifications {
     _show(context, message, isError: true);
   }
 
-  static void _show(BuildContext context, String message, {required bool isError}) {
+  static void showWarning(BuildContext context, String message) {
+    _show(context, message, isError: true, isWarning: true);
+  }
+
+  static void _show(
+    BuildContext context,
+    String message, {
+    required bool isError,
+    bool isWarning = false,
+  }) {
     final colors = context.appColors;
-    
+
     ScaffoldMessenger.of(context).hideCurrentSnackBar();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Row(
           children: [
             Icon(
-              isError ? Icons.warning_amber_rounded : Icons.check_circle_outline,
+              isError
+                  ? Icons.warning_amber_rounded
+                  : Icons.check_circle_outline,
               color: Colors.white,
               size: 20,
             ),
@@ -36,11 +47,11 @@ class VRMNotifications {
             ),
           ],
         ),
-        backgroundColor: isError ? context.colorScheme.error : colors.forest,
+        backgroundColor: isWarning
+            ? Colors.orange.shade700
+            : (isError ? context.colorScheme.error : colors.forest),
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         margin: const EdgeInsets.all(16),
         duration: const Duration(seconds: 3),
       ),

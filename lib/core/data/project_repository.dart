@@ -88,7 +88,11 @@ class ProjectRepository {
       final projects = <ProjectState>[];
 
       // List subdirectories and look for project.json in each
-      final projectFolders = await projectsDir.list().where((entity) => entity is Directory).cast<Directory>().toList();
+      final projectFolders = await projectsDir
+          .list()
+          .where((entity) => entity is Directory)
+          .cast<Directory>()
+          .toList();
 
       for (final folder in projectFolders) {
         try {

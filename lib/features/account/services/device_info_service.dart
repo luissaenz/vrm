@@ -14,11 +14,8 @@ class DeviceInfo {
     this.installDate,
   });
 
-  factory DeviceInfo.unknown() => DeviceInfo(
-        model: 'Unknown Device',
-        brand: 'Unknown',
-        id: 'unknown',
-      );
+  factory DeviceInfo.unknown() =>
+      DeviceInfo(model: 'Unknown Device', brand: 'Unknown', id: 'unknown');
 }
 
 class DeviceInfoService {

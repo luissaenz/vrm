@@ -4,10 +4,7 @@ import 'package:flutter/material.dart';
 class AutoAcceptBar extends StatelessWidget {
   final Animation<double> progressAnimation;
 
-  const AutoAcceptBar({
-    super.key,
-    required this.progressAnimation,
-  });
+  const AutoAcceptBar({super.key, required this.progressAnimation});
 
   @override
   Widget build(BuildContext context) {

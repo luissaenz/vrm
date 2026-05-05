@@ -9,7 +9,9 @@ class StitcherProgress {
 }
 
 class NativeStitcherService {
-  static const MethodChannel _channel = MethodChannel('com.vrm.vrm_app/stitcher');
+  static const MethodChannel _channel = MethodChannel(
+    'com.vrm.vrm_app/stitcher',
+  );
 
   Future<String> stitchVideos({
     required String projectId,
@@ -23,7 +25,9 @@ class NativeStitcherService {
       }
 
       final directory = await getApplicationDocumentsDirectory();
-      final projectDir = Directory('${directory.path}/vrm_data/projects/$projectId');
+      final projectDir = Directory(
+        '${directory.path}/vrm_data/projects/$projectId',
+      );
       if (!await projectDir.exists()) {
         await projectDir.create(recursive: true);
       }
@@ -56,13 +60,25 @@ class NativeStitcherService {
         throw Exception('Native stitching returned failure');
       } on MissingPluginException {
         // Fallback 1: ffmpeg via CLI (desktop/emulator)
-        onProgress(StitcherProgress(0.2, 'Native stitch unavailable, trying ffmpeg...'));
-        final stitched = await _stitchWithFFmpeg(clipPaths, outputPath, onProgress);
+        onProgress(
+          StitcherProgress(0.2, 'Native stitch unavailable, trying ffmpeg...'),
+        );
+        final stitched = await _stitchWithFFmpeg(
+          clipPaths,
+          outputPath,
+          onProgress,
+        );
         if (stitched != null) return stitched;
 
         // Fallback 2: direct concatenation for compatible MP4s
-        onProgress(StitcherProgress(0.3, 'FFmpeg unavailable, trying direct concat...'));
-        final concatenated = await _concatRaw(clipPaths, outputPath, onProgress);
+        onProgress(
+          StitcherProgress(0.3, 'FFmpeg unavailable, trying direct concat...'),
+        );
+        final concatenated = await _concatRaw(
+          clipPaths,
+          outputPath,
+          onProgress,
+        );
         if (concatenated != null) return concatenated;
 
         throw Exception(
@@ -92,16 +108,22 @@ class NativeStitcherService {
 
       // Create concat file list
       final concatFile = File('${outputPath}.concat.txt');
-      final concatContent = clipPaths.map((p) => "file '${p.replaceAll("'", "'\\''")}'").join('\n'); // ignore: unnecessary_brace_in_string_interps
+      final concatContent = clipPaths
+          .map((p) => "file '${p.replaceAll("'", "'\\''")}'")
+          .join('\n'); // ignore: unnecessary_brace_in_string_interps
       await concatFile.writeAsString(concatContent);
 
       onProgress(StitcherProgress(0.4, 'Re-encoding clips...'));
 
       final result = await Process.run('ffmpeg', [
-        '-f', 'concat',
-        '-safe', '0',
-        '-i', concatFile.path,
-        '-c', 'copy',
+        '-f',
+        'concat',
+        '-safe',
+        '0',
+        '-i',
+        concatFile.path,
+        '-c',
+        'copy',
         '-y',
         outputPath,
       ]);
@@ -147,10 +169,12 @@ class NativeStitcherService {
           }
         }
 
-        onProgress(StitcherProgress(
-          (i + 1) / clipPaths.length,
-          'Processing clip ${i + 1} of ${clipPaths.length}...',
-        ));
+        onProgress(
+          StitcherProgress(
+            (i + 1) / clipPaths.length,
+            'Processing clip ${i + 1} of ${clipPaths.length}...',
+          ),
+        );
       }
 
       await sink.close();

@@ -1,6 +1,6 @@
 import 'package:camera/camera.dart';
-import 'package:flutter/foundation.dart';
 import '../../../core/exceptions/vrm_exceptions.dart';
+import '../../../core/services/logger_service.dart';
 import '../config/camera_config.dart';
 
 /// Wrapper del plugin `camera` que aisla la lógica de hardware.
@@ -13,14 +13,25 @@ class CameraService {
   bool get isRecording => _controller?.value.isRecordingVideo ?? false;
   CameraLensDirection get currentDirection => _currentDirection;
 
+  static const _resolutionFallbacks = [
+    ResolutionPreset.high,
+    ResolutionPreset.medium,
+    ResolutionPreset.low,
+  ];
+
   /// Inicializa la cámara con configuración fija.
+  /// Si la resolución [CameraConfig.resolution] falla, degrada automáticamente:
+  /// high → medium → low.
   Future<void> initialize({CameraLensDirection? direction}) async {
     _currentDirection = direction ?? CameraConfig.defaultDirection;
 
     try {
       final cameras = await availableCameras();
       if (cameras.isEmpty) {
-        throw CameraHardwareException('No cameras available on this device', code: 'no_cameras');
+        throw CameraHardwareException(
+          'No cameras available on this device',
+          code: 'no_cameras',
+        );
       }
 
       CameraDescription selectedCamera;
@@ -29,24 +40,39 @@ class CameraService {
           (camera) => camera.lensDirection == _currentDirection,
         );
       } catch (_) {
-        // Fallback to first available camera
         selectedCamera = cameras.first;
       }
 
-      _controller = CameraController(
-        selectedCamera,
-        CameraConfig.resolution,
-        enableAudio: CameraConfig.enableAudio,
-        imageFormatGroup: CameraConfig.imageFormat,
-      );
+      var lastError = '';
+      for (final res in _resolutionFallbacks) {
+        try {
+          _controller = CameraController(
+            selectedCamera,
+            res,
+            enableAudio: CameraConfig.enableAudio,
+            imageFormatGroup: CameraConfig.imageFormat,
+          );
+          await _controller!.initialize();
+          if (res != CameraConfig.resolution) {
+            LoggerService.log(
+              'CameraService',
+              'Camera initialized with fallback resolution: $res',
+            );
+          }
+          return;
+        } on CameraException catch (e) {
+          lastError = '${e.code}: ${e.description}';
+          await _controller?.dispose();
+          _controller = null;
+        }
+      }
 
-      await _controller!.initialize();
-    } on CameraException catch (e) {
       throw CameraHardwareException(
-        'Failed to initialize camera: ${e.description}',
-        code: e.code,
-        originalError: e,
+        'Failed to initialize camera with all resolutions: $lastError',
+        code: 'init_failed',
       );
+    } on CameraHardwareException {
+      rethrow;
     } catch (e) {
       throw CameraHardwareException(
         'Unexpected error during camera initialization',
@@ -58,7 +84,10 @@ class CameraService {
   /// Inicia la grabación de video.
   Future<void> startRecording() async {
     if (_controller == null || !isInitialized) {
-      throw CameraHardwareException('Camera not initialized', code: 'not_initialized');
+      throw CameraHardwareException(
+        'Camera not initialized',
+        code: 'not_initialized',
+      );
     }
     if (isRecording) return;
 
@@ -81,10 +110,16 @@ class CameraService {
   /// Detiene la grabación y retorna el archivo temporal.
   Future<XFile> stopRecording() async {
     if (_controller == null || !isInitialized) {
-      throw CameraHardwareException('Camera not initialized', code: 'not_initialized');
+      throw CameraHardwareException(
+        'Camera not initialized',
+        code: 'not_initialized',
+      );
     }
     if (!isRecording) {
-      throw CameraHardwareException('Camera is not recording', code: 'not_recording');
+      throw CameraHardwareException(
+        'Camera is not recording',
+        code: 'not_recording',
+      );
     }
 
     try {
@@ -119,34 +154,47 @@ class CameraService {
   }
 
   /// Configura el modo de flash.
+  /// Lanza [CameraHardwareException] si el hardware no soporta el modo.
   Future<void> setFlashMode(FlashMode mode) async {
     if (_controller == null || !isInitialized) return;
     try {
       await _controller!.setFlashMode(mode);
     } catch (e) {
-      // SUPUESTO: Si el modo no es soportado por el hardware, ignoramos silenciosamente
-      // para evitar crashes en la pÃ¡gina de grabaciÃ³n.
-      debugPrint('CameraService Error: setFlashMode($mode) failing: $e');
+      throw CameraHardwareException(
+        'Flash mode $mode not supported: $e',
+        code: 'flash_mode_error',
+        originalError: e,
+      );
     }
   }
 
   /// Configura el modo de enfoque.
+  /// Lanza [CameraHardwareException] si el hardware no soporta el modo.
   Future<void> setFocusMode(FocusMode mode) async {
     if (_controller == null || !isInitialized) return;
     try {
       await _controller!.setFocusMode(mode);
     } catch (e) {
-      debugPrint('CameraService Error: setFocusMode($mode) failing: $e');
+      throw CameraHardwareException(
+        'Focus mode $mode not supported: $e',
+        code: 'focus_mode_error',
+        originalError: e,
+      );
     }
   }
 
   /// Configura el modo de exposición.
+  /// Lanza [CameraHardwareException] si el hardware no soporta el modo.
   Future<void> setExposureMode(ExposureMode mode) async {
     if (_controller == null || !isInitialized) return;
     try {
       await _controller!.setExposureMode(mode);
     } catch (e) {
-      debugPrint('CameraService Error: setExposureMode($mode) failing: $e');
+      throw CameraHardwareException(
+        'Exposure mode $mode not supported: $e',
+        code: 'exposure_mode_error',
+        originalError: e,
+      );
     }
   }
 

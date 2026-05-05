@@ -10,6 +10,7 @@ import '../../core/theme.dart';
 import 'package:vrm_app/l10n/app_localizations.dart';
 import '../../core/services/export_service.dart';
 import '../../shared/widgets/vrm_button.dart';
+import '../../shared/widgets/widget_progress.dart';
 import '../../shared/utils/vrm_notifications.dart';
 
 class RecordingEndPage extends StatefulWidget {
@@ -27,6 +28,9 @@ class _RecordingEndPageState extends State<RecordingEndPage> {
   bool _isPlaying = false;
   bool _isExporting = false;
   bool _exportDone = false;
+  bool _isSavingOverlay = false;
+  double _exportProgress = 0.0;
+  StreamSubscription<double>? _exportProgressSub;
 
   @override
   void initState() {
@@ -34,20 +38,29 @@ class _RecordingEndPageState extends State<RecordingEndPage> {
     if (widget.finalVideoPath != null) {
       _initializeVideo();
     }
+    _exportProgressSub = ExportService().progressStream.listen((progress) {
+      if (mounted) {
+        setState(() => _exportProgress = progress);
+      }
+    });
   }
 
   @override
   void dispose() {
     _videoController?.dispose();
+    _exportProgressSub?.cancel();
     super.dispose();
   }
 
   Future<void> _initializeVideo() async {
     try {
-      _videoController = VideoPlayerController.file(File(widget.finalVideoPath!));
+      _videoController = VideoPlayerController.file(
+        File(widget.finalVideoPath!),
+      );
       await _videoController!.initialize().timeout(
         const Duration(seconds: 5),
-        onTimeout: () => throw TimeoutException('Video initialization exceeded 5s'),
+        onTimeout: () =>
+            throw TimeoutException('Video initialization exceeded 5s'),
       );
 
       if (mounted) {
@@ -94,7 +107,11 @@ class _RecordingEndPageState extends State<RecordingEndPage> {
     }
 
     if (mounted) {
-      setState(() => _isExporting = true);
+      setState(() {
+        _isExporting = true;
+        _isSavingOverlay = true;
+        _exportProgress = 0.0;
+      });
     }
 
     try {
@@ -138,6 +155,7 @@ class _RecordingEndPageState extends State<RecordingEndPage> {
         setState(() {
           _isExporting = false;
           _exportDone = true;
+          _isSavingOverlay = false;
         });
       }
     }
@@ -184,41 +202,53 @@ class _RecordingEndPageState extends State<RecordingEndPage> {
       backgroundColor: isDark
           ? context.colorScheme.surface
           : const Color(0xFFF9FAF9),
-      body: Stack(
-        children: [
-          // Background soft glow
-          Positioned(
-            top: 100,
-            left: 0,
-            right: 0,
-            child: ImageFiltered(
-              imageFilter: ImageFilter.blur(sigmaX: 60, sigmaY: 60),
-              child: Container(
-                height: 200,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: colors.forest.withValues(alpha: isDark ? 0.08 : 0.04),
+      body: _isSavingOverlay
+          ? WidgetProgress(
+              title: 'Guardando en galería...',
+              subtitle: '${(_exportProgress * 100).round()}% completado',
+              description:
+                  'El video se está guardando en tu galería. '
+                  'No cierres la aplicación durante este proceso.',
+              progress: _exportProgress,
+              duration: const Duration(seconds: 30),
+            )
+          : Stack(
+              children: [
+                // Background soft glow
+                Positioned(
+                  top: 100,
+                  left: 0,
+                  right: 0,
+                  child: ImageFiltered(
+                    imageFilter: ImageFilter.blur(sigmaX: 60, sigmaY: 60),
+                    child: Container(
+                      height: 200,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: colors.forest.withValues(
+                          alpha: isDark ? 0.08 : 0.04,
+                        ),
+                      ),
+                      child: const SizedBox.expand(),
+                    ),
+                  ),
                 ),
-                child: const SizedBox.expand(),
-              ),
+                SafeArea(
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.only(bottom: 120),
+                    physics: const BouncingScrollPhysics(),
+                    child: Column(
+                      children: [
+                        _buildHeader(context, l10n),
+                        _buildSummarySection(context, l10n),
+                        _buildPreviewSection(context, l10n),
+                      ],
+                    ),
+                  ),
+                ),
+                _buildBottomAction(context, l10n),
+              ],
             ),
-          ),
-          SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.only(bottom: 120),
-              physics: const BouncingScrollPhysics(),
-              child: Column(
-                children: [
-                  _buildHeader(context, l10n),
-                  _buildSummarySection(context, l10n),
-                  _buildPreviewSection(context, l10n),
-                ],
-              ),
-            ),
-          ),
-          _buildBottomAction(context, l10n),
-        ],
-      ),
     );
   }
 
@@ -410,9 +440,7 @@ class _RecordingEndPageState extends State<RecordingEndPage> {
                     else
                       Container(
                         color: Colors.grey[300],
-                        child: const Center(
-                          child: CircularProgressIndicator(),
-                        ),
+                        child: const Center(child: CircularProgressIndicator()),
                       ),
                     Container(color: Colors.black.withValues(alpha: 0.1)),
                     if (_isVideoInitialized)
@@ -453,7 +481,8 @@ class _RecordingEndPageState extends State<RecordingEndPage> {
 
   Widget _buildBottomAction(BuildContext context, AppLocalizations l10n) {
     final hasVideo = widget.finalVideoPath != null;
-    final canExport = _isVideoInitialized && hasVideo && !_isExporting && !_exportDone;
+    final canExport =
+        _isVideoInitialized && hasVideo && !_isExporting && !_exportDone;
 
     return Positioned(
       bottom: 0,
@@ -476,9 +505,7 @@ class _RecordingEndPageState extends State<RecordingEndPage> {
         child: VRMButton(
           label: _exportDone
               ? l10n.exported
-              : (hasVideo
-                  ? l10n.exportVideo
-                  : l10n.videoNotAvailable),
+              : (hasVideo ? l10n.exportVideo : l10n.videoNotAvailable),
           onPressed: canExport
               ? () {
                   _showSnackBar(l10n.preparingExport);
@@ -486,8 +513,12 @@ class _RecordingEndPageState extends State<RecordingEndPage> {
                 }
               : null,
           isLoading: _isExporting,
-          icon: _exportDone ? Icons.check_circle_outline : Icons.ios_share_rounded,
-          color: _exportDone ? const Color(0xFF2DD4BF) : context.appColors.forest,
+          icon: _exportDone
+              ? Icons.check_circle_outline
+              : Icons.ios_share_rounded,
+          color: _exportDone
+              ? const Color(0xFF2DD4BF)
+              : context.appColors.forest,
         ),
       ),
     );

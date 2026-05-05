@@ -18,12 +18,12 @@ class HardwareValidationResult {
   });
 
   Map<String, dynamic> toJson() => {
-        'focusLockSupported': focusLockSupported,
-        'flashSupported': flashSupported,
-        'exposureLockSupported': exposureLockSupported,
-        'model': model,
-        'error': error,
-      };
+    'focusLockSupported': focusLockSupported,
+    'flashSupported': flashSupported,
+    'exposureLockSupported': exposureLockSupported,
+    'model': model,
+    'error': error,
+  };
 }
 
 Future<HardwareValidationResult> validateHardware() async {
