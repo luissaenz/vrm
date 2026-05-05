@@ -3,9 +3,38 @@ import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:vrm_app/l10n/app_localizations.dart';
 import 'package:vrm_app/core/theme.dart';
+import 'services/device_info_service.dart';
+import '../settings/services/settings_service.dart';
 
-class AccountProfilePage extends StatelessWidget {
+class AccountProfilePage extends StatefulWidget {
   const AccountProfilePage({super.key});
+
+  @override
+  State<AccountProfilePage> createState() => _AccountProfilePageState();
+}
+
+class _AccountProfilePageState extends State<AccountProfilePage> {
+  DeviceInfo? _deviceInfo;
+  DateTime? _memberSince;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadData();
+  }
+
+  Future<void> _loadData() async {
+    final info = await DeviceInfoService.instance.getDeviceInfo();
+    final memberSince = await SettingsService.instance.getMemberSince();
+    if (mounted) {
+      setState(() {
+        _deviceInfo = info;
+        _memberSince = memberSince;
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -122,14 +151,16 @@ class AccountProfilePage extends StatelessWidget {
             context,
             icon: Icons.phone_android,
             label: AppLocalizations.of(context)!.deviceId,
-            value: 'Android Device', // Can be made dynamic
+            value: _isLoading ? '...' : (_deviceInfo?.model ?? 'Unknown'),
           ),
           const SizedBox(height: 12),
           _buildInfoRow(
             context,
             icon: Icons.calendar_today,
             label: AppLocalizations.of(context)!.memberSince,
-            value: 'April 2026', // Can be made dynamic
+            value: _isLoading ? '...' : (_memberSince != null
+                ? '${_memberSince!.day}/${_memberSince!.month}/${_memberSince!.year}'
+                : 'N/A'),
           ),
         ],
       ),
@@ -198,36 +229,28 @@ class AccountProfilePage extends StatelessWidget {
             context,
             icon: Icons.notifications_outlined,
             title: l10n.notifications,
-            onTap: () {
-              // Navigate to notification settings
-            },
+            onTap: () {},
           ),
           _buildDivider(context),
           _buildSettingsTile(
             context,
             icon: Icons.language_outlined,
             title: l10n.language,
-            onTap: () {
-              // Navigate to language settings
-            },
+            onTap: () {},
           ),
           _buildDivider(context),
           _buildSettingsTile(
             context,
             icon: Icons.storage_outlined,
             title: l10n.storage,
-            onTap: () {
-              // Navigate to storage settings
-            },
+            onTap: () {},
           ),
           _buildDivider(context),
           _buildSettingsTile(
             context,
             icon: Icons.security_outlined,
             title: l10n.privacyAndSecurity,
-            onTap: () {
-              // Navigate to privacy settings
-            },
+            onTap: () {},
           ),
         ],
       ),
@@ -314,7 +337,6 @@ class AccountProfilePage extends StatelessWidget {
           TextButton(
             onPressed: () async {
               try {
-                // Clear all data logic
                 final appDir = await getApplicationDocumentsDirectory();
                 final vrmDataDir = Directory('${appDir.path}/vrm_data');
 
@@ -363,7 +385,6 @@ class AccountProfilePage extends StatelessWidget {
           ),
           TextButton(
             onPressed: () {
-              // Sign out logic
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text(l10n.signedOut)),

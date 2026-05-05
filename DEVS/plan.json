@@ -1,0 +1,106 @@
+{
+  "project": "VRM Atomic Camera",
+  "phase": "mvp",
+  "source": "plan.md",
+  "generated_at": "2026-05-05",
+  "steps": [
+    {
+      "id": "01",
+      "name": "01-Core-de-Grabacion",
+      "status": "pending",
+      "objective": "Implementar el flujo completo grabación-revisión-unión-exportación: que el usuario logre ir desde Idea → Guion → Grabar → Unir → Exportar",
+      "scope": [
+        "lib/features/recording/",
+        "lib/core/services/native_stitcher_service.dart",
+        "lib/core/services/export_service.dart",
+        "lib/core/plugins/default/stitcher_plugin.dart",
+        "lib/features/assistant/services/script_fallback_service.dart"
+      ],
+      "depends_on": [],
+      "acceptance_criteria": [
+        "Usuario puede grabar clip MP4 real y verlo en galería local",
+        "Usuario puede revisar clip grabado con VideoPlayerController.file()",
+        "Auto-stitch de múltiples clips funciona sin MissingPluginException",
+        "Exportación a galería nativa con photo_manager funcional",
+        "Persistencia local offline: proyecto se guarda y reanuda en JSON",
+        "Fallback IA offline genera guion cuando backend no responde",
+        "Pipeline completo: Idea → Script → Grabar → Revisar → Stitch → Exportar"
+      ],
+      "estimated_complexity": "high",
+      "suggested_model": null
+    },
+    {
+      "id": "02",
+      "name": "02-Interfaz-Reactiva",
+      "status": "pending",
+      "objective": "Conectar toggles de hardware (modo calle/fantasma, bloqueo auto-focus) a la librería de cámara y las preferencias del teleprompter. Implementar datos reales de cuenta de usuario.",
+      "scope": [
+        "lib/features/recording/services/camera_service.dart",
+        "lib/features/account/",
+        "lib/features/settings/",
+        "lib/features/influencer_profile/"
+      ],
+      "depends_on": ["01"],
+      "acceptance_criteria": [
+        "Modo Calle y Modo Fantasma ejecutan parámetros reales en la cámara",
+        "Bloqueo de auto-focus conectado a setFocusMode()",
+        "Toggles del teleprompter (velocidad, tamaño) persisten y afectan al widget",
+        "Mi Cuenta muestra datos reales del dispositivo (no texto hardcodeado)",
+        "Perfil Influencer persiste datos a disco (no se pierde al cerrar)",
+        "Clear All Data borra directorio vrm_data completo",
+        "Settings page toggles tienen efecto real (tema, etc)"
+      ],
+      "estimated_complexity": "medium",
+      "suggested_model": null
+    },
+    {
+      "id": "03",
+      "name": "03-Estabilidad-y-Performance",
+      "status": "pending",
+      "objective": "Blindar la app con manejo de errores críticos (memoria, cámara), optimizar performance en dispositivo físico y pulir estados de carga/transición UX.",
+      "scope": [
+        "lib/core/exceptions/",
+        "lib/features/recording/",
+        "test/",
+        "pubspec.yaml"
+      ],
+      "depends_on": ["02"],
+      "acceptance_criteria": [
+        "Try/catch en todos los puntos de fallo de cámara con recovery path visual",
+        "App no crashea cuando la cámara rechaza frames o no hay memoria",
+        "Sin memory leaks detectables en 10 min de grabación continua",
+        "Pantallas de Guardando..., spinners, notificaciones de guión faltante implementadas",
+        "Dependencias no utilizadas (sqflite, battery_plus) removidas",
+        "AppSize optimizado (Proguard / asset trimming)"
+      ],
+      "estimated_complexity": "high",
+      "suggested_model": null
+    },
+    {
+      "id": "04",
+      "name": "04-Puerta-de-Tiendas",
+      "status": "pending",
+      "objective": "Preparar la app para publicación en App Store y Google Play: documentos legales, branding visual y paquetes de release firmados.",
+      "scope": [
+        "PRIVACY_POLICY.md",
+        "ios/Runner/Info.plist",
+        "android/app/src/main/AndroidManifest.xml",
+        "assets/images/branding/",
+        "pubspec.yaml"
+      ],
+      "depends_on": ["03"],
+      "acceptance_criteria": [
+        "PRIVACY_POLICY.md alojada y accesible públicamente",
+        "Info.plist actualizado con descripción de uso de cámara y micrófono",
+        "AndroidManifest.xml con permisos correctamente documentados",
+        "Icono app 1024x1024 y splash screen nativa generados",
+        "5 capturas de uso en resolución máxima",
+        "Release .aab generado y firmado con keystore",
+        "Cuestionario de Seguridad de Datos de Play Console completado",
+        "App subida a Apple Transporter/TestFlight"
+      ],
+      "estimated_complexity": "medium",
+      "suggested_model": null
+    }
+  ]
+}

@@ -18,6 +18,8 @@ import 'services/voice_command_service.dart';
 import 'services/permission_service.dart';
 import 'services/camera_service.dart';
 import 'services/clip_storage_service.dart';
+import '../settings/services/settings_service.dart';
+import 'models/teleprompter_prefs.dart';
 import 'services/recording_manager.dart';
 import 'package:permission_handler/permission_handler.dart'
     show openAppSettings;
@@ -148,6 +150,28 @@ class _RecordingPageState extends State<RecordingPage>
     });
 
     _initVoiceCommands();
+    _loadTeleprompterPrefs();
+  }
+
+  Future<void> _loadTeleprompterPrefs() async {
+    final prefs = await SettingsService.instance.getTeleprompterPrefs();
+    if (mounted) {
+      setState(() {
+        _teleprompterFontSize = prefs.fontSize;
+        _readingSpeed = prefs.readingSpeed;
+        _screenBrightness = prefs.brightness;
+      });
+    }
+  }
+
+  Future<void> _saveTeleprompterPrefs() async {
+    await SettingsService.instance.setTeleprompterPrefs(
+      TeleprompterPrefs(
+        fontSize: _teleprompterFontSize,
+        readingSpeed: _readingSpeed,
+        brightness: _screenBrightness,
+      ),
+    );
   }
 
   /// Día 14: Verifica que los archivos de la sesión existan.
@@ -1696,8 +1720,10 @@ class _RecordingPageState extends State<RecordingPage>
                   min: 20,
                   max: 30,
                   unit: 'PT',
-                  onChanged: (val) =>
-                      setState(() => _teleprompterFontSize = val),
+                  onChanged: (val) {
+                      setState(() => _teleprompterFontSize = val);
+                      _saveTeleprompterPrefs();
+                    },
                 ),
                 const SizedBox(height: 36),
 
@@ -1709,7 +1735,10 @@ class _RecordingPageState extends State<RecordingPage>
                   min: 50,
                   max: 300,
                   unit: 'PPM',
-                  onChanged: (val) => setState(() => _readingSpeed = val),
+                  onChanged: (val) {
+                      setState(() => _readingSpeed = val);
+                      _saveTeleprompterPrefs();
+                    },
                 ),
                 const SizedBox(height: 36),
 
@@ -1721,8 +1750,10 @@ class _RecordingPageState extends State<RecordingPage>
                   min: 0,
                   max: 100,
                   unit: '%',
-                  onChanged: (val) =>
-                      setState(() => _screenBrightness = val / 100),
+                  onChanged: (val) {
+                      setState(() => _screenBrightness = val / 100);
+                      _saveTeleprompterPrefs();
+                    },
                 ),
                 const SizedBox(height: 48),
 

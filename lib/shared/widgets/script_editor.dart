@@ -131,6 +131,7 @@ class VRMScriptEditor extends StatelessWidget {
   static Widget actionIcon({
     required VoidCallback onPressed,
     required IconData icon,
+    Color? color,
   }) {
     return Builder(
       builder: (context) {
@@ -139,7 +140,11 @@ class VRMScriptEditor extends StatelessWidget {
           borderRadius: BorderRadius.circular(10),
           child: Container(
             padding: const EdgeInsets.all(8),
-            child: Icon(icon, size: 20, color: context.appColors.textTertiary),
+            child: Icon(
+              icon,
+              size: 20,
+              color: color ?? context.appColors.textTertiary,
+            ),
           ),
         );
       },

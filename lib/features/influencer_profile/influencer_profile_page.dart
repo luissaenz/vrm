@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import '../../core/theme.dart';
 import '../../shared/widgets/header.dart';
 import '../../shared/widgets/script_editor.dart';
+import '../settings/services/settings_service.dart';
 
 class InfluencerProfilePage extends StatefulWidget {
   const InfluencerProfilePage({super.key});
@@ -30,6 +31,23 @@ class _InfluencerProfilePageState extends State<InfluencerProfilePage> {
   final TextEditingController _slangController = TextEditingController();
   String _polishLevel = 'Orgánico';
   final TextEditingController _refController = TextEditingController();
+
+  Future<void> _saveProfile() async {
+    final profile = {
+      'phrase': _phraseController.text,
+      'authorityLevel': _authorityLevel,
+      'discourse': _selectedDiscourse,
+      'prob': _probController.text,
+      'change': _changeController.text,
+      'wrong': _wrongController.text,
+      'belief': _beliefController.text,
+      'tones': _selectedTones,
+      'slang': _slangController.text,
+      'polishLevel': _polishLevel,
+      'ref': _refController.text,
+    };
+    await SettingsService.instance.setInfluencerProfile(profile);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -551,12 +569,12 @@ class _InfluencerProfilePageState extends State<InfluencerProfilePage> {
         mainAxisSize: MainAxisSize.min,
         children: [
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async {
               if (_currentStep < 3) {
                 setState(() => _currentStep++);
               } else {
-                // Finalize logic
-                Navigator.pop(context);
+                await _saveProfile();
+                if (context.mounted) Navigator.pop(context);
               }
             },
             style: ElevatedButton.styleFrom(

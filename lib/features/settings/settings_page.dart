@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:vrm_app/l10n/app_localizations.dart';
 import 'package:vrm_app/core/theme.dart';
+import 'services/settings_service.dart';
+import '../recording/models/teleprompter_prefs.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -10,8 +12,144 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
+  final SettingsService _settings = SettingsService.instance;
+  ThemeMode _themeMode = ThemeMode.system;
+  bool _cloudSyncEnabled = false;
+  TeleprompterPrefs _teleprompterPrefs = TeleprompterPrefs.defaults();
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSettings();
+  }
+
+  Future<void> _loadSettings() async {
+    final themeMode = await _settings.getThemeMode();
+    final cloudSync = await _settings.getCloudSyncEnabled();
+    final teleprompter = await _settings.getTeleprompterPrefs();
+    if (mounted) {
+      setState(() {
+        _themeMode = themeMode;
+        _cloudSyncEnabled = cloudSync;
+        _teleprompterPrefs = teleprompter;
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _onThemeChanged(ThemeMode mode) async {
+    await _settings.setThemeMode(mode);
+    if (mounted) {
+      setState(() => _themeMode = mode);
+    }
+  }
+
+  Future<void> _onCloudSyncChanged(bool value) async {
+    await _settings.setCloudSyncEnabled(value);
+    if (mounted) {
+      setState(() => _cloudSyncEnabled = value);
+    }
+  }
+
+  Future<void> _showFontSizeDialog() async {
+    double tempFontSize = _teleprompterPrefs.fontSize;
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(AppLocalizations.of(context)!.fontSize),
+        content: StatefulBuilder(
+          builder: (context, setSliderState) {
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('${tempFontSize.toInt()}px'),
+                Slider(
+                  min: 16,
+                  max: 48,
+                  value: tempFontSize,
+                  onChanged: (v) => setSliderState(() => tempFontSize = v),
+                ),
+              ],
+            );
+          },
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(AppLocalizations.of(context)!.cancel),
+          ),
+          FilledButton(
+            onPressed: () async {
+              final newPrefs = TeleprompterPrefs(
+                fontSize: tempFontSize,
+                readingSpeed: _teleprompterPrefs.readingSpeed,
+                brightness: _teleprompterPrefs.brightness,
+              );
+              await _settings.setTeleprompterPrefs(newPrefs);
+              if (mounted) setState(() => _teleprompterPrefs = newPrefs);
+              if (mounted) Navigator.pop(context);
+            },
+            child: const Text('Guardar'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _showSpeedDialog() async {
+    double tempSpeed = _teleprompterPrefs.readingSpeed;
+    await showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(AppLocalizations.of(context)!.scrollSpeed),
+        content: StatefulBuilder(
+          builder: (context, setSliderState) {
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('${tempSpeed.toInt()} PPM'),
+                Slider(
+                  min: 60,
+                  max: 300,
+                  value: tempSpeed,
+                  onChanged: (v) => setSliderState(() => tempSpeed = v),
+                ),
+              ],
+            );
+          },
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text(AppLocalizations.of(context)!.cancel),
+          ),
+          FilledButton(
+            onPressed: () async {
+              final newPrefs = TeleprompterPrefs(
+                fontSize: _teleprompterPrefs.fontSize,
+                readingSpeed: tempSpeed,
+                brightness: _teleprompterPrefs.brightness,
+              );
+              await _settings.setTeleprompterPrefs(newPrefs);
+              if (mounted) setState(() => _teleprompterPrefs = newPrefs);
+              if (mounted) Navigator.pop(context);
+            },
+            child: const Text('Guardar'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     final colors = context.appColors;
     final l10n = AppLocalizations.of(context)!;
 
@@ -45,9 +183,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   icon: Icons.timer_outlined,
                   title: l10n.defaultRecordingDuration,
                   subtitle: l10n.configureDefaultTime,
-                  onTap: () {
-                    // Navigate to recording duration settings
-                  },
+                  onTap: () => _showComingSoon(context),
                 ),
                 _buildDivider(),
                 _buildSettingsTile(
@@ -55,9 +191,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   icon: Icons.camera_alt_outlined,
                   title: l10n.cameraSettings,
                   subtitle: l10n.resolutionAndQuality,
-                  onTap: () {
-                    // Navigate to camera settings
-                  },
+                  onTap: () => _showComingSoon(context),
                 ),
               ],
             ),
@@ -69,20 +203,16 @@ class _SettingsPageState extends State<SettingsPage> {
                   context,
                   icon: Icons.text_fields,
                   title: l10n.fontSize,
-                  subtitle: l10n.defaultTextSize,
-                  onTap: () {
-                    // Navigate to font size settings
-                  },
+                  subtitle: '${_teleprompterPrefs.fontSize.toInt()}px',
+                  onTap: _showFontSizeDialog,
                 ),
                 _buildDivider(),
                 _buildSettingsTile(
                   context,
                   icon: Icons.speed_outlined,
                   title: l10n.scrollSpeed,
-                  subtitle: l10n.defaultScrollSpeed,
-                  onTap: () {
-                    // Navigate to scroll speed settings
-                  },
+                  subtitle: '${_teleprompterPrefs.readingSpeed.toInt()} PPM',
+                  onTap: _showSpeedDialog,
                 ),
               ],
             ),
@@ -94,14 +224,12 @@ class _SettingsPageState extends State<SettingsPage> {
                   context,
                   icon: Icons.cloud_outlined,
                   title: l10n.cloudSync,
-                  subtitle: l10n.cloudSyncDisabled,
+                  subtitle: _cloudSyncEnabled ? 'Enabled' : l10n.cloudSyncDisabled,
                   trailing: Switch(
-                    value: false,
-                    onChanged: (value) {
-                      // Toggle cloud sync
-                    },
+                    value: _cloudSyncEnabled,
+                    onChanged: _onCloudSyncChanged,
                   ),
-                  onTap: () {},
+                  onTap: () => _showComingSoon(context),
                 ),
                 _buildDivider(),
                 _buildSettingsTile(
@@ -109,9 +237,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   icon: Icons.storage_outlined,
                   title: l10n.manageStorage,
                   subtitle: l10n.clearCacheAndData,
-                  onTap: () {
-                    // Navigate to storage management
-                  },
+                  onTap: () => _showComingSoon(context),
                 ),
               ],
             ),
@@ -124,34 +250,28 @@ class _SettingsPageState extends State<SettingsPage> {
                   icon: Icons.info_outlined,
                   title: l10n.appVersion,
                   subtitle: '1.0.0',
-                  onTap: () {},
+                  onTap: () => _showComingSoon(context),
                 ),
                 _buildDivider(),
                 _buildSettingsTile(
                   context,
                   icon: Icons.description_outlined,
                   title: l10n.termsOfService,
-                  onTap: () {
-                    // Open terms of service
-                  },
+                  onTap: () => _showComingSoon(context),
                 ),
                 _buildDivider(),
                 _buildSettingsTile(
                   context,
                   icon: Icons.privacy_tip_outlined,
                   title: l10n.privacyPolicy,
-                  onTap: () {
-                    // Open privacy policy
-                  },
+                  onTap: () => _showComingSoon(context),
                 ),
                 _buildDivider(),
                 _buildSettingsTile(
                   context,
                   icon: Icons.help_outline,
                   title: l10n.helpAndSupport,
-                  onTap: () {
-                    // Open help
-                  },
+                  onTap: () => _showComingSoon(context),
                 ),
               ],
             ),
@@ -224,10 +344,8 @@ class _SettingsPageState extends State<SettingsPage> {
             icon: const Icon(Icons.settings_brightness, size: 18),
           ),
         ],
-        selected: {ThemeMode.dark}, // Should be dynamic
-        onSelectionChanged: (newSelection) {
-          // Update theme mode
-        },
+        selected: {_themeMode},
+        onSelectionChanged: (newSelection) => _onThemeChanged(newSelection.first),
         showSelectedIcon: false,
       ),
     );
@@ -279,6 +397,15 @@ class _SettingsPageState extends State<SettingsPage> {
       indent: 16,
       endIndent: 16,
       color: context.appColors.forest.withValues(alpha: 0.1),
+    );
+  }
+
+  void _showComingSoon(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Próximamente'),
+        duration: Duration(seconds: 1),
+      ),
     );
   }
 }

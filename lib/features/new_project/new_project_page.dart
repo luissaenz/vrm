@@ -11,6 +11,8 @@ import './models/script_analysis.dart';
 import '../../shared/widgets/widget_progress.dart';
 import '../../shared/widgets/widget_estimation.dart';
 import '../assistant/script_studio_page.dart';
+import 'package:speech_to_text/speech_to_text.dart';
+import '../recording/services/permission_service.dart';
 
 class NewProjectPage extends StatefulWidget {
   const NewProjectPage({super.key});
@@ -22,7 +24,11 @@ class NewProjectPage extends StatefulWidget {
 class _NewProjectPageState extends State<NewProjectPage> {
   final TextEditingController _scriptController = TextEditingController();
   final OnboardingRepository _repository = OnboardingRepository();
+  final PermissionService _permissionService = PermissionService();
+  final SpeechToText _speech = SpeechToText();
+  
   bool _isLoading = false;
+  bool _isListening = false;
 
   // Parámetros de ritmo dinámicos
   double _segmentRateWpm = 160.0;
@@ -242,6 +248,61 @@ class _NewProjectPageState extends State<NewProjectPage> {
     }
   }
 
+  Future<void> _toggleListening() async {
+    if (!_isListening) {
+      final micGranted = await _permissionService.requestPermissions();
+      if (!micGranted) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Permiso de micrófono requerido')),
+          );
+        }
+        return;
+      }
+
+      bool available = await _speech.initialize(
+        onStatus: (status) {
+          debugPrint('[Dictation] Status: $status');
+          if (status == 'notListening' || status == 'done') {
+            if (mounted) setState(() => _isListening = false);
+          }
+        },
+        onError: (error) {
+          debugPrint('[Dictation] Error: $error');
+          if (mounted) setState(() => _isListening = false);
+        },
+      );
+
+      if (available) {
+        setState(() => _isListening = true);
+        _speech.listen(
+          onResult: (result) {
+            setState(() {
+              if (result.finalResult) {
+                final currentText = _scriptController.text.trim();
+                _scriptController.text = currentText.isEmpty
+                    ? result.recognizedWords
+                    : '$currentText ${result.recognizedWords}';
+                
+                // Cursor to end
+                _scriptController.selection = TextSelection.fromPosition(
+                  TextPosition(offset: _scriptController.text.length),
+                );
+              }
+            });
+          },
+          localeId: 'es-ES',
+          listenOptions: SpeechListenOptions(
+            listenMode: ListenMode.dictation,
+          ),
+        );
+      }
+    } else {
+      await _speech.stop();
+      setState(() => _isListening = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -369,8 +430,9 @@ class _NewProjectPageState extends State<NewProjectPage> {
           foregroundColor: context.appColors.textSecondary,
         ),
         VRMScriptEditor.actionIcon(
-          onPressed: () {},
-          icon: Icons.mic_none_outlined,
+          onPressed: _toggleListening,
+          icon: _isListening ? Icons.mic : Icons.mic_none_outlined,
+          color: _isListening ? Colors.red : null,
         ),
       ],
       trailing: VRMScriptEditor.actionButton(

@@ -1,6 +1,5 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:vrm_app/l10n/app_localizations.dart';
 import 'package:vrm_app/shared/widgets/section_header.dart';
 import 'package:vrm_app/shared/widgets/action_card.dart';

@@ -22,6 +22,7 @@ class _StitchProgressPageState extends State<StitchProgressPage> {
   double _progress = 0.0;
   String _status = 'Starting stitch...';
   String? _errorMessage;
+  bool _isRetrying = false;
 
   @override
   void initState() {
@@ -34,10 +35,22 @@ class _StitchProgressPageState extends State<StitchProgressPage> {
     if (status.contains('Re-encoding')) return l10n.stitchingStatusReencoding;
     if (status.contains('Processing')) return l10n.stitchingStatusProcessing;
     if (status.contains('Completed')) return l10n.stitchingStatusCompleted;
+    if (status.contains('Native stitch')) return 'Stitching...';
+    if (status.contains('FFmpeg')) return 'Processing with ffmpeg...';
+    if (status.contains('direct concat')) return 'Merging video files...';
     return status;
   }
 
+  bool get _isSingleClip => widget.approvedClips.length <= 1;
+
   Future<void> _startStitching() async {
+    setState(() {
+      _errorMessage = null;
+      _isRetrying = false;
+      _progress = 0.0;
+      _status = 'Starting stitch...';
+    });
+
     try {
       final finalVideoPath = await _stitcherService.stitchVideos(
         projectId: widget.projectId,
@@ -66,7 +79,6 @@ class _StitchProgressPageState extends State<StitchProgressPage> {
         });
       }
 
-      // Navigate to next page after a short delay
       Future.delayed(const Duration(milliseconds: 1200), () {
         if (mounted) {
           Navigator.of(context).pushReplacementNamed(
@@ -100,13 +112,40 @@ class _StitchProgressPageState extends State<StitchProgressPage> {
                 const SizedBox(height: 24),
                 Text(
                   _errorMessage!,
-                  style: const TextStyle(color: Colors.white, fontSize: 16),
+                  style: const TextStyle(color: Colors.white70, fontSize: 14),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 32),
+                if (_isSingleClip)
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.of(context).pushNamed(
+                        '/recording-end',
+                        arguments: {
+                          'finalVideoPath': widget.approvedClips.isNotEmpty
+                              ? widget.approvedClips.first
+                              : null,
+                        },
+                      );
+                    },
+                    icon: const Icon(Icons.skip_next),
+                    label: const Text('CONTINUE WITH SINGLE CLIP'),
+                  ),
+                const SizedBox(height: 12),
                 ElevatedButton(
+                  onPressed: _isRetrying ? null : _startStitching,
+                  child: _isRetrying
+                      ? const SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Text('RETRY'),
+                ),
+                const SizedBox(height: 12),
+                TextButton(
                   onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('VOLVER'),
+                  child: const Text('GO BACK'),
                 ),
               ],
             ),
@@ -125,4 +164,4 @@ class _StitchProgressPageState extends State<StitchProgressPage> {
       ),
     );
   }
-}
+}
