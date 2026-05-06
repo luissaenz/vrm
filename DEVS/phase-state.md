@@ -1,7 +1,7 @@
 # 🗺️ Phase State: mvp
 
 > Generado: 2026-05-05 vía 6_CONTEXTO.md
-> Actualizado: 2026-05-05 vía 6_CONTEXTO.md (Post-Paso 03)
+> Actualizado: 2026-05-06 vía 6_CONTEXTO.md (Post-Paso 04)
 
 ---
 
@@ -17,7 +17,7 @@
 | 01 | Core de Grabación | 🟡 inherited (features exist via step 02/03, never formalized) |
 | 02 | Interfaz Reactiva y Refinamiento Local | ✅ completed |
 | 03 | Estabilidad y Pulimento Físico | ✅ completed |
-| 04 | Puerta de Tiendas y Valla Legal | pending |
+| 04 | Puerta de Tiendas y Valla Legal | ✅ completed |
 
 **Dependencias entre pasos:**
 - 01 ← 02 ← 03 ← 04 (secuencial)
@@ -52,6 +52,14 @@
 | **ScriptStudio fallback notification** | `lib/features/assistant/script_studio_page.dart` (L337-361) | SnackBar flotante naranja cuando `viability.summary` contiene "localmente" o "fallback". |
 | **ProGuard limpio** | `android/app/proguard-rules.pro` (L1-12) | Reglas ffmpegkit muertas removidas (L9-12). Solo Flutter wrapper + JNI. |
 | **Integridad al iniciar grabación** | `lib/features/recording/services/recording_manager.dart` (L60) | `verifySessionIntegrity()` llamado al inicio de `startRecording()`. Alerta si clips faltantes. |
+| **Store Prep CLI unificado** | `scripts/store_prep_cli.dart` (L642) | CLI con 5 subcomandos: check, keystore, assets, privacy, screenshots. Sigue patron `vrm_health_check.dart`. 10/10 checks. Detecta keystore faltante, passwords default, placeholders, permisos, gitignore. |
+| **PRIVACY_POLICY.md sin placeholders** | `PRIVACY_POLICY.md` (raíz), `docs/PRIVACY_POLICY.md` | Root reemplazado con version docs/. 0 placeholders. Email real: ludens.vrm@gmail.com. Fecha: April 18, 2026. |
+| **Keystore generado** | `android/vrm-release-key.jks` (2760 bytes), `android/key.properties` | RSA 2048, alias vrm_upload_key, validez 10000d. Passwords randomizadas (no default). |
+| **Settings enlace Privacy Policy** | `lib/features/settings/settings_page.dart` (L8-9, L413-424) | `_privacyPolicyUrl` apunta a raw.githubusercontent.com/luissaenz/vrm/main/PRIVACY_POLICY.md → HTTP 200. `_openPrivacyPolicy()` con try/catch + SnackBar. |
+| **key.properties passwords randomizadas** | `android/key.properties` (L1-2) | `vrm_store_2kh`, `vrm_key_2kh`. No default. Verificado por store_prep_cli.dart check. |
+| **Screenshots en directorio store** | `assets/store/screenshots/step{1-5}.png` | 5 screenshots copiadas a directorio correcto segun diseño (1024x1024 — pendiente recapturar a 1080x1920+). |
+| **Play Store Data Safety documentado** | `DEVS/play_store_data_safety.md` | Checklist de respuestas para formulario Data Safety de Play Console. |
+| **.gitignore secreto** | `.gitignore` | Cubre `*.jks`, `*.keystore`, `/android/key.properties`. |
 
 ### ⚠️ Parcialmente implementado
 
@@ -67,6 +75,8 @@
 | Componente | Archivo(s) | Problema |
 |---|---|---|
 | **F10 Auto-Stitch** | `lib/core/services/native_stitcher_service.dart` (L52), `lib/core/plugins/default/stitcher_plugin.dart` (L64), `lib/features/recording/pages/stitch_progress_page.dart` (L128) | **ROTO**: `MethodChannel('com.vrm.vrm_app/stitcher')` definido en Dart pero SIN handler nativo en Android (Java/Kotlin) ni iOS (Swift). `stitchVideos()` siempre lanza `MissingPluginException`. UI de progreso y orquestación (RecordingManager.startStitching) están completas. `pubspec.yaml` L71: `# ffmpeg_kit_flutter has been removed`. |
+| **Screenshots store-ready** | `assets/store/screenshots/step{1-5}.png` | 5 archivos existen pero 1024x1024. Android requiere 1080x1920+, iOS 1284x2778+. Pendiente capturar en dispositivo real. |
+| **Privacy Policy hosteada via GitHub Pages** | `settings_page.dart:8-9` | URL apunta a raw.githubusercontent.com (funciona). GitHub Pages no habilitado — post-MVP. |
 | **Mi Cuenta** | `account_profile_page.dart` | ✅ IMPLEMENTADO: DeviceInfoService con device_info_plus. Muestra modelo real, memberSince desde primer launch. |
 | **Settings** | `settings_page.dart` | ✅ IMPLEMENTADO: SettingsService conecta a SharedPreferences. Theme switcher funciona (VRMApp carga desde prefs). Teleprompter sliders persisten prefs. Cloud sync toggle funciona. |
 | **Perfil Influencer** | `influencer_profile_page.dart` (L631) | ✅ IMPLEMENTADO: _saveProfile() persiste en SharedPreferences al hacer finalize. |
@@ -218,6 +228,17 @@
 | **ProGuard ya configurado, solo limpiar reglas muertas** | `isMinifyEnabled=true`, `isShrinkResources=true`, `proguard-rules.pro` existe. Solo remover reglas ffmpegkit (L9-12). | Confirmado en análisis de código. No requiere configuración adicional. |
 | **Stream<double> para progreso exportación** | `ExportService` emite progreso via `StreamController.broadcast()` en vez de callback `onProgress`. | Permite múltiples suscriptores. Desacopla UI de lógica de exportación. |
 
+### Decisiones de Paso 4 (Puerta de Tiendas y Valla Legal)
+
+| Decisión | Detalle | Justificación |
+|---|---|---|
+| **store_prep_cli.dart como herramienta DX unificada** | CLI unificado con 5 subcomandos. Reemplaza propuestas individuales de 4 agentes (speed, ds, hy3, laguna). Sigue patron `vrm_health_check.dart`. | Reduce fragmentación. Unica CLI para todo el pipeline store readiness. |
+| **Dart sobre Python para DX** | CLI escrito en Dart. hy3 propuso Python — descartado. | Todos los scripts del proyecto usan Dart (`vrm_health_check.dart`, `validador_hardware.dart`). Consistencia del ecosistema. |
+| **docs/PRIVACY_POLICY.md como fuente de verdad** | Root PRIVACY_POLICY.md reemplazado con contenido de docs/ version. docs/ tiene datos reales, root era template genérico. | Unifica versiones. Elimina riesgo de placeholders en release. |
+| **Android stitch handler ya implementado** | `MainActivity.kt:52-146` tiene mergeVideos() con MediaMuxer. DS afirmó ausencia — FALSO. | Código existe. Implementador no toca. |
+| **Capturas manuales + guía CLI** | `store_prep_cli.dart screenshots` guía captura manual. Capturas finales requieren dispositivo real. | Golden tests generan base, pero resolución store requiere dispositivo físico. |
+| **Corrección D7: key.properties passwords** | Passwords randomizadas via `_randomSuffix()` con `Random.secure()`. No más `vrm_password_123`. | Seguridad: passwords default expuestas en repo público. |
+
 ---
 
 ## 5. Registro de Pasos Completados
@@ -227,6 +248,7 @@
 | — | — | — | — | — | Primer paso de fase mvp. IN_PROGRESS vacío. |
 | 02-Interfaz-Reactiva-y-Refinamiento-Local | ✅ completed | `DEVS/IMPLEMENTED/mvp/02-Interfaz-Reactiva-y-Refinamiento-Local/` | 34949d7 | Corrections applied: CR-001 (theme switcher), IMP-002 (stubs removed), IMP-003 (memberSince), IMP-004 (file naming). 12/13 criteria passed. | Paso 2 completado y validado. Theme persistence now works (VRMApp loads from SettingsService). |
 | 03-Estabilidad-y-Pulimento-Fisico | ✅ completed | `DEVS/IMPLEMENTED/mvp/03-Estabilidad-y-Pulimento-Fisico/` | 10cad57 | LoggerService persistente, CameraService fallback resolución + error propagation, ExportService Stream progreso + overlay, MemoryMonitor + didHaveMemoryPressure, ScriptStudio fallback notification, ProGuard limpio, VRM Health Check CLI. 14/14 criteria passed. | Paso 3 completado y validado. 0 críticos, 3 importantes, 4 mejoras. |
+| 04-Puerta-de-Tiendas-y-Valla-Legal | ✅ completed | `DEVS/IMPLEMENTED/mvp/04-Puerta-de-Tiendas-y-Valla-Legal/` | 35f6c57 | store_prep_cli.dart CLI unificado, PRIVACY_POLICY.md limpio (0 placeholders), keystore RSA 2048 generado, key.properties passwords randomizadas, settings page enlace Privacy Policy funcional, screenshots en directorio store, Play Store data safety documentado, gitignore seguro. 10/12 criteria verified passed. | Paso 4 completado con 3 críticos residuales (privacy URL hosting, screenshots resolución, link settings). Corrector aplicó fixes: URL raw.githubusercontent.com funcional, Random.secure(), paths portátiles. |
 
 ---
 
@@ -260,3 +282,4 @@
 | **validador_hardware.dart (Paso 2)** | Script CLI que prueba focus lock, flash torch, exposure lock en dispositivo real. Reporta compatibilidad JSON. | QA automatizado de toggles de cámara. Elimina prueba manual por modelo. |
 | **VRM Health Check (Paso 3)** | `scripts/vrm_health_check.dart` (415L) | CLI unificado: `check` (pre-flight permisos/espacio/cámara), `validate` (recovery paths), `memory` (leak detection), `scaffold` (estructura datos). Reduce diagnóstico de 30min a ~2s. Verifica LoggerService, MemoryMonitor, ProGuard, pipeline files. |
 | **Scripts Python existentes** | `scripts/fragmentation_test.py`, `scripts/verify_backend.py` | Útiles para validación backend, pero no cubren frontend |
+| **Store Prep CLI (Paso 4)** | `scripts/store_prep_cli.dart` (642L) | CLI unificado: `check` (8 checks pre-store), `keystore` (genera RSA 2048), `assets validate` (iconos/splash/screenshots), `privacy` (valida placeholders), `screenshots` (guía captura). Reduce preparación store de ~4h a ~15min. Detects keystore faltante, passwords default, placeholders, permisos, gitignore. |

@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:vrm_app/l10n/app_localizations.dart';
 import 'package:vrm_app/core/theme.dart';
 import 'services/settings_service.dart';
 import '../recording/models/teleprompter_prefs.dart';
+
+const _privacyPolicyUrl =
+    'https://raw.githubusercontent.com/luissaenz/vrm/main/PRIVACY_POLICY.md';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
@@ -262,7 +266,7 @@ class _SettingsPageState extends State<SettingsPage> {
                   context,
                   icon: Icons.privacy_tip_outlined,
                   title: l10n.privacyPolicy,
-                  onTap: () => _showComingSoon(context),
+                  onTap: () => _openPrivacyPolicy(context),
                 ),
                 _buildDivider(),
                 _buildSettingsTile(
@@ -404,5 +408,18 @@ class _SettingsPageState extends State<SettingsPage> {
         duration: Duration(seconds: 1),
       ),
     );
+  }
+
+  Future<void> _openPrivacyPolicy(BuildContext context) async {
+    final uri = Uri.parse(_privacyPolicyUrl);
+    try {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al abrir: ${e.toString()}')),
+        );
+      }
+    }
   }
 }
