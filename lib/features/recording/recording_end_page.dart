@@ -12,11 +12,13 @@ import '../../core/services/export_service.dart';
 import '../../shared/widgets/vrm_button.dart';
 import '../../shared/widgets/widget_progress.dart';
 import '../../shared/utils/vrm_notifications.dart';
+import 'models/session_data.dart';
 
 class RecordingEndPage extends StatefulWidget {
   final String? finalVideoPath;
+  final SessionData? sessionData;
 
-  const RecordingEndPage({super.key, this.finalVideoPath});
+  const RecordingEndPage({super.key, this.finalVideoPath, this.sessionData});
 
   @override
   State<RecordingEndPage> createState() => _RecordingEndPageState();
@@ -31,6 +33,20 @@ class _RecordingEndPageState extends State<RecordingEndPage> {
   bool _isSavingOverlay = false;
   double _exportProgress = 0.0;
   StreamSubscription<double>? _exportProgressSub;
+
+  String get _durationMinutes {
+    final sd = widget.sessionData;
+    if (sd == null) return '--';
+    final elapsed = sd.lastUpdatedAt.difference(sd.startedAt);
+    final minutes = elapsed.inMinutes;
+    return minutes > 0 ? minutes.toString() : '<1';
+  }
+
+  int get _totalTakes {
+    final sd = widget.sessionData;
+    if (sd == null) return 0;
+    return sd.takesPerChunk.values.fold(0, (sum, t) => sum + t.total);
+  }
 
   @override
   void initState() {
@@ -313,7 +329,7 @@ class _RecordingEndPageState extends State<RecordingEndPage> {
                   text: TextSpan(
                     children: [
                       TextSpan(
-                        text: "42",
+                        text: _durationMinutes,
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 48,
                           fontWeight: FontWeight.w800,
@@ -322,7 +338,7 @@ class _RecordingEndPageState extends State<RecordingEndPage> {
                         ),
                       ),
                       TextSpan(
-                        text: "m",
+                        text: _durationMinutes == '--' ? '' : 'm',
                         style: GoogleFonts.plusJakartaSans(
                           fontSize: 24,
                           fontWeight: FontWeight.w600,
@@ -364,7 +380,10 @@ class _RecordingEndPageState extends State<RecordingEndPage> {
               ),
               const SizedBox(height: 12),
               Text(
-                l10n.timeSavedDescription("42", "12"),
+                l10n.timeSavedDescription(
+                  _durationMinutes,
+                  _totalTakes.toString(),
+                ),
                 textAlign: TextAlign.center,
                 style: GoogleFonts.inter(
                   fontSize: 15,

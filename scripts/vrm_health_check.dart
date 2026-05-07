@@ -152,6 +152,13 @@ Future<void> _runCheck(bool fix) async {
       : 'scripts/ NO encontrado';
   print('  ${scriptsExists ? "✅" : "❌"} ${details["scripts_dir"]}');
 
+  // --fix: cleanup orphan temp files and sessions
+  if (fix) {
+    print('');
+    print('[7] Ejecutando --fix cleanup...');
+    await _runFixCleanup();
+  }
+
   // Resumen
   print('');
   print('=== RESULT ===');
@@ -163,6 +170,56 @@ Future<void> _runCheck(bool fix) async {
   if (results.values.any((v) => !v)) {
     exitCode = 1;
   }
+}
+
+Future<void> _runFixCleanup() async {
+  var cleaned = 0;
+
+  // Clean vrm_data/tmp/ orphan files
+  final tmpDir = Directory('vrm_data/tmp');
+  if (await tmpDir.exists()) {
+    await for (final entity in tmpDir.list()) {
+      await entity.delete(recursive: true);
+      cleaned++;
+    }
+    print('  ✅ Eliminados $cleaned archivos temporales de vrm_data/tmp/');
+  } else {
+    print('  ℹ️  vrm_data/tmp/ no existe — nada que limpiar');
+  }
+
+  // Reset orphan sessions (session_data.json sin proyecto padre válido)
+  final projectsDir = Directory('vrm_data/projects');
+  if (await projectsDir.exists()) {
+    var orphanSessions = 0;
+    await for (final projDir in projectsDir.list()) {
+      if (projDir is! Directory) continue;
+      final projectFile = File('${projDir.path}/project.json');
+      final sessionFile = File('${projDir.path}/session_data.json');
+      final clipsDir = Directory('${projDir.path}/clips');
+      if (await sessionFile.exists() && !await projectFile.exists()) {
+        await sessionFile.delete();
+        orphanSessions++;
+        cleaned++;
+        print(
+          '  ✅ Eliminada sesión huérfana: ${projDir.path}/session_data.json',
+        );
+      }
+      if (await clipsDir.exists()) {
+        final clipFiles = await clipsDir.list().toList();
+        if (clipFiles.isEmpty) {
+          await clipsDir.delete();
+          print('  ✅ Eliminado clips/ vacío: ${projDir.path}/clips/');
+        }
+      }
+    }
+    if (orphanSessions == 0) {
+      print('  ℹ️  No se encontraron sesiones huérfanas');
+    }
+  } else {
+    print('  ℹ️  vrm_data/projects/ no existe — nada que limpiar');
+  }
+
+  print('  ✅ --fix completado: $cleaned elementos procesados');
 }
 
 // ─── VALIDATE ────────────────────────────────────────────────────────────────

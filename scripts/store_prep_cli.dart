@@ -189,28 +189,50 @@ Future<void> _runCheck() async {
   final storeDirExists = await Directory(_storeScreenshotsDir).exists();
   final existingDirExists = await Directory(_existingScreenshotsDir).exists();
   var screenshotCount = 0;
+  var resolutionOk = true;
+  var badResolution = <String>[];
 
   if (storeDirExists) {
     final files = await Directory(
       _storeScreenshotsDir,
-    ).list().where((e) => e.path.endsWith('.png')).length;
-    screenshotCount += files;
+    ).list().where((e) => e.path.endsWith('.png')).toList();
+    screenshotCount += files.length;
+    for (final f in files) {
+      if (!_validateScreenshotResolution(f.path)) {
+        resolutionOk = false;
+        badResolution.add(f.path.split('\\').last.split('/').last);
+      }
+    }
   }
   if (existingDirExists) {
     final files = await Directory(
       _existingScreenshotsDir,
-    ).list().where((e) => e.path.endsWith('.png')).length;
-    screenshotCount += files;
+    ).list().where((e) => e.path.endsWith('.png')).toList();
+    screenshotCount += files.length;
+    for (final f in files) {
+      if (!_validateScreenshotResolution(f.path)) {
+        resolutionOk = false;
+        badResolution.add(f.path.split('\\').last.split('/').last);
+      }
+    }
   }
 
-  results['screenshots'] = screenshotCount >= 5;
+  results['screenshots'] = screenshotCount >= 5 && resolutionOk;
   details['screenshots'] = screenshotCount >= 5
-      ? '$screenshotCount screenshots encontradas'
+      ? (resolutionOk
+            ? '$screenshotCount screenshots OK (≥1080x1920)'
+            : 'Resolución insuficiente: ${badResolution.join(", ")}')
       : 'Solo $screenshotCount screenshots (mínimo 5)';
-  print('  ${screenshotCount >= 5 ? "✅" : "❌"} ${details["screenshots"]}');
+  print(
+    '  ${(screenshotCount >= 5 && resolutionOk) ? "✅" : "❌"} ${details["screenshots"]}',
+  );
   if (screenshotCount < 5) {
     allOk = false;
     print('    → Capturar 5 screenshots 1080x1920+ en dispositivo real');
+  }
+  if (!resolutionOk) {
+    allOk = false;
+    print('    → Recapturar en dispositivo real a resolución ≥1080x1920');
   }
 
   // 6. .gitignore
@@ -487,22 +509,47 @@ Future<void> _runAssets(List<String> args) async {
   final storeDir = Directory(_storeScreenshotsDir);
   final existingDir = Directory(_existingScreenshotsDir);
   var screenshots = <FileSystemEntity>[];
+  var resolutionOk = true;
+  var badResolution = <String>[];
 
   if (await storeDir.exists()) {
-    screenshots.addAll(
-      await storeDir.list().where((e) => e.path.endsWith('.png')).toList(),
-    );
+    final files = await storeDir
+        .list()
+        .where((e) => e.path.endsWith('.png'))
+        .toList();
+    screenshots.addAll(files);
+    for (final f in files) {
+      if (!_validateScreenshotResolution(f.path)) {
+        resolutionOk = false;
+        badResolution.add(f.path.split('\\').last.split('/').last);
+      }
+    }
   }
   if (await existingDir.exists()) {
-    screenshots.addAll(
-      await existingDir.list().where((e) => e.path.endsWith('.png')).toList(),
-    );
+    final files = await existingDir
+        .list()
+        .where((e) => e.path.endsWith('.png'))
+        .toList();
+    screenshots.addAll(files);
+    for (final f in files) {
+      if (!_validateScreenshotResolution(f.path)) {
+        resolutionOk = false;
+        badResolution.add(f.path.split('\\').last.split('/').last);
+      }
+    }
   }
 
-  if (screenshots.length >= 5) {
-    print('  ✅ ${screenshots.length} screenshots encontradas');
+  if (screenshots.length >= 5 && resolutionOk) {
+    print('  ✅ ${screenshots.length} screenshots OK (≥1080x1920)');
   } else {
-    print('  ❌ Solo ${screenshots.length}/5 screenshots (mínimo 5)');
+    if (screenshots.length < 5) {
+      print('  ❌ Solo ${screenshots.length}/5 screenshots (mínimo 5)');
+    }
+    if (!resolutionOk) {
+      print(
+        '  ❌ Resolución insuficiente: ${badResolution.join(", ")} (mínimo 1080x1920)',
+      );
+    }
     allOk = false;
   }
 
@@ -575,6 +622,30 @@ Future<void> _runPrivacy() async {
 
 // ─── SCREENSHOTS ──────────────────────────────────────────────────────────────
 
+({int width, int height})? _getPngDimensionsSync(String path) {
+  try {
+    final file = File(path);
+    final bytes = file.readAsBytesSync();
+    if (bytes.length < 24) return null;
+    if (bytes[0] != 0x89 ||
+        bytes[1] != 0x50 ||
+        bytes[2] != 0x4E ||
+        bytes[3] != 0x47)
+      return null;
+    final w = bytes[16] << 24 | bytes[17] << 16 | bytes[18] << 8 | bytes[19];
+    final h = bytes[20] << 24 | bytes[21] << 16 | bytes[22] << 8 | bytes[23];
+    return (width: w, height: h);
+  } catch (_) {
+    return null;
+  }
+}
+
+bool _validateScreenshotResolution(String path) {
+  final dims = _getPngDimensionsSync(path);
+  if (dims == null) return false;
+  return dims.width >= 1080 && dims.height >= 1920;
+}
+
 void _runScreenshotsGuide() {
   print('=== Store Prep: Screenshot Guide ===\n');
   print('Para Google Play Store y App Store:');
@@ -595,6 +666,10 @@ void _runScreenshotsGuide() {
   print('     adb shell screencap -p /sdcard/screenshot.png');
   print('     adb pull /sdcard/screenshot.png assets/store/screenshots/');
   print('  4. Alternativa: Captura manual + transferir por USB');
+  print('');
+  print('VALIDACIÓN:');
+  print('  dart run scripts/store_prep_cli.dart check');
+  print('  → Verifica resolución ≥1080x1920 (Android) o ≥1284x2778 (iOS)');
   print('');
   print('ARCHIVOS:');
   print('  Guardar en assets/store/screenshots/ como step1.png..step5.png');

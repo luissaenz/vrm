@@ -335,8 +335,8 @@ class _ScriptStudioPageState extends State<ScriptStudioPage> {
 
       final summary = analysis.viability?.summary.toLowerCase() ?? '';
       if (summary.contains('localmente') || summary.contains('fallback')) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
+        ScaffoldMessenger.of(context).showMaterialBanner(
+          MaterialBanner(
             content: const Row(
               children: [
                 Icon(Icons.info_outline, color: Colors.white, size: 20),
@@ -351,12 +351,14 @@ class _ScriptStudioPageState extends State<ScriptStudioPage> {
               ],
             ),
             backgroundColor: Colors.orange.shade700,
-            behavior: SnackBarBehavior.floating,
-            duration: const Duration(seconds: 5),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            margin: const EdgeInsets.all(16),
+            leading: const Icon(Icons.info_outline, color: Colors.white),
+            actions: [
+              TextButton(
+                onPressed: () =>
+                    ScaffoldMessenger.of(context).hideCurrentMaterialBanner(),
+                child: const Text('OK', style: TextStyle(color: Colors.white)),
+              ),
+            ],
           ),
         );
       }

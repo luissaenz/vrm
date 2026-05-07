@@ -27,6 +27,7 @@ import 'package:permission_handler/permission_handler.dart'
 import 'package:video_player/video_player.dart';
 import 'dart:io';
 import '../../../core/exceptions/vrm_exceptions.dart';
+import '../../../core/services/logger_service.dart';
 
 class RecordingPage extends StatefulWidget {
   final ScriptAnalysis analysis;
@@ -202,7 +203,7 @@ class _RecordingPageState extends State<RecordingPage>
         );
       }
     } catch (e) {
-      debugPrint('[RecordingPage] Integrity check failed: $e');
+      LoggerService.log('RecordingPage', 'Integrity check failed', error: e);
     }
   }
 
@@ -284,8 +285,9 @@ class _RecordingPageState extends State<RecordingPage>
   @override
   void didHaveMemoryPressure() {
     super.didHaveMemoryPressure();
-    debugPrint(
-      '[RecordingPage] Memory pressure detected — cleaning up temp files',
+    LoggerService.log(
+      'RecordingPage',
+      'Memory pressure detected — cleaning up temp files',
     );
     _clipStorageService.cleanupTemp();
     if (mounted) {
@@ -300,8 +302,9 @@ class _RecordingPageState extends State<RecordingPage>
       return;
     }
 
-    debugPrint(
-      '[RecordingPage] App paused during recording — saving partial clip',
+    LoggerService.log(
+      'RecordingPage',
+      'App paused during recording — saving partial clip',
     );
 
     try {
@@ -325,7 +328,11 @@ class _RecordingPageState extends State<RecordingPage>
         }
       }
     } catch (e) {
-      debugPrint('[RecordingPage] Failed to save partial clip: $e');
+      LoggerService.log(
+        'RecordingPage',
+        'Failed to save partial clip',
+        error: e,
+      );
       // Force cleanup
       _isProcessingRecording = false;
       if (_cameraService.isRecording) {
@@ -362,7 +369,7 @@ class _RecordingPageState extends State<RecordingPage>
 
   void _handleVoiceCommand(String command) {
     final cmd = command.toLowerCase().trim();
-    debugPrint('[Lumis Voice] Ejecutando comando: $cmd');
+    LoggerService.log('RecordingPage', 'Voice command: $cmd');
 
     if (cmd.contains('grabar') || cmd.contains('record')) {
       if (_recordingState == RecordingState.idle) {
@@ -536,8 +543,16 @@ class _RecordingPageState extends State<RecordingPage>
           icon: Icons.videocam_off,
         );
       }
+    } on SessionIntegrityException catch (e) {
+      if (mounted) {
+        setState(() {
+          _recordingState = RecordingState.idle;
+          _isProcessingRecording = false;
+          _sessionData = e.originalError as SessionData?;
+        });
+      }
     } catch (e) {
-      debugPrint('[RecordingPage] Failed to start recording: $e');
+      LoggerService.log('RecordingPage', 'Failed to start recording', error: e);
       if (mounted) {
         setState(() {
           _recordingState = RecordingState.idle;
@@ -621,8 +636,16 @@ class _RecordingPageState extends State<RecordingPage>
           ),
         );
       }
+    } on SessionIntegrityException catch (e) {
+      if (mounted) {
+        setState(() {
+          _recordingState = RecordingState.idle;
+          _isProcessingRecording = false;
+          _sessionData = e.originalError as SessionData?;
+        });
+      }
     } catch (e) {
-      debugPrint('[RecordingPage] Failed to stop recording: $e');
+      LoggerService.log('RecordingPage', 'Failed to stop recording', error: e);
       if (mounted) {
         setState(() {
           _recordingState = RecordingState.idle;
@@ -658,12 +681,27 @@ class _RecordingPageState extends State<RecordingPage>
         await _cameraService.setExposureMode(ExposureMode.auto);
       }
     } on CameraHardwareException catch (e) {
-      debugPrint('[RecordingPage] Hardware setting not supported: $e');
+      LoggerService.log(
+        'RecordingPage',
+        'Hardware setting not supported',
+        error: e,
+      );
       if (mounted) {
         VRMNotifications.showWarning(context, e.message);
       }
+    } on SessionIntegrityException {
+      if (mounted) {
+        setState(() {
+          _recordingState = RecordingState.idle;
+          _isProcessingRecording = false;
+        });
+      }
     } catch (e) {
-      debugPrint('[RecordingPage] Error aplicando ajustes de hardware: $e');
+      LoggerService.log(
+        'RecordingPage',
+        'Error aplicando ajustes de hardware',
+        error: e,
+      );
     }
   }
 
@@ -686,7 +724,7 @@ class _RecordingPageState extends State<RecordingPage>
 
     final file = File(path);
     if (!await file.exists()) {
-      debugPrint('[RecordingPage] Ghost file not found: $path');
+      LoggerService.log('RecordingPage', 'Ghost file not found: $path');
       return;
     }
 
@@ -704,7 +742,11 @@ class _RecordingPageState extends State<RecordingPage>
         await controller.dispose();
       }
     } catch (e) {
-      debugPrint('[RecordingPage] Error initializing ghost controller: $e');
+      LoggerService.log(
+        'RecordingPage',
+        'Error initializing ghost controller',
+        error: e,
+      );
     }
   }
 
@@ -781,7 +823,7 @@ class _RecordingPageState extends State<RecordingPage>
     }
 
     if (_recordingState == RecordingState.finished) {
-      return const RecordingEndPage();
+      return RecordingEndPage(sessionData: _sessionData);
     }
 
     // Show error screen if permissions were denied
@@ -1144,7 +1186,11 @@ class _RecordingPageState extends State<RecordingPage>
                   setState(() => _isCameraInitialized = true);
                 }
               } catch (e) {
-                debugPrint('[RecordingPage] Failed to switch camera: $e');
+                LoggerService.log(
+                  'RecordingPage',
+                  'Failed to switch camera',
+                  error: e,
+                );
               }
             },
             isEnabled: !_isRecordingActive,

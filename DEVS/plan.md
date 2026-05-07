@@ -100,3 +100,185 @@ dependencies:
 
 La app está increíblemente bien cimentada en la base UI (75% codeada, 25% por terminar), pero es imperativo **trasladar el esfuerzo directamente al componente `_cameraController` que efectúa escritura de disco**, validando si esto no explota en un entorno `Release` de un móvil físico.
 Este plan se acatará como la "Guía Principal VRM" hasta que `final.mp4` pueda reproducirse sanamente en la galería de su inventor.
+
+---
+
+## 📥 Pasos incorporados desde sugerencias de validación
+> Incorporados el 2026-05-06 — Fase activa: mvp
+
+## Paso 05: Catch-especifico-SessionIntegrityException
+
+**Origen:** Sugerencia 🟡 de validacion — Paso 03
+**Prioridad:** Media
+**Fase:** mvp
+
+### Objetivo
+Reemplazar catch generico en `recording_page.dart` por `on SessionIntegrityException catch (e)` con feedback visual especifico (SnackBar naranja).
+
+### Tareas
+- [ ] Agregar `on SessionIntegrityException catch (e)` antes del catch generico en L535-548
+- [ ] Mostrar SnackBar naranja con mensaje "Integridad de sesion comprometida — clips faltantes removidos"
+
+### Criterios de Aceptacion
+- [ ] SessionIntegrityException capturado con handler dedicado
+- [ ] Usuario recibe SnackBar naranja (no gris generico)
+- [ ] Catch generico posterior sigue funcionando para otras excepciones
+
+### Notas
+Depende de `recording_manager.dart:verifyIntegrityStatic()` que ya existe.
+
+## Paso 06: MaterialBanner-notificacion-fallback-IA
+
+**Origen:** Sugerencia 🔵 de validacion — Paso 03
+**Prioridad:** Baja
+**Fase:** mvp
+
+### Objetivo
+Reemplazar SnackBar flotante por `MaterialBanner` sticky en `script_studio_page.dart:337` para notificacion de fallback IA.
+
+### Tareas
+- [ ] Reemplazar `ScaffoldMessenger.showSnackBar()` con `ScaffoldMessenger.showMaterialBanner()`
+- [ ] Mantener mismo mensaje naranja y comportamiento de cierre
+
+### Criterios de Aceptacion
+- [ ] Banner sticky visible hasta que usuario lo descarte
+- [ ] Mismo contenido informativo que SnackBar actual
+- [ ] No rompe flujo de ScriptStudio
+
+### Notas
+MaterialBanner es mas visible que SnackBar para estados de fallback.
+
+## Paso 07: Metricas-reales-sesion-RecordingEndPage
+
+**Origen:** Sugerencia 🔵 de validacion — Paso 03
+**Prioridad:** Baja
+**Fase:** mvp
+
+### Objetivo
+Reemplazar metricas hardcodeadas "42m" en `recording_end_page.dart:309` con datos reales de `SessionData`.
+
+### Tareas
+- [ ] Conectar `RecordingEndPage` a `SessionData` del proyecto actual
+- [ ] Mostrar duracion real de clips grabados
+- [ ] Mostrar cantidad real de takes
+
+### Criterios de Aceptacion
+- [ ] Metricas reflejan datos reales de la sesion
+- [ ] Si no hay datos, mostrar "--" en vez de "42m"
+- [ ] Compatible con estado previo a primera grabacion
+
+### Notas
+Requiere pasar SessionData como parametro o leer desde ProjectRepository.
+
+## Paso 08: Migrar-debugPrint-residual-LoggerService
+
+**Origen:** Sugerencia 🔵 de validacion — Paso 03
+**Prioridad:** Baja
+**Fase:** mvp
+
+### Objetivo
+Reemplazar 2 llamadas `debugPrint` residuales en `RecordingPage._applyHardwareSettings()` (L657, L662) con `LoggerService.log()`.
+
+### Tareas
+- [ ] Reemplazar `debugPrint('Setting flash mode to $mode')` con `LoggerService.log('CameraService', 'Setting flash mode to $mode')`
+- [ ] Reemplazar segundo `debugPrint` similar
+
+### Criterios de Aceptacion
+- [ ] 0 llamadas a `debugPrint` en `recording_page.dart`
+- [ ] Mensajes aparecen en `vrm_data/logs/app.log`
+- [ ] Funcionamiento identico en debug y release
+
+### Notas
+Fix trivial (<5 lineas). LoggerService singleton ya disponible.
+
+## Paso 09: vrm-health-check-fix-real
+
+**Origen:** Sugerencia 🔵 de validacion — Paso 03
+**Prioridad:** Baja
+**Fase:** mvp
+
+### Objetivo
+Implementar cleanup real en `vrm_health_check.dart --fix` en vez de solo imprimir advertencia.
+
+### Tareas
+- [ ] Implementar logica de reparacion en `vrm_health_check.dart:120-122`
+- [ ] Eliminar archivos temporales huerfanos en `vrm_data/tmp/`
+- [ ] Resetear sesiones huerfanas sin proyecto padre
+
+### Criterios de Aceptacion
+- [ ] `--fix` ejecuta acciones concretas, no solo print
+- [ ] Acciones documentadas en output
+- [ ] No elimina datos de proyectos validos
+
+### Notas
+Sigue patron de `store_prep_cli.dart` donde los subcomandos ejecutan acciones reales.
+
+## Paso 10: Adaptive-icons-Android-13
+
+**Origen:** Sugerencia 🔵 de validacion — Paso 04
+**Prioridad:** Baja
+**Fase:** mvp
+
+### Objetivo
+Configurar `adaptive_icon_background` y `adaptive_icon_foreground` en `pubspec.yaml` para compatibilidad Android 13+.
+
+### Tareas
+- [ ] Agregar `adaptive_icon_background: "#FFFFFF"` en config flutter_launcher_icons
+- [ ] Agregar `adaptive_icon_foreground: "assets/images/branding/icon_source.png"`
+- [ ] Regenerar iconos con `flutter pub run flutter_launcher_icons`
+
+### Criterios de Aceptacion
+- [ ] `mipmap-anydpi-v26/` contiene adaptive icon config
+- [ ] Icono se ve correcto en Android 13+ con forma adaptable
+- [ ] No rompe iconos existentes en Android <13
+
+### Notas
+Post-MVP. No bloquea release actual. D6 del analisis-FINAL.
+
+## Paso 11: Reparar-widget-test-roto
+
+**Origen:** Sugerencia 🔵 de validacion — Paso 04
+**Prioridad:** Baja
+**Fase:** mvp
+
+### Objetivo
+Eliminar o reparar `test/widget_test.dart` que falla por referencia a widget counter inexistente.
+
+### Tareas
+- [ ] Opcion A: Eliminar `widget_test.dart` si no cubre funcionalidad real
+- [ ] Opcion B: Reemplazar con test util que verifique renderizado de pantalla principal
+
+### Criterios de Aceptacion
+- [ ] `flutter test` pasa 18/18 o 17/17 (dependiendo si se elimina o reemplaza)
+- [ ] No se pierde cobertura de tests existentes
+
+### Notas
+Test pre-existente del template Flutter inicial. Nunca fue relevante para VRM.
+
+## Paso 12: Screenshots-store-ready
+
+**Origen:** Sugerencia 🔵 (escalado) de validacion — Paso 04
+**Prioridad:** Alta
+**Fase:** mvp
+
+### Objetivo
+Capturar 5 screenshots en dispositivo real a resolucion store: 1080x1920+ (Android), 1284x2778+ (iOS).
+
+### Tareas
+- [ ] Conectar dispositivo fisico con app compilada en debug
+- [ ] Capturar Dashboard (pantalla principal)
+- [ ] Capturar Creacion de proyecto / Script
+- [ ] Capturar Grabacion con overlay de control
+- [ ] Capturar Revision de clips
+- [ ] Capturar Exportacion / Performance
+- [ ] Transferir a `assets/store/screenshots/` como step1.png..step5.png
+- [ ] Ejecutar `dart run scripts/store_prep_cli.dart check` para verificar
+
+### Criterios de Aceptacion
+- [ ] 5 archivos PNG en `assets/store/screenshots/` 
+- [ ] Cada archivo >= 1080x1920px (Android) o 1284x2778+ (iOS)
+- [ ] `store_prep_cli.dart check` reporta screenshots OK
+- [ ] Capturas en dispositivo real (no emulador)
+
+### Notas
+Tarea manual. Usar `adb shell screencap -p` o captura nativa. Guia en `dart run scripts/store_prep_cli.dart screenshots`. Es el unico blocker 🔴 remanente para release a stores.

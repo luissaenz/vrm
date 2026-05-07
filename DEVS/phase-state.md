@@ -1,7 +1,7 @@
 # 🗺️ Phase State: mvp
 
 > Generado: 2026-05-05 vía 6_CONTEXTO.md
-> Actualizado: 2026-05-06 vía 6_CONTEXTO.md (Post-Paso 04)
+> Actualizado: 2026-05-06 vía 6_CONTEXTO.md (Post-Paso 05)
 
 ---
 
@@ -18,9 +18,10 @@
 | 02 | Interfaz Reactiva y Refinamiento Local | ✅ completed |
 | 03 | Estabilidad y Pulimento Físico | ✅ completed |
 | 04 | Puerta de Tiendas y Valla Legal | ✅ completed |
+| 05 | Correcciones y Validación | ✅ completed |
 
 **Dependencias entre pasos:**
-- 01 ← 02 ← 03 ← 04 (secuencial)
+- 01 ← 02 ← 03 ← 04 ← 05 (secuencial)
 
 ---
 
@@ -46,13 +47,14 @@
 | **CameraService propagación errores hardware** | `lib/features/recording/services/camera_service.dart` (L143-184) | `setFlashMode/setFocusMode/setExposureMode` lanzan `CameraHardwareException` en vez de try-catch silencioso. UI captura y muestra SnackBar. |
 | **ExportService progreso Stream** | `lib/core/services/export_service.dart` (L19-26) | `StreamController<double>.broadcast()` con `_emitProgress()`. Progreso 0.0→1.0. Consumido por `RecordingEndPage`. |
 | **RecordingEndPage overlay exportación** | `lib/features/recording/recording_end_page.dart` (L202-210) | `_isSavingOverlay` + `WidgetProgress` con título "Guardando en galería..." y `CircularProgressIndicator`. |
-| **RecordingPage didHaveMemoryPressure** | `lib/features/recording/recording_page.dart` (L283-290) | Override `didHaveMemoryPressure()` → `ClipStorageService.cleanupTemp()` + `VRMNotifications.showWarning('Memoria baja — limpiando caché')`. |
+| **RecordingPage didHaveMemoryPressure** | `lib/features/recording/recording_page.dart` (L283-290) | Override `didHaveMemoryPressure()` → `ClipStorageService.cleanupTemp()` + `VRMNotifications.showWarning('Memoria baja — limpiando caché')`. 0 debugPrint en archivo — todos migrados a LoggerService.log(). |
 | **MemoryMonitor singleton** | `lib/features/recording/services/memory_monitor.dart` (L105) | Timer periódico (30s). Genera `LeakReport` con warnings de leak. Patrón singleton. Integrado con LoggerService. |
 | **SessionIntegrityException recovery** | `lib/features/recording/services/recording_manager.dart` (L330-366) | `verifyIntegrityStatic()` remueve referencias a clips faltantes sin perder proyecto. Datos corregidos pasados en `originalError`. |
-| **ScriptStudio fallback notification** | `lib/features/assistant/script_studio_page.dart` (L337-361) | SnackBar flotante naranja cuando `viability.summary` contiene "localmente" o "fallback". |
+| **ScriptStudio fallback notification** | `lib/features/assistant/script_studio_page.dart` (L337-363) | MaterialBanner sticky naranja con dismiss manual cuando `viability.summary` contiene "localmente" o "fallback". |
 | **ProGuard limpio** | `android/app/proguard-rules.pro` (L1-12) | Reglas ffmpegkit muertas removidas (L9-12). Solo Flutter wrapper + JNI. |
 | **Integridad al iniciar grabación** | `lib/features/recording/services/recording_manager.dart` (L60) | `verifySessionIntegrity()` llamado al inicio de `startRecording()`. Alerta si clips faltantes. |
-| **Store Prep CLI unificado** | `scripts/store_prep_cli.dart` (L642) | CLI con 5 subcomandos: check, keystore, assets, privacy, screenshots. Sigue patron `vrm_health_check.dart`. 10/10 checks. Detecta keystore faltante, passwords default, placeholders, permisos, gitignore. |
+| **SessionIntegrityException handlers (3 métodos)** | `lib/features/recording/recording_page.dart` (L541, L634, L683) | `on SessionIntegrityException catch` capturado en `_startActualRecording()`, `_stopRecording()`, `_applyHardwareSettings()` — todos antes de catch genérico. Reset idle + sin duplicar SnackBar. |
+| **Store Prep CLI unificado** | `scripts/store_prep_cli.dart` (L642) | CLI con 5 subcomandos: check, keystore, assets, privacy, screenshots. Sigue patron `vrm_health_check.dart`. 10/10 checks. Detecta keystore faltante, passwords default, placeholders, permisos, gitignore. Valida resolución screenshots via PNG IHDR header. |
 | **PRIVACY_POLICY.md sin placeholders** | `PRIVACY_POLICY.md` (raíz), `docs/PRIVACY_POLICY.md` | Root reemplazado con version docs/. 0 placeholders. Email real: ludens.vrm@gmail.com. Fecha: April 18, 2026. |
 | **Keystore generado** | `android/vrm-release-key.jks` (2760 bytes), `android/key.properties` | RSA 2048, alias vrm_upload_key, validez 10000d. Passwords randomizadas (no default). |
 | **Settings enlace Privacy Policy** | `lib/features/settings/settings_page.dart` (L8-9, L413-424) | `_privacyPolicyUrl` apunta a raw.githubusercontent.com/luissaenz/vrm/main/PRIVACY_POLICY.md → HTTP 200. `_openPrivacyPolicy()` con try/catch + SnackBar. |
@@ -67,15 +69,15 @@
 |---|---|---|
 | **F3 Idea Lab** | `script_studio_page.dart`, `script_fallback_service.dart` | Script generation usa 6 templates hardcodeados en español con `{{idea}}` placeholder. No hay IA real conectada. ✅ Notificación fallback implementada (SnackBar informativo cuando se usa generación local). |
 | **F4-F5 Generación IA** | `new_project_page.dart` (L68-226), `backend_script_plugin.dart` | `NewProjectPage` tiene API call comentado (L68-101), usa mock inline de 200 líneas con 8 segmentos hardcodeados. `BackendScriptPlugin` apunta a `localhost:8000` sin servidor. |
-| **F11 Exportación** | `lib/core/services/export_service.dart` (L125), `recording_end_page.dart` | ✅ ExportService con `Stream<double>` progreso. ✅ Overlay "Guardando en galería..." con `WidgetProgress`. NO probado en dispositivo real. Permisos (`Permission.photos`) pueden tener edge cases en iOS 14+ / Android 13+. `RecordingEndPage` muestra métricas hardcodeadas ("42m"). |
-| **Tests** | `test/repository_test.dart` (L156), `pipeline_test.dart` (L78), `error_handling_test.dart` (L76) | 3 tests reales: ProjectRepository (save/load/list/delete/search/count con FakePathProvider), Pipeline factory/execution/validation, PipelineException hierarchy. `widget_test.dart` (L30) está roto (referencia counter que no existe). `social_media_test.dart` usa mocks. |
+| **F11 Exportación** | `lib/core/services/export_service.dart` (L125), `recording_end_page.dart` | ✅ ExportService con `Stream<double>` progreso. ✅ Overlay "Guardando en galería..." con `WidgetProgress`. ✅ Metrics reales vía SessionData (duración desde startedAt/lastUpdatedAt, takes desde takesPerChunk). NO probado en dispositivo real. Permisos (`Permission.photos`) pueden tener edge cases en iOS 14+ / Android 13+. |
+| **Tests** | `test/repository_test.dart` (L156), `pipeline_test.dart` (L78), `error_handling_test.dart` (L76) | 3 tests reales: ProjectRepository (save/load/list/delete/search/count con FakePathProvider), Pipeline factory/execution/validation, PipelineException hierarchy. `widget_test.dart` reparado (renderiza VRMApp sin crash). `social_media_test.dart` usa mocks. 18/18 tests pasan. |
 
 ### 🟡 No existe aún / stubbed
 
 | Componente | Archivo(s) | Problema |
 |---|---|---|
 | **F10 Auto-Stitch** | `lib/core/services/native_stitcher_service.dart` (L52), `lib/core/plugins/default/stitcher_plugin.dart` (L64), `lib/features/recording/pages/stitch_progress_page.dart` (L128) | **ROTO**: `MethodChannel('com.vrm.vrm_app/stitcher')` definido en Dart pero SIN handler nativo en Android (Java/Kotlin) ni iOS (Swift). `stitchVideos()` siempre lanza `MissingPluginException`. UI de progreso y orquestación (RecordingManager.startStitching) están completas. `pubspec.yaml` L71: `# ffmpeg_kit_flutter has been removed`. |
-| **Screenshots store-ready** | `assets/store/screenshots/step{1-5}.png` | 5 archivos existen pero 1024x1024. Android requiere 1080x1920+, iOS 1284x2778+. Pendiente capturar en dispositivo real. |
+| **Screenshots store-ready** | `assets/store/screenshots/step{1-5}.png` | 5 archivos existen pero 1024x1024. Android requiere 1080x1920+, iOS 1284x2778+. Pendiente capturar en dispositivo real. Tooling: `store_prep_cli.dart check/assets validate` ahora detecta resolución insuficiente via PNG IHDR header parsing. |
 | **Privacy Policy hosteada via GitHub Pages** | `settings_page.dart:8-9` | URL apunta a raw.githubusercontent.com (funciona). GitHub Pages no habilitado — post-MVP. |
 | **Mi Cuenta** | `account_profile_page.dart` | ✅ IMPLEMENTADO: DeviceInfoService con device_info_plus. Muestra modelo real, memberSince desde primer launch. |
 | **Settings** | `settings_page.dart` | ✅ IMPLEMENTADO: SettingsService conecta a SharedPreferences. Theme switcher funciona (VRMApp carga desde prefs). Teleprompter sliders persisten prefs. Cloud sync toggle funciona. |
@@ -197,6 +199,15 @@
 | **Feature-based directories** | `lib/features/{feature}/{pages,services,models,widgets}/` | Escalabilidad y separación de concerns. Cada feature autocontenida. |
 | **Onboarding → Dashboard → Recording** como flujo principal | `main.dart` L45: onboarding condicional. Named routes para navegación profunda. | Flujo lineal simple para MVP. |
 
+### Decisiones de Paso 5 (Correcciones y Validación)
+
+| Decisión | Detalle | Justificación |
+|---|---|---|
+| **LoggerService.log() sobre debugPrint** | 7 debugPrint residuales en recording_page.dart migrados a LoggerService.log(). Patrón: `LoggerService.log('RecordingPage', 'msg', error: e)`. | debugPrint es no-op en Release. LoggerService garantiza diagnóstico en producción. Patrón ya establecido en L288-290. |
+| **PNG IHDR header parsing en store_prep_cli** | `_getPngDimensionsSync()` parsea bytes 16-23 (big-endian width/height) del header PNG. 0 dependencias externas. | store_prep_cli check/assets validate ahora detectan resolución <1080x1920. Sin esto, tool reportaba ✅ con screenshots inválidas. |
+| **3 handlers SessionIntegrityException** | Insertados antes de catch genérico en `_startActualRecording`, `_stopRecording`, `_applyHardwareSettings`. Reset idle + sin SnackBar duplicado. | ling detectó que 3 métodos (no 1) necesitaban handler. Consistencia con patrón `_verifyIntegrity()`. |
+| **MaterialBanner sobre SnackBar** | Reemplazado SnackBar flotante con MaterialBanner sticky + dismiss manual en ScriptStudio. | MaterialBanner permanece visible hasta descarte del usuario. Mejor UX para advertencias importantes. |
+
 ### Correcciones al plan (discrepancias detectadas)
 
 - **Plan dice F8 Grabación 50% → Realidad 100%**: El plan asume que `_cameraController` no escribe disco. `CameraService` + `ClipStorageService` ya escriben MP4 reales con manejo de espacio y lifecycle.
@@ -249,6 +260,7 @@
 | 02-Interfaz-Reactiva-y-Refinamiento-Local | ✅ completed | `DEVS/IMPLEMENTED/mvp/02-Interfaz-Reactiva-y-Refinamiento-Local/` | 34949d7 | Corrections applied: CR-001 (theme switcher), IMP-002 (stubs removed), IMP-003 (memberSince), IMP-004 (file naming). 12/13 criteria passed. | Paso 2 completado y validado. Theme persistence now works (VRMApp loads from SettingsService). |
 | 03-Estabilidad-y-Pulimento-Fisico | ✅ completed | `DEVS/IMPLEMENTED/mvp/03-Estabilidad-y-Pulimento-Fisico/` | 10cad57 | LoggerService persistente, CameraService fallback resolución + error propagation, ExportService Stream progreso + overlay, MemoryMonitor + didHaveMemoryPressure, ScriptStudio fallback notification, ProGuard limpio, VRM Health Check CLI. 14/14 criteria passed. | Paso 3 completado y validado. 0 críticos, 3 importantes, 4 mejoras. |
 | 04-Puerta-de-Tiendas-y-Valla-Legal | ✅ completed | `DEVS/IMPLEMENTED/mvp/04-Puerta-de-Tiendas-y-Valla-Legal/` | 35f6c57 | store_prep_cli.dart CLI unificado, PRIVACY_POLICY.md limpio (0 placeholders), keystore RSA 2048 generado, key.properties passwords randomizadas, settings page enlace Privacy Policy funcional, screenshots en directorio store, Play Store data safety documentado, gitignore seguro. 10/12 criteria verified passed. | Paso 4 completado con 3 críticos residuales (privacy URL hosting, screenshots resolución, link settings). Corrector aplicó fixes: URL raw.githubusercontent.com funcional, Random.secure(), paths portátiles. |
+| 05-Correcciones-y-Validacion | ✅ completed | `DEVS/IMPLEMENTED/mvp/05-Correcciones-y-Validacion/` | 64dc630 | SessionIntegrityException handlers en 3 métodos (`_startActualRecording`, `_stopRecording`, `_applyHardwareSettings`). MaterialBanner en ScriptStudio. Metrics reales SessionData en RecordingEndPage. 0 debugPrint en recording_page.dart (7 migrados a LoggerService.log()). store_prep_cli.dart validación resolución screenshots via PNG IHDR header. widget_test.dart reparado. | Corrector aplicó fixes: 7 debugPrint→LoggerService, store_prep_cli resolution validation. 19/20 criteria met. 1 crítico residual (#19 screenshots requiere captura manual en dispositivo real). 18/18 tests pass, flutter analyze 0 errores. |
 
 ---
 
@@ -282,4 +294,4 @@
 | **validador_hardware.dart (Paso 2)** | Script CLI que prueba focus lock, flash torch, exposure lock en dispositivo real. Reporta compatibilidad JSON. | QA automatizado de toggles de cámara. Elimina prueba manual por modelo. |
 | **VRM Health Check (Paso 3)** | `scripts/vrm_health_check.dart` (415L) | CLI unificado: `check` (pre-flight permisos/espacio/cámara), `validate` (recovery paths), `memory` (leak detection), `scaffold` (estructura datos). Reduce diagnóstico de 30min a ~2s. Verifica LoggerService, MemoryMonitor, ProGuard, pipeline files. |
 | **Scripts Python existentes** | `scripts/fragmentation_test.py`, `scripts/verify_backend.py` | Útiles para validación backend, pero no cubren frontend |
-| **Store Prep CLI (Paso 4)** | `scripts/store_prep_cli.dart` (642L) | CLI unificado: `check` (8 checks pre-store), `keystore` (genera RSA 2048), `assets validate` (iconos/splash/screenshots), `privacy` (valida placeholders), `screenshots` (guía captura). Reduce preparación store de ~4h a ~15min. Detects keystore faltante, passwords default, placeholders, permisos, gitignore. |
+| **Store Prep CLI (Pasos 4-5)** | `scripts/store_prep_cli.dart` (671L) | CLI unificado: `check` (8 checks pre-store + validación resolución screenshots via PNG IHDR header), `keystore` (genera RSA 2048), `assets validate` (iconos/splash/screenshots + validación resolución), `privacy` (valida placeholders), `screenshots` (guía captura). Reduce preparación store de ~4h a ~15min. Detecta keystore faltante, passwords default, placeholders, permisos, gitignore, resolución screenshots insuficiente. |

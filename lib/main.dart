@@ -8,6 +8,7 @@ import 'package:vrm_app/features/recording/pages/stitch_progress_page.dart';
 import 'package:vrm_app/features/recording/recording_end_page.dart';
 import 'package:vrm_app/features/recording/recording_page.dart';
 import 'package:vrm_app/features/new_project/models/script_analysis.dart';
+import 'package:vrm_app/features/recording/models/session_data.dart';
 import 'package:vrm_app/features/settings/services/settings_service.dart';
 
 import 'package:flutter/services.dart';
@@ -104,6 +105,7 @@ class _VRMAppState extends State<VRMApp> {
           return MaterialPageRoute(
             builder: (context) => RecordingEndPage(
               finalVideoPath: args?['finalVideoPath'] as String?,
+              sessionData: args?['sessionData'] as SessionData?,
             ),
           );
         }
