@@ -823,7 +823,10 @@ class _RecordingPageState extends State<RecordingPage>
     }
 
     if (_recordingState == RecordingState.finished) {
-      return RecordingEndPage(sessionData: _sessionData);
+      return RecordingEndPage(
+        sessionData: _sessionData,
+        finalVideoPath: _sessionData?.finalVideoPath,
+      );
     }
 
     // Show error screen if permissions were denied

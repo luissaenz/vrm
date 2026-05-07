@@ -151,6 +151,7 @@ class _ClipReviewPageState extends State<ClipReviewPage>
                 .approvedClips
                 .values
                 .toList(),
+            'sessionData': widget.recordingManager.sessionData,
           },
         );
       }

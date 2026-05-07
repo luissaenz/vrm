@@ -151,27 +151,36 @@ MaterialBanner es mas visible que SnackBar para estados de fallback.
 Código ya implementado en Paso 05 (Correcciones). `script_studio_page.dart:338-363`.
 Plan actualizado tras unificación de análisis (2026-05-07).
 
-## Paso 07: Metricas-reales-sesion-RecordingEndPage
+## Paso 07: Metricas-reales-sesion-RecordingEndPage ✅ COMPLETADO
 
 **Origen:** Sugerencia 🔵 de validacion — Paso 03
 **Prioridad:** Baja
 **Fase:** mvp
+**Implementado en:** Código existente (recording_end_page.dart:37-49) + Residuales 2026-05-07
 
 ### Objetivo
 Reemplazar metricas hardcodeadas "42m" en `recording_end_page.dart:309` con datos reales de `SessionData`.
 
 ### Tareas
-- [ ] Conectar `RecordingEndPage` a `SessionData` del proyecto actual
-- [ ] Mostrar duracion real de clips grabados
-- [ ] Mostrar cantidad real de takes
+- [x] Conectar `RecordingEndPage` a `SessionData` del proyecto actual
+- [x] Mostrar duracion real de clips grabados
+- [x] Mostrar cantidad real de takes
+- [x] Reemplazar progress:0.75 hardcodeado con getter _progress calculado
+- [x] Pasar sessionData en stitch_progress_page.dart navegacion a /recording-end
+- [x] Pasar finalVideoPath en recording_page.dart:826
+- [x] Crear validador_metrics_session.dart con flag --progress-only
 
 ### Criterios de Aceptacion
-- [ ] Metricas reflejan datos reales de la sesion
-- [ ] Si no hay datos, mostrar "--" en vez de "42m"
-- [ ] Compatible con estado previo a primera grabacion
+- [x] Metricas reflejan datos reales de la sesion
+- [x] Si no hay datos, mostrar "--" en vez de "42m"
+- [x] Compatible con estado previo a primera grabacion
+- [x] Progress circle no hardcodeado — usa chunksRecorded / totalChunks
+- [x] Flujo Stitch→End pasa sessionData correctamente
+- [x] DX: validador_metrics_session.dart ejecuta sin errores
 
 ### Notas
-Requiere pasar SessionData como parametro o leer desde ProjectRepository.
+Ya implementado: `_durationMinutes` y `_totalTakes` calculan métricas reales desde `startedAt`/`lastUpdatedAt` y `takesPerChunk`. Fallback "--" cuando `sessionData` es null.
+Residuales implementados 2026-05-07: progress real, sessionData en stitch, finalVideoPath en recording_page, validador DX.
 
 ## Paso 08: Migrar-debugPrint-residual-LoggerService
 

@@ -48,6 +48,13 @@ class _RecordingEndPageState extends State<RecordingEndPage> {
     return sd.takesPerChunk.values.fold(0, (sum, t) => sum + t.total);
   }
 
+  double get _progress {
+    final sd = widget.sessionData;
+    if (sd == null || sd.chunksRecorded.isEmpty) return 0.0;
+    final totalChunks = sd.currentChunkIndex > 0 ? sd.currentChunkIndex + 1 : 1;
+    return sd.chunksRecorded.length / totalChunks;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -312,7 +319,7 @@ class _RecordingEndPageState extends State<RecordingEndPage> {
               height: 208,
               child: CustomPaint(
                 painter: _ProgressPainter(
-                  progress: 0.75,
+                  progress: _progress,
                   color: context.appColors.forest,
                   backgroundColor: context.appColors.forest.withValues(
                     alpha: 0.05,

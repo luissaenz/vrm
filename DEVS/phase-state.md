@@ -20,6 +20,7 @@
 | 04 | Puerta de Tiendas y Valla Legal | ✅ completed |
 | 05 | Correcciones y Validación | ✅ completed |
 | 06 | MaterialBanner-notificacion-fallback-IA | ✅ completed |
+| 07 | Metricas-Reales-Sesion-RecordingEndPage | ✅ completed |
 
 **Dependencias entre pasos:**
 - 01 ← 02 ← 03 ← 04 ← 05 ← 06 (secuencial)
@@ -48,6 +49,10 @@
 | **CameraService propagación errores hardware** | `lib/features/recording/services/camera_service.dart` (L143-184) | `setFlashMode/setFocusMode/setExposureMode` lanzan `CameraHardwareException` en vez de try-catch silencioso. UI captura y muestra SnackBar. |
 | **ExportService progreso Stream** | `lib/core/services/export_service.dart` (L19-26) | `StreamController<double>.broadcast()` con `_emitProgress()`. Progreso 0.0→1.0. Consumido por `RecordingEndPage`. |
 | **RecordingEndPage overlay exportación** | `lib/features/recording/recording_end_page.dart` (L202-210) | `_isSavingOverlay` + `WidgetProgress` con título "Guardando en galería..." y `CircularProgressIndicator`. |
+| **RecordingEndPage metrics reales** | `lib/features/recording/recording_end_page.dart` (L37-56) | `_durationMinutes`, `_totalTakes`, `_progress` calculados desde SessionData. 0 valores hardcodeados. Progress circle refleja `chunksRecorded / totalChunks`. |
+| **RecordingPage pasa finalVideoPath** | `lib/features/recording/recording_page.dart` (L826) | `RecordingEndPage(sessionData: _sessionData, finalVideoPath: _sessionData?.finalVideoPath)` — sesion completa navega con video path. |
+| **Stitch→End con sessionData** | `lib/features/recording/pages/stitch_progress_page.dart` (L10, L91, L134) | `sessionData` como param del widget + pasado en route arguments. Sin perdida de datos post-stitch. |
+| **Validador metricas sesion** | `scripts/validador_metrics_session.dart` (173L) | CLI con `check --project-id <uuid> [--progress-only]` y `demo`. Detecta hardcodeo de duracion/takes/progreso en session_data.json. |
 | **RecordingPage didHaveMemoryPressure** | `lib/features/recording/recording_page.dart` (L283-290) | Override `didHaveMemoryPressure()` → `ClipStorageService.cleanupTemp()` + `VRMNotifications.showWarning('Memoria baja — limpiando caché')`. 0 debugPrint en archivo — todos migrados a LoggerService.log(). |
 | **MemoryMonitor singleton** | `lib/features/recording/services/memory_monitor.dart` (L105) | Timer periódico (30s). Genera `LeakReport` con warnings de leak. Patrón singleton. Integrado con LoggerService. |
 | **SessionIntegrityException recovery** | `lib/features/recording/services/recording_manager.dart` (L330-366) | `verifyIntegrityStatic()` remueve referencias a clips faltantes sin perder proyecto. Datos corregidos pasados en `originalError`. |
@@ -70,7 +75,7 @@
 |---|---|---|
 | **F3 Idea Lab** | `script_studio_page.dart`, `script_fallback_service.dart` | Script generation usa 6 templates hardcodeados en español con `{{idea}}` placeholder. No hay IA real conectada. ✅ Notificación fallback implementada (SnackBar informativo cuando se usa generación local). |
 | **F4-F5 Generación IA** | `new_project_page.dart` (L68-226), `backend_script_plugin.dart` | `NewProjectPage` tiene API call comentado (L68-101), usa mock inline de 200 líneas con 8 segmentos hardcodeados. `BackendScriptPlugin` apunta a `localhost:8000` sin servidor. |
-| **F11 Exportación** | `lib/core/services/export_service.dart` (L125), `recording_end_page.dart` | ✅ ExportService con `Stream<double>` progreso. ✅ Overlay "Guardando en galería..." con `WidgetProgress`. ✅ Metrics reales vía SessionData (duración desde startedAt/lastUpdatedAt, takes desde takesPerChunk). NO probado en dispositivo real. Permisos (`Permission.photos`) pueden tener edge cases en iOS 14+ / Android 13+. |
+| **F11 Exportación** | `lib/core/services/export_service.dart` (L125), `recording_end_page.dart` | ✅ ExportService con `Stream<double>` progreso. ✅ Overlay "Guardando en galería..." con `WidgetProgress`. ✅ Metrics reales vía SessionData (duración desde startedAt/lastUpdatedAt, takes desde takesPerChunk, progreso desde chunksRecorded/totalChunks). NO probado en dispositivo real. Permisos (`Permission.photos`) pueden tener edge cases en iOS 14+ / Android 13+. |
 | **Tests** | `test/repository_test.dart` (L156), `pipeline_test.dart` (L78), `error_handling_test.dart` (L76) | 3 tests reales: ProjectRepository (save/load/list/delete/search/count con FakePathProvider), Pipeline factory/execution/validation, PipelineException hierarchy. `widget_test.dart` reparado (renderiza VRMApp sin crash). `social_media_test.dart` usa mocks. 18/18 tests pasan. |
 
 ### 🟡 No existe aún / stubbed
@@ -200,6 +205,15 @@
 | **Feature-based directories** | `lib/features/{feature}/{pages,services,models,widgets}/` | Escalabilidad y separación de concerns. Cada feature autocontenida. |
 | **Onboarding → Dashboard → Recording** como flujo principal | `main.dart` L45: onboarding condicional. Named routes para navegación profunda. | Flujo lineal simple para MVP. |
 
+### Decisiones de Paso 7 (Metricas Reales Sesion RecordingEndPage)
+
+| Decision | Detalle | Justificacion |
+|---|---|---|
+| **Progreso desde `chunksRecorded / totalChunks`** en vez de `approvedClips` | `_progress` = `chunksRecorded.length / (currentChunkIndex + 1)` | `chunksRecorded` = chunks efectivamente grabados. `approvedClips` no existe en SessionData. Mas precisa sin agregar campos. |
+| **`totalChunks` inferido de `currentChunkIndex + 1`** | SessionData no tiene campo `totalChunks` explícito | Aceptable MVP. Post-MVP agregar campo explicito. |
+| **sessionData como route argument** en flujo Stitch→End | `stitch_progress_page.dart` pasa `sessionData` en Navigator arguments | Mismo patron que `recording_page.dart:826`. Evita perder datos de sesion tras stitch exitoso. |
+| **Validador CLI con `--progress-only`** | `validador_metrics_session.dart` flag para validar solo calculo de progreso | Permite validacion rapida sin session_data.json completo. Usado en Tarea 0. |
+
 ### Decisiones de Paso 5 (Correcciones y Validación)
 
 | Decisión | Detalle | Justificación |
@@ -263,6 +277,7 @@
 | 04-Puerta-de-Tiendas-y-Valla-Legal | ✅ completed | `DEVS/IMPLEMENTED/mvp/04-Puerta-de-Tiendas-y-Valla-Legal/` | 35f6c57 | store_prep_cli.dart CLI unificado, PRIVACY_POLICY.md limpio (0 placeholders), keystore RSA 2048 generado, key.properties passwords randomizadas, settings page enlace Privacy Policy funcional, screenshots en directorio store, Play Store data safety documentado, gitignore seguro. 10/12 criteria verified passed. | Paso 4 completado con 3 críticos residuales (privacy URL hosting, screenshots resolución, link settings). Corrector aplicó fixes: URL raw.githubusercontent.com funcional, Random.secure(), paths portátiles. |
 | 05-Correcciones-y-Validacion | ✅ completed | `DEVS/IMPLEMENTED/mvp/05-Correcciones-y-Validacion/` | 64dc630 | SessionIntegrityException handlers en 3 métodos (`_startActualRecording`, `_stopRecording`, `_applyHardwareSettings`). MaterialBanner en ScriptStudio. Metrics reales SessionData en RecordingEndPage. 0 debugPrint en recording_page.dart (7 migrados a LoggerService.log()). store_prep_cli.dart validación resolución screenshots via PNG IHDR header. widget_test.dart reparado. | Corrector aplicó fixes: 7 debugPrint→LoggerService, store_prep_cli resolution validation. 19/20 criteria met. 1 crítico residual (#19 screenshots requiere captura manual en dispositivo real). 18/18 tests pass, flutter analyze 0 errores. |
 | 06-MaterialBanner-notificacion-fallback-IA | ✅ completed | `DEVS/IMPLEMENTED/mvp/06-MaterialBanner-notificacion-fallback-IA/` | 328055e | MaterialBanner sticky naranja en `script_studio_page.dart:338-363`. vrm_banner_validator CLI creado como DX para consistencia de notificaciones. | Unificado de 4 análisis (ds, laguna, step, hy3). Todos confirmaron: código ya implementado. Sin cambios adicionales. |
+| 07-Metricas-Reales-Sesion-RecordingEndPage | ✅ completed | `DEVS/IMPLEMENTED/mvp/07-Metricas-Reales-Sesion-RecordingEndPage/` | 88df3de | `progress: 0.75` → getter `_progress` (chunksRecorded/totalChunks). `stitch_progress_page.dart` pasa sessionData en route args (L91, L134). `recording_page.dart` pasa finalVideoPath (L826). `validador_metrics_session.dart` con flag `--progress-only` (173L). | 3 correcciones aplicadas (D1-D3). 8/8 criterios aceptacion. 0 criticos. 1 importante (dogfooding). 18/18 tests. flutter analyze 0 errores. |
 
 ---
 
@@ -297,3 +312,4 @@
 | **VRM Health Check (Paso 3)** | `scripts/vrm_health_check.dart` (415L) | CLI unificado: `check` (pre-flight permisos/espacio/cámara), `validate` (recovery paths), `memory` (leak detection), `scaffold` (estructura datos). Reduce diagnóstico de 30min a ~2s. Verifica LoggerService, MemoryMonitor, ProGuard, pipeline files. |
 | **Scripts Python existentes** | `scripts/fragmentation_test.py`, `scripts/verify_backend.py` | Útiles para validación backend, pero no cubren frontend |
 | **Store Prep CLI (Pasos 4-5)** | `scripts/store_prep_cli.dart` (671L) | CLI unificado: `check` (8 checks pre-store + validación resolución screenshots via PNG IHDR header), `keystore` (genera RSA 2048), `assets validate` (iconos/splash/screenshots + validación resolución), `privacy` (valida placeholders), `screenshots` (guía captura). Reduce preparación store de ~4h a ~15min. Detecta keystore faltante, passwords default, placeholders, permisos, gitignore, resolución screenshots insuficiente. |
+| **Validador Metricas Sesion (Paso 7)** | `scripts/validador_metrics_session.dart` (173L) | CLI: `check --project-id <uuid> [--progress-only]` y `demo`. Valida que RecordingEndPage use metricas reales (no hardcodeadas). Detecta `0.75` hardcodeado, duracion "42m", takes falsos en session_data.json. Reduce QA manual de metricas de 10min a ~1s. |

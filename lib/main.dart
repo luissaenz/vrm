@@ -89,6 +89,7 @@ class _VRMAppState extends State<VRMApp> {
             builder: (context) => StitchProgressPage(
               projectId: args['projectId'] as String,
               approvedClips: args['approvedClips'] as List<String>,
+              sessionData: args['sessionData'] as SessionData?,
             ),
           );
         } else if (settings.name == '/recording') {

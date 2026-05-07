@@ -2,15 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:vrm_app/l10n/app_localizations.dart';
 import '../../../core/services/native_stitcher_service.dart';
 import '../../../shared/widgets/widget_progress.dart';
+import '../models/session_data.dart';
 
 class StitchProgressPage extends StatefulWidget {
   final String projectId;
   final List<String> approvedClips;
+  final SessionData? sessionData;
 
   const StitchProgressPage({
     super.key,
     required this.projectId,
     required this.approvedClips,
+    this.sessionData,
   });
 
   @override
@@ -83,7 +86,10 @@ class _StitchProgressPageState extends State<StitchProgressPage> {
         if (mounted) {
           Navigator.of(context).pushReplacementNamed(
             '/recording-end',
-            arguments: {'finalVideoPath': finalVideoPath},
+            arguments: {
+              'finalVideoPath': finalVideoPath,
+              'sessionData': widget.sessionData,
+            },
           );
         }
       });
@@ -125,6 +131,7 @@ class _StitchProgressPageState extends State<StitchProgressPage> {
                           'finalVideoPath': widget.approvedClips.isNotEmpty
                               ? widget.approvedClips.first
                               : null,
+                          'sessionData': widget.sessionData,
                         },
                       );
                     },
