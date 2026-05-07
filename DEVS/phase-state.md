@@ -1,7 +1,7 @@
 # 🗺️ Phase State: mvp
 
 > Generado: 2026-05-05 vía 6_CONTEXTO.md
-> Actualizado: 2026-05-06 vía 6_CONTEXTO.md (Post-Paso 05)
+> Actualizado: 2026-05-07 vía 6_CONTEXTO.md (Post-Paso 08)
 
 ---
 
@@ -21,9 +21,10 @@
 | 05 | Correcciones y Validación | ✅ completed |
 | 06 | MaterialBanner-notificacion-fallback-IA | ✅ completed |
 | 07 | Metricas-Reales-Sesion-RecordingEndPage | ✅ completed |
+| 08 | Migrar-debugPrint-residual-LoggerService | ✅ completed |
 
 **Dependencias entre pasos:**
-- 01 ← 02 ← 03 ← 04 ← 05 ← 06 (secuencial)
+- 01 ← 02 ← 03 ← 04 ← 05 ← 06 ← 07 ← 08 (secuencial)
 
 ---
 
@@ -205,6 +206,14 @@
 | **Feature-based directories** | `lib/features/{feature}/{pages,services,models,widgets}/` | Escalabilidad y separación de concerns. Cada feature autocontenida. |
 | **Onboarding → Dashboard → Recording** como flujo principal | `main.dart` L45: onboarding condicional. Named routes para navegación profunda. | Flujo lineal simple para MVP. |
 
+### Decisiones de Paso 8 (Migrar-debugPrint-residual-LoggerService)
+
+| Decision | Detalle | Justificacion |
+|---|---|---|
+| **Scope original ya completado en Paso 05** | 6/6 agentes verificaron que recording_page.dart tiene 0 debugPrint. Plan desactualizado. | Codigo gana. Paso 08 es esencialmente validacion + DX tooling. |
+| **DX tool: debugprint_scanner.dart** | `scripts/debugprint_scanner.dart` (276L) con `dart run scripts/debugprint_scanner.dart` para scan y `--fix` para migracion automatica. | Unifica 5 propuestas de agentes (glm51, laguna1, Kilo, hy3, ds). Kilo propuso version mas completa con --fix. Previene regresion de debugPrint en Release. |
+| **72 debugPrint residuales fuera de scope** | 15 archivos en lib/ tienen 70 debugPrint documentados en analisis-FINAL D3. | Roadmap post-MVP. Paso 08 scope limitado a recording_page.dart. |
+
 ### Decisiones de Paso 7 (Metricas Reales Sesion RecordingEndPage)
 
 | Decision | Detalle | Justificacion |
@@ -278,6 +287,7 @@
 | 05-Correcciones-y-Validacion | ✅ completed | `DEVS/IMPLEMENTED/mvp/05-Correcciones-y-Validacion/` | 64dc630 | SessionIntegrityException handlers en 3 métodos (`_startActualRecording`, `_stopRecording`, `_applyHardwareSettings`). MaterialBanner en ScriptStudio. Metrics reales SessionData en RecordingEndPage. 0 debugPrint en recording_page.dart (7 migrados a LoggerService.log()). store_prep_cli.dart validación resolución screenshots via PNG IHDR header. widget_test.dart reparado. | Corrector aplicó fixes: 7 debugPrint→LoggerService, store_prep_cli resolution validation. 19/20 criteria met. 1 crítico residual (#19 screenshots requiere captura manual en dispositivo real). 18/18 tests pass, flutter analyze 0 errores. |
 | 06-MaterialBanner-notificacion-fallback-IA | ✅ completed | `DEVS/IMPLEMENTED/mvp/06-MaterialBanner-notificacion-fallback-IA/` | 328055e | MaterialBanner sticky naranja en `script_studio_page.dart:338-363`. vrm_banner_validator CLI creado como DX para consistencia de notificaciones. | Unificado de 4 análisis (ds, laguna, step, hy3). Todos confirmaron: código ya implementado. Sin cambios adicionales. |
 | 07-Metricas-Reales-Sesion-RecordingEndPage | ✅ completed | `DEVS/IMPLEMENTED/mvp/07-Metricas-Reales-Sesion-RecordingEndPage/` | 88df3de | `progress: 0.75` → getter `_progress` (chunksRecorded/totalChunks). `stitch_progress_page.dart` pasa sessionData en route args (L91, L134). `recording_page.dart` pasa finalVideoPath (L826). `validador_metrics_session.dart` con flag `--progress-only` (173L). | 3 correcciones aplicadas (D1-D3). 8/8 criterios aceptacion. 0 criticos. 1 importante (dogfooding). 18/18 tests. flutter analyze 0 errores. |
+| 08-Migrar-debugPrint-residual-LoggerService | ✅ completed | `DEVS/IMPLEMENTED/mvp/08-Migrar-debugPrint-residual-LoggerService/` | 7fa5dfa | Scope original (2 debugPrint en recording_page.dart L657,L662) YA COMPLETADO en Paso 05. 6/6 agentes confirmaron 0 debugPrint. Kilo migró 2 debugPrint extra en recording_end_page.dart (L95, L172). DX tool `scripts/debugprint_scanner.dart` (276L) creado con scan + --fix. 72 debugPrint residuales en 15 archivos documentados como roadmap post-MVP. | 5/5 criterios aceptacion. 3/3 correcciones D1-D3 aplicadas. 0 criticos. 2 mejoras. flutter analyze 0 errores. 18/18 tests. |
 
 ---
 
@@ -313,3 +323,4 @@
 | **Scripts Python existentes** | `scripts/fragmentation_test.py`, `scripts/verify_backend.py` | Útiles para validación backend, pero no cubren frontend |
 | **Store Prep CLI (Pasos 4-5)** | `scripts/store_prep_cli.dart` (671L) | CLI unificado: `check` (8 checks pre-store + validación resolución screenshots via PNG IHDR header), `keystore` (genera RSA 2048), `assets validate` (iconos/splash/screenshots + validación resolución), `privacy` (valida placeholders), `screenshots` (guía captura). Reduce preparación store de ~4h a ~15min. Detecta keystore faltante, passwords default, placeholders, permisos, gitignore, resolución screenshots insuficiente. |
 | **Validador Metricas Sesion (Paso 7)** | `scripts/validador_metrics_session.dart` (173L) | CLI: `check --project-id <uuid> [--progress-only]` y `demo`. Valida que RecordingEndPage use metricas reales (no hardcodeadas). Detecta `0.75` hardcodeado, duracion "42m", takes falsos en session_data.json. Reduce QA manual de metricas de 10min a ~1s. |
+| **DebugPrint Scanner (Paso 8)** | `scripts/debugprint_scanner.dart` (276L) | CLI: `dart run scripts/debugprint_scanner.dart` escanea 88+ archivos lib/ buscando debugPrint residuales en ~1s. `--fix` migra automaticamente a LoggerService.log(). QA automatizado de logging — evita regresion de debugPrint en Release. Reduce revision manual de ~15min a ~1s. |

@@ -573,8 +573,10 @@ class _InfluencerProfilePageState extends State<InfluencerProfilePage> {
               if (_currentStep < 3) {
                 setState(() => _currentStep++);
               } else {
+                final navigator = Navigator.of(context);
                 await _saveProfile();
-                if (context.mounted) Navigator.pop(context);
+                if (!context.mounted) return;
+                navigator.pop();
               }
             },
             style: ElevatedButton.styleFrom(

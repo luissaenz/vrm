@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'dart:convert';
 import 'dart:io';
 
@@ -47,7 +49,8 @@ Future<void> _cmdCheck(List<String> args) async {
 
   final progressOnly = args.contains('--progress-only');
 
-  final homeDir = Platform.environment['HOME'] ??
+  final homeDir =
+      Platform.environment['HOME'] ??
       Platform.environment['USERPROFILE'] ??
       '/tmp';
   final sessionPath = '$homeDir/vrm_data/projects/$projectId/session_data.json';

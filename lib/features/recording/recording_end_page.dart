@@ -9,6 +9,7 @@ import 'package:video_player/video_player.dart';
 import '../../core/theme.dart';
 import 'package:vrm_app/l10n/app_localizations.dart';
 import '../../core/services/export_service.dart';
+import '../../core/services/logger_service.dart';
 import '../../shared/widgets/vrm_button.dart';
 import '../../shared/widgets/widget_progress.dart';
 import '../../shared/utils/vrm_notifications.dart';
@@ -92,7 +93,11 @@ class _RecordingEndPageState extends State<RecordingEndPage> {
         });
       }
     } catch (e) {
-      debugPrint('[RecordingEndPage] Video initialization failed: $e');
+      LoggerService.log(
+        'RecordingEndPage',
+        'Video initialization failed',
+        error: e,
+      );
       if (mounted) {
         setState(() {
           _isVideoInitialized = false;
@@ -169,7 +174,7 @@ class _RecordingEndPageState extends State<RecordingEndPage> {
         }
       }
     } catch (e) {
-      debugPrint('[RecordingEndPage] Export error: $e');
+      LoggerService.log('RecordingEndPage', 'Export error', error: e);
       if (mounted) {
         _showSnackBar(l10n.errorSavingVideo, isError: true);
       }
