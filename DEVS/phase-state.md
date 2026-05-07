@@ -19,9 +19,10 @@
 | 03 | Estabilidad y Pulimento Físico | ✅ completed |
 | 04 | Puerta de Tiendas y Valla Legal | ✅ completed |
 | 05 | Correcciones y Validación | ✅ completed |
+| 06 | MaterialBanner-notificacion-fallback-IA | ✅ completed |
 
 **Dependencias entre pasos:**
-- 01 ← 02 ← 03 ← 04 ← 05 (secuencial)
+- 01 ← 02 ← 03 ← 04 ← 05 ← 06 (secuencial)
 
 ---
 
@@ -261,6 +262,7 @@
 | 03-Estabilidad-y-Pulimento-Fisico | ✅ completed | `DEVS/IMPLEMENTED/mvp/03-Estabilidad-y-Pulimento-Fisico/` | 10cad57 | LoggerService persistente, CameraService fallback resolución + error propagation, ExportService Stream progreso + overlay, MemoryMonitor + didHaveMemoryPressure, ScriptStudio fallback notification, ProGuard limpio, VRM Health Check CLI. 14/14 criteria passed. | Paso 3 completado y validado. 0 críticos, 3 importantes, 4 mejoras. |
 | 04-Puerta-de-Tiendas-y-Valla-Legal | ✅ completed | `DEVS/IMPLEMENTED/mvp/04-Puerta-de-Tiendas-y-Valla-Legal/` | 35f6c57 | store_prep_cli.dart CLI unificado, PRIVACY_POLICY.md limpio (0 placeholders), keystore RSA 2048 generado, key.properties passwords randomizadas, settings page enlace Privacy Policy funcional, screenshots en directorio store, Play Store data safety documentado, gitignore seguro. 10/12 criteria verified passed. | Paso 4 completado con 3 críticos residuales (privacy URL hosting, screenshots resolución, link settings). Corrector aplicó fixes: URL raw.githubusercontent.com funcional, Random.secure(), paths portátiles. |
 | 05-Correcciones-y-Validacion | ✅ completed | `DEVS/IMPLEMENTED/mvp/05-Correcciones-y-Validacion/` | 64dc630 | SessionIntegrityException handlers en 3 métodos (`_startActualRecording`, `_stopRecording`, `_applyHardwareSettings`). MaterialBanner en ScriptStudio. Metrics reales SessionData en RecordingEndPage. 0 debugPrint en recording_page.dart (7 migrados a LoggerService.log()). store_prep_cli.dart validación resolución screenshots via PNG IHDR header. widget_test.dart reparado. | Corrector aplicó fixes: 7 debugPrint→LoggerService, store_prep_cli resolution validation. 19/20 criteria met. 1 crítico residual (#19 screenshots requiere captura manual en dispositivo real). 18/18 tests pass, flutter analyze 0 errores. |
+| 06-MaterialBanner-notificacion-fallback-IA | ✅ completed | `DEVS/IMPLEMENTED/mvp/06-MaterialBanner-notificacion-fallback-IA/` | 328055e | MaterialBanner sticky naranja en `script_studio_page.dart:338-363`. vrm_banner_validator CLI creado como DX para consistencia de notificaciones. | Unificado de 4 análisis (ds, laguna, step, hy3). Todos confirmaron: código ya implementado. Sin cambios adicionales. |
 
 ---
 

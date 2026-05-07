@@ -127,26 +127,29 @@ Reemplazar catch generico en `recording_page.dart` por `on SessionIntegrityExcep
 ### Notas
 Depende de `recording_manager.dart:verifyIntegrityStatic()` que ya existe.
 
-## Paso 06: MaterialBanner-notificacion-fallback-IA
+## Paso 06: MaterialBanner-notificacion-fallback-IA ✅ COMPLETADO
 
 **Origen:** Sugerencia 🔵 de validacion — Paso 03
 **Prioridad:** Baja
 **Fase:** mvp
+**Implementado en:** Paso 05 (Correcciones)
 
 ### Objetivo
 Reemplazar SnackBar flotante por `MaterialBanner` sticky en `script_studio_page.dart:337` para notificacion de fallback IA.
 
 ### Tareas
-- [ ] Reemplazar `ScaffoldMessenger.showSnackBar()` con `ScaffoldMessenger.showMaterialBanner()`
-- [ ] Mantener mismo mensaje naranja y comportamiento de cierre
+- [x] Reemplazar `ScaffoldMessenger.showSnackBar()` con `ScaffoldMessenger.showMaterialBanner()`
+- [x] Mantener mismo mensaje naranja y comportamiento de cierre
 
 ### Criterios de Aceptacion
-- [ ] Banner sticky visible hasta que usuario lo descarte
-- [ ] Mismo contenido informativo que SnackBar actual
-- [ ] No rompe flujo de ScriptStudio
+- [x] Banner sticky visible hasta que usuario lo descarte
+- [x] Mismo contenido informativo que SnackBar actual
+- [x] No rompe flujo de ScriptStudio
 
 ### Notas
 MaterialBanner es mas visible que SnackBar para estados de fallback.
+Código ya implementado en Paso 05 (Correcciones). `script_studio_page.dart:338-363`.
+Plan actualizado tras unificación de análisis (2026-05-07).
 
 ## Paso 07: Metricas-reales-sesion-RecordingEndPage
 
