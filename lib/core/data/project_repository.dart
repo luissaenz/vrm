@@ -1,9 +1,9 @@
 import 'dart:io';
 import 'dart:convert';
-import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import '../models/project_state.dart';
 import '../exceptions/pipeline_exceptions.dart';
+import 'package:vrm_app/core/services/logger_service.dart';
 
 /// Repository for managing project persistence as JSON files
 class ProjectRepository {
@@ -104,7 +104,10 @@ class ProjectRepository {
           }
         } catch (e) {
           // Log error but continue with other files
-          debugPrint('Warning: Failed to load project from ${folder.path}: $e');
+          LoggerService.log(
+            'project_repository',
+            'Warning: Failed to load project from ${folder.path}: $e',
+          );
           continue;
         }
       }
@@ -184,7 +187,10 @@ class ProjectRepository {
       final jsonString = await sessionFile.readAsString();
       return jsonDecode(jsonString) as Map<String, dynamic>;
     } catch (e) {
-      debugPrint('Error loading session data for $projectId: $e');
+      LoggerService.log(
+        'project_repository',
+        'Error loading session data for $projectId: $e',
+      );
       return null;
     }
   }

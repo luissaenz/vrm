@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import '../models/clip_metadata.dart';
+import 'package:vrm_app/core/services/logger_service.dart';
 
 /// Servicio de gestión de almacenamiento para clips de video.
 class ClipStorageService {
@@ -35,7 +36,10 @@ class ClipStorageService {
 
     if (!await clipsDir.exists()) {
       await clipsDir.create(recursive: true);
-      debugPrint('[ClipStorage] Clips directory created: ${clipsDir.path}');
+      LoggerService.log(
+        'clip_storage_service',
+        '[ClipStorage] Clips directory created: ${clipsDir.path}',
+      );
     }
 
     return clipsDir;
@@ -117,7 +121,10 @@ class ClipStorageService {
         try {
           await File(sourcePath).delete();
         } catch (_) {
-          debugPrint('[ClipStorage] Could not delete source: $sourcePath');
+          LoggerService.log(
+            'clip_storage_service',
+            '[ClipStorage] Could not delete source: $sourcePath',
+          );
         }
       }
 
@@ -133,12 +140,18 @@ class ClipStorageService {
         throw FileSystemException('Recorded clip is empty (corrupt)');
       }
 
-      debugPrint('[ClipStorage] Clip saved: $destPath ($size bytes)');
+      LoggerService.log(
+        'clip_storage_service',
+        '[ClipStorage] Clip saved: $destPath ($size bytes)',
+      );
 
       return destPath;
     } catch (e) {
       // Fallback: read bytes and write manually
-      debugPrint('[ClipStorage] copy() failed, trying writeAsBytes: $e');
+      LoggerService.log(
+        'clip_storage_service',
+        '[ClipStorage] copy() failed, trying writeAsBytes: $e',
+      );
       try {
         final bytes = await File(sourceFile.path).readAsBytes();
         await destFile.writeAsBytes(bytes);
@@ -157,7 +170,10 @@ class ClipStorageService {
         );
         return destPath;
       } catch (fallbackError) {
-        debugPrint('[ClipStorage] Fallback also failed: $fallbackError');
+        LoggerService.log(
+          'clip_storage_service',
+          '[ClipStorage] Fallback also failed: $fallbackError',
+        );
         // Clean up corrupt file if it exists
         if (await destFile.exists()) {
           try {
@@ -182,7 +198,10 @@ class ClipStorageService {
     final file = File(filePath);
     if (await file.exists()) {
       await file.delete();
-      debugPrint('[ClipStorage] Deleted clip: $filePath');
+      LoggerService.log(
+        'clip_storage_service',
+        '[ClipStorage] Deleted clip: $filePath',
+      );
     }
   }
 
@@ -195,10 +214,16 @@ class ClipStorageService {
         fractionDigits: 2,
       );
       final freeMB = storageSpace.free ~/ (1024 * 1024);
-      debugPrint('[ClipStorage] Real free space: ${freeMB}MB');
+      LoggerService.log(
+        'clip_storage_service',
+        '[ClipStorage] Real free space: ${freeMB}MB',
+      );
       return freeMB;
     } catch (e) {
-      debugPrint('[ClipStorage] Could not determine real free space: $e');
+      LoggerService.log(
+        'clip_storage_service',
+        '[ClipStorage] Could not determine real free space: $e',
+      );
       return minFreeSpaceMB;
     }
   }
@@ -230,11 +255,17 @@ class ClipStorageService {
           }
         }
         if (deleted > 0) {
-          debugPrint('[ClipStorage] Cleaned $deleted temp files');
+          LoggerService.log(
+            'clip_storage_service',
+            '[ClipStorage] Cleaned $deleted temp files',
+          );
         }
       }
     } catch (e) {
-      debugPrint('[ClipStorage] Cleanup error: $e');
+      LoggerService.log(
+        'clip_storage_service',
+        '[ClipStorage] Cleanup error: $e',
+      );
     }
   }
 }

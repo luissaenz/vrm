@@ -1,16 +1,12 @@
 # 📝 Sugerencias pendientes
 
-## Paso 08 — Migrar-debugPrint-residual-LoggerService
+## 🟡 Importantes
 
-### 🔵 Mejoras
-- **M-001:** `debugprint_scanner.dart` no filtra debugPrint bajo `kDebugMode` wrap (memory_monitor.dart:62). Falso positivo en debug-only log. Ignorar lineas dentro de `if (kDebugMode)`.
-- **M-002:** 70 debugPrint residuales fuera de scope en lib/. Roadmap post-MVP. Scanner `--fix` puede migrarlos.
+- **ID-002:** Especificación analisis-FINAL §3 pide funciones privadas (`_isSameLineKDebugModeGuard`) en `debugprint_scanner.dart`. Implementación las hizo públicas en `debugprint_detector.dart`. Desvío de diseño acordado. Corrección: renombrar a privadas o actualizar especificación para reflejar módulo separado.
 
-> Incorporado desde validacion Paso 08 (2026-05-07).
+## 🔵 Mejoras
 
-## Paso 09 — vrm-health-check-fix-real
+- **ID-003:** `debugprint_scanner.dart --fix` no maneja `debugPrint()` multilínea (arg en línea siguiente). 7 calls residuales no migrables automáticamente. Considerar parser multi-línea o AST-based.
 
-### 🔵 Mejoras
-- **M-001:** Sin try/catch individual por archivo en `_runFixCleanup()`. Si archivo bloqueado, `entity.delete()` lanza excepción no capturada y aborta todo cleanup. Post-MVP: try/catch por archivo con reporte individual.
-
-> Incorporado desde validacion Paso 09 (2026-05-07).
+> Las sugerencias anteriores fueron incorporadas a `plan.md` el 2026-05-09.
+> Fase procesada: mvp

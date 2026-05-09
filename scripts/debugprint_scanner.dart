@@ -1,6 +1,8 @@
-// ignore_for_file: avoid_print
+// ignore_for_file: avoid_print, unused_element
 
 import 'dart:io';
+
+import 'debugprint_detector.dart';
 
 /// Escanea lib/ buscando debugPrint residuales.
 /// Modo scan: reporta archivo, línea, contenido.
@@ -154,28 +156,13 @@ List<_DebugPrintMatch> _findDebugPrintCalls(List<String> lines) {
   return result;
 }
 
-/// Scan backwards from [lineIdx] to detect if code is inside
-/// `if (kDebugMode)` or `if (!kReleaseMode)` block.
-/// These debugPrint calls are intentional — only run in debug mode.
-bool _isInsideDebugModeBlock(List<String> lines, int lineIdx) {
-  int braceDepth = 0;
-
-  for (int i = lineIdx; i >= 0; i--) {
-    final l = lines[i];
-
-    for (int j = 0; j < l.length; j++) {
-      if (l[j] == '{') braceDepth++;
-      if (l[j] == '}') braceDepth--;
-    }
-
-    if (braceDepth > 0 &&
-        (l.contains('kDebugMode') || l.contains('!kReleaseMode'))) {
-      return true;
-    }
-  }
-
-  return false;
-}
+// ── FINAL-spec private wrappers (delegate to debugprint_detector.dart) ──
+bool _isInsideDebugModeBlock(List<String> lines, int lineIdx) =>
+    isInsideDebugModeBlock(lines, lineIdx);
+bool _isSameLineKDebugModeGuard(String line) => isSameLineKDebugModeGuard(line);
+bool _isInsideAssert(String line) => isInsideAssert(line);
+bool _isInsideBracedDebugModeBlock(List<String> lines, int lineIdx) =>
+    isInsideBracedDebugModeBlock(lines, lineIdx);
 
 int _fixDebugPrintCalls(File file, String content, List<String> lines) {
   final tag = _deriveTag(file.path);

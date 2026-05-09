@@ -297,3 +297,65 @@ Capturar 5 screenshots en dispositivo real a resolucion store: 1080x1920+ (Andro
 
 ### Notas
 Tarea manual. Usar `adb shell screencap -p` o captura nativa. Guia en `dart run scripts/store_prep_cli.dart screenshots`. Es el unico blocker 🔴 remanente para release a stores.
+
+---
+
+## 📥 Pasos incorporados desde sugerencias de validación
+> Incorporados el 2026-05-09 — Fase activa: mvp
+
+## Paso 13: Mejorar-debugprint-scanner-kdebugmode
+
+**Origen:** Sugerencia 🔵 de validacion — Paso 08
+**Prioridad:** Baja
+**Fase:** mvp
+
+### Objetivo
+Actualizar `debugprint_scanner.dart` para que no reporte llamadas a `debugPrint` cuando estan envueltas en condicionales `if (kDebugMode)`, eliminando falsos positivos.
+
+### Tareas
+- [ ] Modificar logica en `debugprint_scanner.dart` para ignorar bloques `if (kDebugMode)`
+- [ ] Validar que no hay falsos positivos (ej. en `memory_monitor.dart`)
+
+### Criterios de Aceptacion
+- [ ] Escaner ignora `debugPrint` dentro de `if (kDebugMode)`
+
+### Notas
+Mejora de DX para evitar friccion en logs de debug.
+
+## Paso 14: Migracion-masiva-debugprint-residuales
+
+**Origen:** Sugerencia 🔵 de validacion — Paso 08
+**Prioridad:** Baja
+**Fase:** mvp
+
+### Objetivo
+Migrar los ~70 `debugPrint` residuales en `lib/` hacia `LoggerService` (idealmente usando `--fix` en el scanner).
+
+### Tareas
+- [ ] (Opcional) Implementar flag `--fix` en `debugprint_scanner.dart`
+- [ ] Migrar los `debugPrint` a `LoggerService.log()` en todo el codigo
+
+### Criterios de Aceptacion
+- [ ] Codigo base libre de llamadas directas a `debugPrint` fuera de bloques de debug puro
+
+### Notas
+Roadmap post-MVP para unificar la observabilidad de la app.
+
+## Paso 15: Vrm-health-check-resiliencia-archivos
+
+**Origen:** Sugerencia 🔵 de validacion — Paso 09
+**Prioridad:** Baja
+**Fase:** mvp
+
+### Objetivo
+Implementar try/catch individual por archivo en `_runFixCleanup()` dentro de `vrm_health_check.dart` para que el borrado de un archivo bloqueado no aborte todo el proceso.
+
+### Tareas
+- [ ] Envolver `entity.delete()` en un try/catch en `vrm_health_check.dart`
+- [ ] Generar reporte individual para archivos que fallaron al borrarse
+
+### Criterios de Aceptacion
+- [ ] Fallo en un archivo no interrumpe el cleanup general
+
+### Notas
+Post-MVP. Aumenta la robustez del script de mantenimiento.

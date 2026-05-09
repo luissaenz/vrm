@@ -10,6 +10,7 @@ import '../../core/theme.dart';
 import '../recording/recording_page.dart';
 
 import '../new_project/models/script_analysis.dart';
+import 'package:vrm_app/core/services/logger_service.dart';
 
 enum PreparationPhase { fixation, decision }
 
@@ -62,17 +63,22 @@ class _PreparationPageState extends State<PreparationPage> {
 
   void _initSpeech() async {
     if (kIsWeb) {
-      debugPrint("Reconocimiento de voz desactivado en Web por ahora.");
+      LoggerService.log(
+        'preparation_page',
+        "Reconocimiento de voz desactivado en Web por ahora.",
+      );
       return;
     }
     try {
       _speechEnabled = await _speechToText.initialize(
-        onStatus: (status) => debugPrint('Speech Status: $status'),
-        onError: (error) => debugPrint('Speech Error: $error'),
+        onStatus: (status) =>
+            LoggerService.log('preparation_page', 'Speech Status: $status'),
+        onError: (error) =>
+            LoggerService.log('preparation_page', 'Speech Error: $error'),
       );
       setState(() {});
     } catch (e) {
-      debugPrint("Speech init error: $e");
+      LoggerService.log('preparation_page', "Speech init error: $e");
     }
   }
 
@@ -80,7 +86,7 @@ class _PreparationPageState extends State<PreparationPage> {
     _flutterTts = FlutterTts();
 
     if (kIsWeb) {
-      debugPrint("TTS en modo simulado para Web.");
+      LoggerService.log('preparation_page', "TTS en modo simulado para Web.");
       return;
     }
 
@@ -98,7 +104,7 @@ class _PreparationPageState extends State<PreparationPage> {
 
     _flutterTts.setStartHandler(() {
       if (mounted) {
-        debugPrint("TTS Started");
+        LoggerService.log('preparation_page', "TTS Started");
       }
     });
 

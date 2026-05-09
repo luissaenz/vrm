@@ -7,6 +7,7 @@ import '../models/script_bundle.dart';
 import '../models/asset_manifest.dart';
 import '../exceptions/pipeline_exceptions.dart';
 import '../services/schema_validator.dart';
+import 'package:vrm_app/core/services/logger_service.dart';
 
 /// Pipeline Lineal Modular (NO Orquestador IA)
 /// Actúa como invocador determinista de plugins intercambiables
@@ -74,14 +75,17 @@ class VRMPipeline {
       // AUTOMATIZACIÓN: Validar contrato de asset
       await SchemaValidator.validate('asset_manifest', processedAsset.toJson());
 
-      debugPrint('[Pipeline] Execution completed successfully');
+      LoggerService.log(
+        'vrm_pipeline',
+        '[Pipeline] Execution completed successfully',
+      );
       return PipelineResult(
         input: input,
         script: script,
         asset: processedAsset,
       );
     } catch (e, stackTrace) {
-      debugPrint('[Pipeline] Execution failed: $e');
+      LoggerService.log('vrm_pipeline', '[Pipeline] Execution failed: $e');
       if (e is PluginException) {
         rethrow;
       }
@@ -117,14 +121,20 @@ class VRMPipeline {
     Map<String, dynamic> initialParams,
   ) async {
     try {
-      debugPrint('[Pipeline] Script-only mode: Fetching idea');
+      LoggerService.log(
+        'vrm_pipeline',
+        '[Pipeline] Script-only mode: Fetching idea',
+      );
       final input = await _executeStage(
         'idea_ingestion',
         ideaSource.pluginId,
         () => ideaSource.fetchIdea(initialParams),
       );
 
-      debugPrint('[Pipeline] Script-only mode: Processing script');
+      LoggerService.log(
+        'vrm_pipeline',
+        '[Pipeline] Script-only mode: Processing script',
+      );
       final scriptConfig =
           initialParams['script_config'] as Map<String, dynamic>? ?? {};
       final script = await _executeStage(
@@ -133,10 +143,16 @@ class VRMPipeline {
         () => scriptProcessor.process(input, scriptConfig),
       );
 
-      debugPrint('[Pipeline] Script-only mode completed successfully');
+      LoggerService.log(
+        'vrm_pipeline',
+        '[Pipeline] Script-only mode completed successfully',
+      );
       return script;
     } catch (e, stackTrace) {
-      debugPrint('[Pipeline] Script-only mode failed: $e');
+      LoggerService.log(
+        'vrm_pipeline',
+        '[Pipeline] Script-only mode failed: $e',
+      );
       if (e is PluginException) {
         rethrow;
       }

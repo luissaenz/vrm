@@ -1,5 +1,6 @@
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/foundation.dart';
+import 'package:vrm_app/core/services/logger_service.dart';
 
 class DeviceInfo {
   final String model;
@@ -48,7 +49,7 @@ class DeviceInfoService {
         return DeviceInfo.unknown();
       }
     } catch (e) {
-      debugPrint('DeviceInfoService Error: $e');
+      LoggerService.log('device_info_service', 'DeviceInfoService Error: $e');
       return DeviceInfo.unknown();
     }
   }

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:flutter/foundation.dart';
 import '../features/onboarding/data/user_profile.dart';
+import 'package:vrm_app/core/services/logger_service.dart';
 
 class ApiService {
   // En el emulador de Android, localhost es 10.0.2.2
@@ -45,7 +46,7 @@ class ApiService {
         throw Exception('Error al llamar al backend: ${response.statusCode}');
       }
     } catch (e) {
-      debugPrint('ApiService Error: $e');
+      LoggerService.log('api_service', 'ApiService Error: $e');
       rethrow;
     }
   }

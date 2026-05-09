@@ -9,6 +9,7 @@ import 'widgets/auto_accept_bar.dart';
 import 'widgets/clip_video_area.dart';
 import 'widgets/review_overlay.dart';
 import '../../shared/widgets/vrm_button.dart';
+import 'package:vrm_app/core/services/logger_service.dart';
 
 /// Página de revisión de clips grabados.
 /// Permite al usuario validar el clip antes de proceder al siguiente fragmento.
@@ -88,7 +89,10 @@ class _ClipReviewPageState extends State<ClipReviewPage>
       // Iniciar timer de auto-aceptación
       _startAutoAcceptTimer();
     } catch (e) {
-      debugPrint('[ClipReviewPage] Video initialization failed: $e');
+      LoggerService.log(
+        'clip_review_page',
+        '[ClipReviewPage] Video initialization failed: $e',
+      );
       if (mounted) {
         setState(() {
           _isVideoInitialized = false;
@@ -156,7 +160,10 @@ class _ClipReviewPageState extends State<ClipReviewPage>
         );
       }
     } catch (e) {
-      debugPrint('[ClipReviewPage] Failed to accept clip: $e');
+      LoggerService.log(
+        'clip_review_page',
+        '[ClipReviewPage] Failed to accept clip: $e',
+      );
       if (mounted) {
         setState(() => _isProcessing = false);
         ScaffoldMessenger.of(context).showSnackBar(
@@ -194,7 +201,10 @@ class _ClipReviewPageState extends State<ClipReviewPage>
         },
       );
     } catch (e) {
-      debugPrint('[ClipReviewPage] Failed to reject clip: $e');
+      LoggerService.log(
+        'clip_review_page',
+        '[ClipReviewPage] Failed to reject clip: $e',
+      );
       if (mounted) {
         setState(() => _isProcessing = false);
         ScaffoldMessenger.of(context).showSnackBar(

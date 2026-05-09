@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
-import 'package:flutter/foundation.dart';
 import '../models/voice_indicator_state.dart';
+import 'package:vrm_app/core/services/logger_service.dart';
 
 /// Lumis Voice: Utility for handling voice triggers and command dispatching.
 /// It uses a wake word ("Lumis") to enter active mode and then
@@ -34,7 +34,10 @@ class VoiceCommandService {
     if (_isInitialized) return true;
     _isInitialized = await _speech.initialize(
       onStatus: _handleStatus,
-      onError: (error) => debugPrint('[Lumis Voice] Error: $error'),
+      onError: (error) => LoggerService.log(
+        'voice_command_service',
+        '[Lumis Voice] Error: $error',
+      ),
       options: [
         SpeechConfigOption('android', 'no_sound', true),
         SpeechConfigOption('ios', 'no_sound', true),
@@ -44,7 +47,7 @@ class VoiceCommandService {
   }
 
   void _handleStatus(String status) {
-    debugPrint('[Lumis Voice] Status: $status');
+    LoggerService.log('voice_command_service', '[Lumis Voice] Status: $status');
     // Si la sesión termina naturalmente, reiniciamos después de un breve delay
     // para no saturar el sistema y evitar bucles de pitidos.
     if (status == 'done' || status == 'notListening') {
@@ -91,7 +94,10 @@ class VoiceCommandService {
         ),
       );
     } catch (e) {
-      debugPrint('[Lumis Voice] Error durante listen: $e');
+      LoggerService.log(
+        'voice_command_service',
+        '[Lumis Voice] Error durante listen: $e',
+      );
       // Si falla, volvemos a un estado seguro
       _currentState = VoiceIndicatorState.passive;
       _stateController.add(_currentState);
@@ -105,7 +111,10 @@ class VoiceCommandService {
     if (result.confidence < 0.5 && !result.finalResult) return;
 
     String text = result.recognizedWords.toLowerCase().trim();
-    debugPrint('[Lumis Voice] Recognized: "$text" (State: $_currentState)');
+    LoggerService.log(
+      'voice_command_service',
+      '[Lumis Voice] Recognized: "$text" (State: $_currentState)',
+    );
 
     if (_currentState == VoiceIndicatorState.passive) {
       if (text.contains(_wakeWord)) {

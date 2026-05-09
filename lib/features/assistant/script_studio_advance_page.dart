@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/theme.dart';
+import 'package:vrm_app/core/services/logger_service.dart';
 
 class ScriptStudioAdvancePage extends StatefulWidget {
   const ScriptStudioAdvancePage({super.key});
@@ -707,15 +708,42 @@ class _ScriptStudioAdvancePageState extends State<ScriptStudioAdvancePage> {
       child: ElevatedButton(
         onPressed: () {
           // TODO: Implement script generation with advanced settings
-          debugPrint('Generate script with advanced settings');
-          debugPrint('Objective: $_selectedObjective');
-          debugPrint('Call to action: $_selectedCallToAction');
-          debugPrint('Approach: $_selectedApproach');
-          debugPrint('Hooks: $_selectedHooks');
-          debugPrint('Energies: $_selectedEnergies');
-          debugPrint('Audience: $_selectedAudience');
-          debugPrint('Speech rate: $_speechRate WPM');
-          debugPrint('Remember settings: $_rememberSettings');
+          LoggerService.log(
+            'script_studio_advance_page',
+            'Generate script with advanced settings',
+          );
+          LoggerService.log(
+            'script_studio_advance_page',
+            'Objective: $_selectedObjective',
+          );
+          LoggerService.log(
+            'script_studio_advance_page',
+            'Call to action: $_selectedCallToAction',
+          );
+          LoggerService.log(
+            'script_studio_advance_page',
+            'Approach: $_selectedApproach',
+          );
+          LoggerService.log(
+            'script_studio_advance_page',
+            'Hooks: $_selectedHooks',
+          );
+          LoggerService.log(
+            'script_studio_advance_page',
+            'Energies: $_selectedEnergies',
+          );
+          LoggerService.log(
+            'script_studio_advance_page',
+            'Audience: $_selectedAudience',
+          );
+          LoggerService.log(
+            'script_studio_advance_page',
+            'Speech rate: $_speechRate WPM',
+          );
+          LoggerService.log(
+            'script_studio_advance_page',
+            'Remember settings: $_rememberSettings',
+          );
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: AppTheme.forest,

@@ -4,6 +4,7 @@ import 'domain/social_account.dart';
 import 'domain/social_media_service.dart';
 import 'domain/social_platform.dart';
 import 'data/platform_services.dart';
+import 'package:vrm_app/core/services/logger_service.dart';
 
 class SocialAccountManager {
   static final SocialAccountManager _instance =
@@ -40,7 +41,10 @@ class SocialAccountManager {
     if (service != null) {
       await service.logout(account);
       _accounts.removeWhere((a) => a.id == account.id);
-      debugPrint('Account disconnected: ${account.name}');
+      LoggerService.log(
+        'social_account_manager',
+        'Account disconnected: ${account.name}',
+      );
     }
   }
 

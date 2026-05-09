@@ -1,7 +1,7 @@
 # 🗺️ Phase State: mvp
 
 > Generado: 2026-05-05 vía 6_CONTEXTO.md
-> Actualizado: 2026-05-09 vía 6_CONTEXTO.md (Post-Paso 12 — Screenshots-store-ready)
+> Actualizado: 2026-05-09 vía 6_CONTEXTO.md (Post-Paso 13 — Mejorar-debugprint-scanner-kdebugmode)
 
 ---
 
@@ -26,9 +26,10 @@
 | 10 | Adaptive-icons-Android-13 | ✅ completed |
 | 11 | Contexto-y-Actualizacion-Estado | ✅ completed |
 | 12 | Screenshots-store-ready | ✅ completed |
+| 13 | Mejorar-debugprint-scanner-kdebugmode | ✅ completed |
 
 **Dependencias entre pasos:**
-- 01 ← 02 ← 03 ← 04 ← 05 ← 06 ← 07 ← 08 ← 09 ← 10 ← 11 ← 12 (secuencial)
+- 01 ← 02 ← 03 ← 04 ← 05 ← 06 ← 07 ← 08 ← 09 ← 10 ← 11 ← 12 ← 13 (secuencial)
 
 ---
 
@@ -74,6 +75,9 @@
 | **Screenshots store-ready** | `assets/store/screenshots/step{1-5}.png` | 5 PNGs reales 1080x2400 (Xiaomi 2201117TL). Headers `89 50 4E 47` verificados. No JPEG disguised. Nombres `step1.png..step5.png`. Legacy `assets/images/screenshots/` eliminado. Capturadas via `capture_store_screenshots.dart` con dogfooding. Validado por `store_prep_cli.dart check` (11/11). |
 | **Capture Store Screenshots DX tool** | `scripts/capture_store_screenshots.dart` (247L) | CLI interactivo ADB: captura secuencial 5 screenshots en dispositivo Android. Flags: `--device <id>`, `--clean`, `--help`. Valida PNG header + dimensiones + file size post-captura. Reduce ~30min manual a ~5min. |
 | **Shared PNG utils** | `scripts/utils.dart` (28L) | `getPngDimensions()` + `validatePngHeader()` compartidos entre `capture_store_screenshots.dart` y `store_prep_cli.dart`. Elimina duplicacion de PNG parser. |
+| **DebugPrint detector** | `scripts/debugprint_detector.dart` (164L) | API pública con 7 funciones: `isInsideDebugModeBlock` (orquestador), `isSameLineKDebugModeGuard`, `isInsideAssert`, `isTernaryKDebugModeGuard`, `isAdjacentKDebugModeGuard`, `isInsideBracedDebugModeBlock`, `stripStringsAndComments`. Cross-file usable por scanner y tests. |
+| **DebugPrint scanner mejorado** | `scripts/debugprint_scanner.dart` (328L) | Refactor: extrae lógica a `debugprint_detector.dart`. 4 wrappers `_` privados (`_isInsideDebugModeBlock`, `_isSameLineKDebugModeGuard`, `_isInsideAssert`, `_isInsideBracedDebugModeBlock`) según spec FINAL. 5 discrepancias D1-D5 resueltas: same-line, adyacente, assert, ternario, braces en strings/comentarios. 88 archivos escaneados, 7 residuales encontrados. |
+| **DebugPrint scanner test** | `test/debugprint_scanner_test.dart` | 31 tests unitarios (8 grupos) cubriendo TP-1 a TP-8 + stripStringsAndComments + orquestador. 52/52 tests totales pasan. |
 | **Play Store Data Safety documentado** | `DEVS/play_store_data_safety.md` | Checklist de respuestas para formulario Data Safety de Play Console. |
 | **.gitignore secreto** | `.gitignore` | Cubre `*.jks`, `*.keystore`, `/android/key.properties`. |
 | **Adaptive icons Android 13+** | `pubspec.yaml:133`, `android/app/src/main/res/mipmap-anydpi-v26/launcher_icon.xml` | `adaptive_icon_background: "#000000"` (corregido de `#FFFFFF`). XML generado con `<adaptive-icon>` → background `#000000` + foreground `icon_source.png`. Icono legacy intacto en mipmap-*/launcher_icon.png. store_prep_cli.dart check [9] verifica existencia post-generación. |
@@ -230,6 +234,19 @@
 | **No crear foreground transparente (Opción B) para MVP** | Requiere edición gráfica. Opción A (background negro) es suficiente para MVP. | Post-MVP crear `icon_foreground.png` con fondo transparente. |
 | **`android:roundIcon` no requerido** | Android 13+ resuelve adaptive icon sin roundIcon explícito. | Opus lo mencionó pero no bloquea. Post-MVP. |
 
+### Decisiones de Paso 13 (Mejorar-debugprint-scanner-kdebugmode)
+
+| Decisión | Detalle | Justificación |
+|---|---|---|
+| **Refactor a 4 helpers + orquestador** | `_isInsideDebugModeBlock` → `isSameLineKDebugModeGuard` + `isInsideAssert` + `isTernaryKDebugModeGuard` + `isAdjacentKDebugModeGuard` + `isInsideBracedDebugModeBlock`. Orquestador en `isInsideDebugModeBlock`. | ds propuso 3 niveles, glm propuso test unitario. Fusión de ambas. Responsabilidad única por helper. |
+| **Dart puro sin dependencias** | Scanner usa solo `dart:io`. Detector usa `dart:core` (RegExp, String). 0 dependencias externas. | Consistencia con scripts existentes. ds y glm coinciden. |
+| **Extracción a `debugprint_detector.dart`** como módulo público | Funciones públicas en archivo separado para testing. Wrappers `_` privados en scanner delegando a detector. | FINAL §3 especifica `_` privadas + test unitario externo — contradicción en Dart. Solución: detector público + wrappers `_` en scanner. Test importa detector. |
+| **Mini-parser strings/comentarios para braceDepth** | `stripStringsAndComments()` ignora `'...'`, `"..."`, `//`, `/* */` antes de contar braces. Maneja escapes `\\` y strings anidados. | D5: braces en strings/comentarios alteraban braceDepth. Prevenía falsos positivos. |
+| **Test unitario como Tarea 0 (DX primero)** | 31 tests en 8 grupos (isSameLineKDebugModeGuard, isInsideAssert, isTernaryKDebugModeGuard, isAdjacentKDebugModeGuard, isInsideBracedDebugModeBlock, stripStringsAndComments, orquestador). | glm propuso test primero. Previene regresión. |
+| **D6-D7 descartadas** | D6 (espaciado `!kReleaseMode`) es falso — `contains()` ya maneja. D7 (falso positivo memory_monitor.dart) no existe. | Verificado contra código real. No implementar. |
+| **Corrector: ID-001 unused_import** | 3 `import 'package:flutter/foundation.dart';` removidos de `project_repository.dart`, `voice_command_service.dart`, `platform_services.dart`. | `--fix` migró debugPrint→LoggerService dejando imports huérfanos. Validación rechazó por criterio #13 (flutter analyze 0 issues). |
+| **Corrector: ID-002 wrappers `_` privados** | Agregados `_isInsideDebugModeBlock`, `_isSameLineKDebugModeGuard`, `_isInsideAssert`, `_isInsideBracedDebugModeBlock` wrappers en scanner delegando al detector público. Scanner interno usa `_isInsideDebugModeBlock`. | FINAL spec pedía `_` privadas en scanner. Wrappers reconcilian spec + testabilidad. |
+
 ### Decisiones de Paso 12 (Screenshots-store-ready)
 
 | Decisión | Detalle | Justificación |
@@ -343,6 +360,7 @@
 | 10-Adaptive-icons-Android-13 | ✅ completed | `DEVS/IMPLEMENTED/mvp/10-Adaptive-icons-Android-13/` | 4877955 | `pubspec.yaml:133` `adaptive_icon_background` corregido `#FFFFFF`→`#000000`. store_prep_cli.dart check [9] agregado (L303-323) verifica `mipmap-anydpi-v26/` existe con XML. `flutter pub run flutter_launcher_icons` ejecutado → XML generado con `<adaptive-icon>` + foreground/background layers. colors.xml `ic_launcher_background` = `#000000`. Iconos legacy PNGs regenerados en todas densidades. 14/15 criterios aceptacion. Validacion 9/10 calidad. | Correccion critica: plan decia "agregar config" pero ya existia. Tarea real = regenerar iconos + corregir color. D3 fondo negro integrado en icon_source.png detectado por opus. 0 criticos, 1 importante (screenshots pre-existente), 2 mejoras. flutter analyze 0 errores. 18/18 tests. |
 | 11-Contexto-y-Actualizacion-Estado | ✅ completed | `DEVS/IMPLEMENTED/mvp/11-Contexto-y-Actualizacion-Estado/` | f7b0527 | Corrección CRÍTICA: Stitch handler nativo EXISTE en Android (MediaMuxer, `MainActivity.kt:52-146`) e iOS (AVComposition, `AppDelegate.swift:35-81`). Phase-state decía "STUB sin handler" — falso. Discrepancia D6 corregida: ⏳→✅ Resuelto. 7 análisis archivados. Tests 21/21 pasan. | Sin cambios en lib/. Solo actualización de estado. Archivado de IN_PROGRESS → IMPLEMENTED. Nuevo DX tool: `scripts/test_coverage_report.dart`. |
 | 12-Screenshots-store-ready | ✅ completed | `DEVS/IMPLEMENTED/mvp/12-Screenshots-store-ready/` | d9a4ef4 | DX tool: `capture_store_screenshots.dart` + `utils.dart` shared module. `store_prep_cli.dart` validacion corruptos <10KB. 5 PNGs 1080x2400 capturadas en Xiaomi 2201117TL. D1-D4 corregidas (JPEGs eliminados, legacy dir removido). ID-004 resuelta (shared utils). 12/12 criterios aceptacion. 11/11 store check. Dogfooding completo. | 8 analisis archivados. 3 scripts nuevos/modificados. Sin cambios en lib/. |
+| 13-Mejorar-debugprint-scanner-kdebugmode | ✅ completed | `DEVS/IMPLEMENTED/mvp/13-Mejorar-debugprint-scanner-kdebugmode/` | 705eb0a | Refactor `_isInsideDebugModeBlock` → 4 helpers + orquestador. D1-D5 resueltas (same-line, adjacent, assert, ternary, braces strings/comentarios). `debugprint_detector.dart` (164L) API pública. `debugprint_scanner_test.dart` 31 tests. Corrector: ID-001 (3 unused_import removidos), ID-002 (_wrappers privados). 52/52 tests. flutter analyze 0 issues. | 8 archivos archivados. 3 archivos nuevos/modificados (detector, scanner, test). 3 archivos lib/ corregidos (ID-001). |
 
 ---
 
@@ -378,7 +396,7 @@
 | **Scripts Python existentes** | `scripts/fragmentation_test.py`, `scripts/verify_backend.py` | Útiles para validación backend, pero no cubren frontend |
 | **Store Prep CLI (Pasos 4-5+10)** | `scripts/store_prep_cli.dart` (703L) | CLI unificado: `check` (11 checks pre-store + check [9] adaptive icons + validación resolución screenshots via PNG IHDR header), `keystore` (genera RSA 2048), `assets validate` (iconos/splash/screenshots + validación resolución), `privacy` (valida placeholders), `screenshots` (guía captura). Reduce preparación store de ~4h a ~15min. Detecta keystore faltante, passwords default, placeholders, permisos, gitignore, adaptive icons faltantes, resolución screenshots insuficiente. Check [9] evita icono recortado/cuadrado en Android 13+ detectable solo en dispositivo físico. |
 | **Validador Metricas Sesion (Paso 7)** | `scripts/validador_metrics_session.dart` (173L) | CLI: `check --project-id <uuid> [--progress-only]` y `demo`. Valida que RecordingEndPage use metricas reales (no hardcodeadas). Detecta `0.75` hardcodeado, duracion "42m", takes falsos en session_data.json. Reduce QA manual de metricas de 10min a ~1s. |
-| **DebugPrint Scanner (Paso 8)** | `scripts/debugprint_scanner.dart` (276L) | CLI: `dart run scripts/debugprint_scanner.dart` escanea 88+ archivos lib/ buscando debugPrint residuales en ~1s. `--fix` migra automaticamente a LoggerService.log(). QA automatizado de logging — evita regresion de debugPrint en Release. Reduce revision manual de ~15min a ~1s. |
+| **DebugPrint Scanner (Pasos 8+13)** | `scripts/debugprint_scanner.dart` (328L) + `scripts/debugprint_detector.dart` (164L) | CLI: `dart run scripts/debugprint_scanner.dart` escanea 88+ archivos lib/ buscando debugPrint residuales en ~1s. `--fix` migra automaticamente a LoggerService.log(). 5 guard patterns detectados: same-line, adjacente, braced block, assert, ternario. `stripStringsAndComments` ignora braces en strings/comentarios. `test/debugprint_scanner_test.dart` con 31 tests previene regresión. QA automatizado de logging — evita regresion de debugPrint en Release. Reduce revision manual de ~15min a ~1s. |
 | **Test Coverage Report (Paso 11)** | `scripts/test_coverage_report.dart` (233L) | CLI: `dart run scripts/test_coverage_report.dart` escanea `lib/features/` y `test/` para generar reporte de cobertura por feature. Detecta features sin tests. UX DX para visibilidad de cobertura. |
 | **Capture Store Screenshots (Paso 12)** | `scripts/capture_store_screenshots.dart` (247L) | CLI interactivo ADB: `dart run scripts/capture_store_screenshots.dart` guia paso a paso captura 5 pantallas. `--clean` elimina JPEGs existentes + dir legacy. `--device <id>` especifica dispositivo. Valida PNG header + dimensiones + file size. Reduce captura manual ~30min a ~5min. Dogfooding verificado (5/5 capturadas). |
 | **Shared PNG Utils (Paso 12)** | `scripts/utils.dart` (28L) | `getPngDimensions()` + `validatePngHeader()` compartidos. Evita duplicacion de PNG parser entre `capture_store_screenshots.dart` y `store_prep_cli.dart`. SRP aplicado: logica PNG en modulo unico. |

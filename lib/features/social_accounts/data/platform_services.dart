@@ -1,14 +1,14 @@
 import 'dart:io';
-import 'package:flutter/foundation.dart';
 import '../domain/social_account.dart';
 import '../domain/social_media_service.dart';
 import '../domain/social_platform.dart';
+import 'package:vrm_app/core/services/logger_service.dart';
 
 class FacebookService implements SocialMediaService {
   @override
   Future<SocialAccount?> authorize() async {
     // TODO: Implement Facebook OAuth flow
-    debugPrint('Authorizing Facebook...');
+    LoggerService.log('platform_services', 'Authorizing Facebook...');
     return SocialAccount(
       id: 'fb_123',
       name: 'Facebook User',
@@ -19,7 +19,7 @@ class FacebookService implements SocialMediaService {
 
   @override
   Future<void> logout(SocialAccount account) async {
-    debugPrint('Logging out of Facebook...');
+    LoggerService.log('platform_services', 'Logging out of Facebook...');
   }
 
   @override
@@ -28,7 +28,10 @@ class FacebookService implements SocialMediaService {
     File videoFile,
     String description,
   ) async {
-    debugPrint('Posting video to Facebook: ${videoFile.path}');
+    LoggerService.log(
+      'platform_services',
+      'Posting video to Facebook: ${videoFile.path}',
+    );
     return true;
   }
 
@@ -42,7 +45,7 @@ class InstagramService implements SocialMediaService {
   @override
   Future<SocialAccount?> authorize() async {
     // TODO: Implement Instagram OAuth flow
-    debugPrint('Authorizing Instagram...');
+    LoggerService.log('platform_services', 'Authorizing Instagram...');
     return SocialAccount(
       id: 'ig_123',
       name: 'Instagram User',
@@ -53,7 +56,7 @@ class InstagramService implements SocialMediaService {
 
   @override
   Future<void> logout(SocialAccount account) async {
-    debugPrint('Logging out of Instagram...');
+    LoggerService.log('platform_services', 'Logging out of Instagram...');
   }
 
   @override
@@ -62,7 +65,10 @@ class InstagramService implements SocialMediaService {
     File videoFile,
     String description,
   ) async {
-    debugPrint('Posting video to Instagram: ${videoFile.path}');
+    LoggerService.log(
+      'platform_services',
+      'Posting video to Instagram: ${videoFile.path}',
+    );
     return true;
   }
 
@@ -76,7 +82,7 @@ class TikTokService implements SocialMediaService {
   @override
   Future<SocialAccount?> authorize() async {
     // TODO: Implement TikTok OAuth flow
-    debugPrint('Authorizing TikTok...');
+    LoggerService.log('platform_services', 'Authorizing TikTok...');
     return SocialAccount(
       id: 'tt_123',
       name: 'TikTok User',
@@ -87,7 +93,7 @@ class TikTokService implements SocialMediaService {
 
   @override
   Future<void> logout(SocialAccount account) async {
-    debugPrint('Logging out of TikTok...');
+    LoggerService.log('platform_services', 'Logging out of TikTok...');
   }
 
   @override
@@ -96,7 +102,10 @@ class TikTokService implements SocialMediaService {
     File videoFile,
     String description,
   ) async {
-    debugPrint('Posting video to TikTok: ${videoFile.path}');
+    LoggerService.log(
+      'platform_services',
+      'Posting video to TikTok: ${videoFile.path}',
+    );
     return true;
   }
 
@@ -110,7 +119,7 @@ class YouTubeService implements SocialMediaService {
   @override
   Future<SocialAccount?> authorize() async {
     // TODO: Implement YouTube OAuth flow
-    debugPrint('Authorizing YouTube...');
+    LoggerService.log('platform_services', 'Authorizing YouTube...');
     return SocialAccount(
       id: 'yt_123',
       name: 'YouTube User',
@@ -121,7 +130,7 @@ class YouTubeService implements SocialMediaService {
 
   @override
   Future<void> logout(SocialAccount account) async {
-    debugPrint('Logging out of YouTube...');
+    LoggerService.log('platform_services', 'Logging out of YouTube...');
   }
 
   @override
@@ -130,7 +139,10 @@ class YouTubeService implements SocialMediaService {
     File videoFile,
     String description,
   ) async {
-    debugPrint('Posting video to YouTube: ${videoFile.path}');
+    LoggerService.log(
+      'platform_services',
+      'Posting video to YouTube: ${videoFile.path}',
+    );
     return true;
   }
 
@@ -144,7 +156,7 @@ class TwitterService implements SocialMediaService {
   @override
   Future<SocialAccount?> authorize() async {
     // TODO: Implement Twitter OAuth flow
-    debugPrint('Authorizing Twitter...');
+    LoggerService.log('platform_services', 'Authorizing Twitter...');
     return SocialAccount(
       id: 'tw_123',
       name: 'Twitter User',
@@ -155,7 +167,7 @@ class TwitterService implements SocialMediaService {
 
   @override
   Future<void> logout(SocialAccount account) async {
-    debugPrint('Logging out of Twitter...');
+    LoggerService.log('platform_services', 'Logging out of Twitter...');
   }
 
   @override
@@ -164,7 +176,10 @@ class TwitterService implements SocialMediaService {
     File videoFile,
     String description,
   ) async {
-    debugPrint('Posting video to Twitter: ${videoFile.path}');
+    LoggerService.log(
+      'platform_services',
+      'Posting video to Twitter: ${videoFile.path}',
+    );
     return true;
   }
 

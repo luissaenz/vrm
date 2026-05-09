@@ -13,6 +13,7 @@ import '../../shared/widgets/widget_estimation.dart';
 import '../assistant/script_studio_page.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import '../recording/services/permission_service.dart';
+import 'package:vrm_app/core/services/logger_service.dart';
 
 class NewProjectPage extends StatefulWidget {
   const NewProjectPage({super.key});
@@ -262,13 +263,13 @@ class _NewProjectPageState extends State<NewProjectPage> {
 
       bool available = await _speech.initialize(
         onStatus: (status) {
-          debugPrint('[Dictation] Status: $status');
+          LoggerService.log('new_project_page', '[Dictation] Status: $status');
           if (status == 'notListening' || status == 'done') {
             if (mounted) setState(() => _isListening = false);
           }
         },
         onError: (error) {
-          debugPrint('[Dictation] Error: $error');
+          LoggerService.log('new_project_page', '[Dictation] Error: $error');
           if (mounted) setState(() => _isListening = false);
         },
       );
