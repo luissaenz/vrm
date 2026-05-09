@@ -1,7 +1,7 @@
 # 🗺️ Phase State: mvp
 
 > Generado: 2026-05-05 vía 6_CONTEXTO.md
-> Actualizado: 2026-05-07 vía 6_CONTEXTO.md (Post-Paso 09)
+> Actualizado: 2026-05-09 vía 6_CONTEXTO.md (Post-Paso 10)
 
 ---
 
@@ -23,9 +23,10 @@
 | 07 | Metricas-Reales-Sesion-RecordingEndPage | ✅ completed |
 | 08 | Migrar-debugPrint-residual-LoggerService | ✅ completed |
 | 09 | vrm-health-check-fix-real | ✅ completed |
+| 10 | Adaptive-icons-Android-13 | ✅ completed |
 
 **Dependencias entre pasos:**
-- 01 ← 02 ← 03 ← 04 ← 05 ← 06 ← 07 ← 08 ← 09 (secuencial)
+- 01 ← 02 ← 03 ← 04 ← 05 ← 06 ← 07 ← 08 ← 09 ← 10 (secuencial)
 
 ---
 
@@ -63,7 +64,7 @@
 | **Integridad al iniciar grabación** | `lib/features/recording/services/recording_manager.dart` (L60) | `verifySessionIntegrity()` llamado al inicio de `startRecording()`. Alerta si clips faltantes. |
 | **SessionIntegrityException handlers (3 métodos)** | `lib/features/recording/recording_page.dart` (L541, L634, L683) | `on SessionIntegrityException catch` capturado en `_startActualRecording()`, `_stopRecording()`, `_applyHardwareSettings()` — todos antes de catch genérico. Reset idle + sin duplicar SnackBar. |
 | **VRM Health Check --dry-run + --fix real** | `scripts/vrm_health_check.dart` (L63-83, L189-217, L219-295) | Flag `--dry-run` previsualiza cleanup sin modificar archivos. `_fixProguardDeadRules()` elimina reglas ffmpegkit muertas (antes solo warning). `_runFixCleanup({bool dryRun})` con rama dry-run completa. |
-| **Store Prep CLI unificado** | `scripts/store_prep_cli.dart` (L642) | CLI con 5 subcomandos: check, keystore, assets, privacy, screenshots. Sigue patron `vrm_health_check.dart`. 10/10 checks. Detecta keystore faltante, passwords default, placeholders, permisos, gitignore. Valida resolución screenshots via PNG IHDR header. |
+| **Store Prep CLI unificado** | `scripts/store_prep_cli.dart` (L703) | CLI con 5 subcomandos: check, keystore, assets, privacy, screenshots. Sigue patron `vrm_health_check.dart`. 11 checks (agregado check [9] adaptive icons). Detecta keystore faltante, passwords default, placeholders, permisos, gitignore. Valida resolución screenshots via PNG IHDR header. |
 | **PRIVACY_POLICY.md sin placeholders** | `PRIVACY_POLICY.md` (raíz), `docs/PRIVACY_POLICY.md` | Root reemplazado con version docs/. 0 placeholders. Email real: ludens.vrm@gmail.com. Fecha: April 18, 2026. |
 | **Keystore generado** | `android/vrm-release-key.jks` (2760 bytes), `android/key.properties` | RSA 2048, alias vrm_upload_key, validez 10000d. Passwords randomizadas (no default). |
 | **Settings enlace Privacy Policy** | `lib/features/settings/settings_page.dart` (L8-9, L413-424) | `_privacyPolicyUrl` apunta a raw.githubusercontent.com/luissaenz/vrm/main/PRIVACY_POLICY.md → HTTP 200. `_openPrivacyPolicy()` con try/catch + SnackBar. |
@@ -71,6 +72,7 @@
 | **Screenshots en directorio store** | `assets/store/screenshots/step{1-5}.png` | 5 screenshots copiadas a directorio correcto segun diseño (1024x1024 — pendiente recapturar a 1080x1920+). |
 | **Play Store Data Safety documentado** | `DEVS/play_store_data_safety.md` | Checklist de respuestas para formulario Data Safety de Play Console. |
 | **.gitignore secreto** | `.gitignore` | Cubre `*.jks`, `*.keystore`, `/android/key.properties`. |
+| **Adaptive icons Android 13+** | `pubspec.yaml:133`, `android/app/src/main/res/mipmap-anydpi-v26/launcher_icon.xml` | `adaptive_icon_background: "#000000"` (corregido de `#FFFFFF`). XML generado con `<adaptive-icon>` → background `#000000` + foreground `icon_source.png`. Icono legacy intacto en mipmap-*/launcher_icon.png. store_prep_cli.dart check [9] verifica existencia post-generación. |
 
 ### ⚠️ Parcialmente implementado
 
@@ -93,7 +95,15 @@
 | **Perfil Influencer** | `influencer_profile_page.dart` (L631) | ✅ IMPLEMENTADO: _saveProfile() persiste en SharedPreferences al hacer finalize. |
 | **Backend IA** | `backend/` (FastAPI), `lib/core/api_service.dart` | Backend FastAPI existe en código (POST `/prompt/{category}/{name}` con OpenAI/Anthropic/Gemini) pero requiere servidor corriendo en `localhost:8000`. Ningún servidor desplegado. |
 
-### ❌ Discrepancias plan vs código
+### ❌ Discrepancias plan vs código (Paso 10)
+
+| # | Plan dice | Código real | Impacto | Estado |
+|---|---|---|---|---|
+| D1 | Agregar `adaptive_icon_background: "#FFFFFF"` y `adaptive_icon_foreground` | YA EXISTEN en pubspec.yaml L133-134 desde 2026-05-05 | Plan desactualizado. Tarea real = regenerar iconos + corregir color. | ✅ Corregido (color `#000000`) |
+| D2 | `mipmap-anydpi-v26/` existe | NO existía pre-ejecución. `flutter pub run flutter_launcher_icons` lo generó. | Icono Android 13+ se veía cuadrado/legacy sin forma adaptable. | ✅ Resuelto |
+| D3 | `adaptive_icon_background: "#FFFFFF"` es correcto | `icon_source.png` tiene fondo negro integrado. Background blanco → anillo blanco visible. | Opus detectó. 3 agentes (ring, step, ds) no lo vieron. | ✅ Corregido a `#000000` |
+
+### ❌ Discrepancias plan vs código (generales)
 
 | # | Plan dice | Código real | Impacto | Estado |
 |---|---|---|---|---|
@@ -208,6 +218,15 @@
 | **Feature-based directories** | `lib/features/{feature}/{pages,services,models,widgets}/` | Escalabilidad y separación de concerns. Cada feature autocontenida. |
 | **Onboarding → Dashboard → Recording** como flujo principal | `main.dart` L45: onboarding condicional. Named routes para navegación profunda. | Flujo lineal simple para MVP. |
 
+### Decisiones de Paso 10 (Adaptive-icons-Android-13)
+
+| Decisión | Detalle | Justificación |
+|---|---|---|
+| **`adaptive_icon_background: "#000000"`** en vez de `"#FFFFFF"` | `icon_source.png` tiene fondo negro integrado. Background blanco → anillo blanco visible en Android 13+. Usar negro → match perfecto. | Opus detectó el fondo negro en `icon_source.png`. 3 agentes no lo vieron (ring, step, ds). Corrección crítica. |
+| **Extender store_prep_cli.dart check [9]** en vez de script nuevo | 3 agentes propusieron scripts independientes (Grok → vrm-icon-regen, step → icons-generate, LagunaM1 → generate_adaptive_icons). Opción opus/glm (extender CLI existente) gana. | Consistente con patrón actual. 0 fragmentación. 1 comando para todo store prep. |
+| **No crear foreground transparente (Opción B) para MVP** | Requiere edición gráfica. Opción A (background negro) es suficiente para MVP. | Post-MVP crear `icon_foreground.png` con fondo transparente. |
+| **`android:roundIcon` no requerido** | Android 13+ resuelve adaptive icon sin roundIcon explícito. | Opus lo mencionó pero no bloquea. Post-MVP. |
+
 ### Decisiones de Paso 9 (vrm-health-check-fix-real)
 
 | Decision | Detalle | Justificacion |
@@ -299,6 +318,7 @@
 | 07-Metricas-Reales-Sesion-RecordingEndPage | ✅ completed | `DEVS/IMPLEMENTED/mvp/07-Metricas-Reales-Sesion-RecordingEndPage/` | 88df3de | `progress: 0.75` → getter `_progress` (chunksRecorded/totalChunks). `stitch_progress_page.dart` pasa sessionData en route args (L91, L134). `recording_page.dart` pasa finalVideoPath (L826). `validador_metrics_session.dart` con flag `--progress-only` (173L). | 3 correcciones aplicadas (D1-D3). 8/8 criterios aceptacion. 0 criticos. 1 importante (dogfooding). 18/18 tests. flutter analyze 0 errores. |
 | 08-Migrar-debugPrint-residual-LoggerService | ✅ completed | `DEVS/IMPLEMENTED/mvp/08-Migrar-debugPrint-residual-LoggerService/` | 7fa5dfa | Scope original (2 debugPrint en recording_page.dart L657,L662) YA COMPLETADO en Paso 05. 6/6 agentes confirmaron 0 debugPrint. Kilo migró 2 debugPrint extra en recording_end_page.dart (L95, L172). DX tool `scripts/debugprint_scanner.dart` (276L) creado con scan + --fix. 72 debugPrint residuales en 15 archivos documentados como roadmap post-MVP. | 5/5 criterios aceptacion. 3/3 correcciones D1-D3 aplicadas. 0 criticos. 2 mejoras. flutter analyze 0 errores. 18/18 tests. |
 | 09-vrm-health-check-fix-real | ✅ completed | `DEVS/IMPLEMENTED/mvp/09-vrm-health-check-fix-real/` | 378d54b | `--dry-run` flag agregado a `check --fix`. `_runFixCleanup({bool dryRun = false})` con preview completo. `_fixProguardDeadRules()` nuevo — realmente elimina reglas ffmpegkit (antes solo print warning). `_runCheck()` refactorizado para soportar dryRun. CLI help actualizado. 7/7 criterios aceptacion. Validacion 8/10 calidad. | Paso esencialmente verificacion — `_runFixCleanup()` ya existia desde Paso 05 (b603e48). `--dry-run` enhancement nuevo en este paso. 0 criticos, 0 importantes, 2 mejoras. flutter analyze 0 errores. 18/18 tests. |
+| 10-Adaptive-icons-Android-13 | ✅ completed | `DEVS/IMPLEMENTED/mvp/10-Adaptive-icons-Android-13/` | 4877955 | `pubspec.yaml:133` `adaptive_icon_background` corregido `#FFFFFF`→`#000000`. store_prep_cli.dart check [9] agregado (L303-323) verifica `mipmap-anydpi-v26/` existe con XML. `flutter pub run flutter_launcher_icons` ejecutado → XML generado con `<adaptive-icon>` + foreground/background layers. colors.xml `ic_launcher_background` = `#000000`. Iconos legacy PNGs regenerados en todas densidades. 14/15 criterios aceptacion. Validacion 9/10 calidad. | Correccion critica: plan decia "agregar config" pero ya existia. Tarea real = regenerar iconos + corregir color. D3 fondo negro integrado en icon_source.png detectado por opus. 0 criticos, 1 importante (screenshots pre-existente), 2 mejoras. flutter analyze 0 errores. 18/18 tests. |
 
 ---
 
@@ -332,6 +352,6 @@
 | **validador_hardware.dart (Paso 2)** | Script CLI que prueba focus lock, flash torch, exposure lock en dispositivo real. Reporta compatibilidad JSON. | QA automatizado de toggles de cámara. Elimina prueba manual por modelo. |
 | **VRM Health Check (Pasos 3+9)** | `scripts/vrm_health_check.dart` (598L) | CLI unificado: `check [--fix] [--dry-run]` (pre-flight + cleanup temp/sesiones huérfanas con preview), `validate` (recovery paths), `memory` (leak detection), `scaffold` (estructura datos). `--fix` ahora elimina reglas ProGuard muertas. `--dry-run` previsualiza acciones sin modificar. Reduce diagnóstico + limpieza de 30min a ~2s. Verifica LoggerService, MemoryMonitor, ProGuard, pipeline files. |
 | **Scripts Python existentes** | `scripts/fragmentation_test.py`, `scripts/verify_backend.py` | Útiles para validación backend, pero no cubren frontend |
-| **Store Prep CLI (Pasos 4-5)** | `scripts/store_prep_cli.dart` (671L) | CLI unificado: `check` (8 checks pre-store + validación resolución screenshots via PNG IHDR header), `keystore` (genera RSA 2048), `assets validate` (iconos/splash/screenshots + validación resolución), `privacy` (valida placeholders), `screenshots` (guía captura). Reduce preparación store de ~4h a ~15min. Detecta keystore faltante, passwords default, placeholders, permisos, gitignore, resolución screenshots insuficiente. |
+| **Store Prep CLI (Pasos 4-5+10)** | `scripts/store_prep_cli.dart` (703L) | CLI unificado: `check` (11 checks pre-store + check [9] adaptive icons + validación resolución screenshots via PNG IHDR header), `keystore` (genera RSA 2048), `assets validate` (iconos/splash/screenshots + validación resolución), `privacy` (valida placeholders), `screenshots` (guía captura). Reduce preparación store de ~4h a ~15min. Detecta keystore faltante, passwords default, placeholders, permisos, gitignore, adaptive icons faltantes, resolución screenshots insuficiente. Check [9] evita icono recortado/cuadrado en Android 13+ detectable solo en dispositivo físico. |
 | **Validador Metricas Sesion (Paso 7)** | `scripts/validador_metrics_session.dart` (173L) | CLI: `check --project-id <uuid> [--progress-only]` y `demo`. Valida que RecordingEndPage use metricas reales (no hardcodeadas). Detecta `0.75` hardcodeado, duracion "42m", takes falsos en session_data.json. Reduce QA manual de metricas de 10min a ~1s. |
 | **DebugPrint Scanner (Paso 8)** | `scripts/debugprint_scanner.dart` (276L) | CLI: `dart run scripts/debugprint_scanner.dart` escanea 88+ archivos lib/ buscando debugPrint residuales en ~1s. `--fix` migra automaticamente a LoggerService.log(). QA automatizado de logging — evita regresion de debugPrint en Release. Reduce revision manual de ~15min a ~1s. |

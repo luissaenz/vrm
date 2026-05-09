@@ -300,6 +300,28 @@ Future<void> _runCheck() async {
     }
   }
 
+  // 9. Adaptive icons Android 13+
+  print('[9] Verificando adaptive icons Android 13+...');
+  final adaptiveDir = Directory(
+    '$_projectRoot/android/app/src/main/res/mipmap-anydpi-v26',
+  );
+  final adaptiveDirExists = await adaptiveDir.exists();
+  var adaptiveXmlExists = false;
+  if (adaptiveDirExists) {
+    final files = await adaptiveDir.list().toList();
+    adaptiveXmlExists = files.any((f) => f.path.endsWith('.xml'));
+  }
+  results['adaptive_icons'] = adaptiveDirExists && adaptiveXmlExists;
+  details['adaptive_icons'] = (adaptiveDirExists && adaptiveXmlExists)
+      ? 'mipmap-anydpi-v26/ existe con XML adaptive'
+      : 'mipmap-anydpi-v26/ NO encontrado o sin XML — ejecutar flutter pub run flutter_launcher_icons';
+  print(
+    '  ${(adaptiveDirExists && adaptiveXmlExists) ? "✅" : "❌"} ${details["adaptive_icons"]}',
+  );
+  if (!adaptiveDirExists || !adaptiveXmlExists) {
+    allOk = false;
+  }
+
   // Summary
   print('\n=== RESULT ===');
   final passed = results.values.where((v) => v).length;
