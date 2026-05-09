@@ -111,14 +111,14 @@
   },
   "phase": {
     "phase_name": "mvp",
-    "current_step": null
+    "current_step": "11-Contexto-y-Actualizacion-Estado"
   },
   "pipeline": {
-    "phase_state_exists": false,
+    "phase_state_exists": true,
     "in_progress_dir_exists": true,
     "implemented_dir_exists": true,
-    "analisis_final_exists": false,
-    "validacion_exists": false,
+    "analisis_final_exists": true,
+    "validacion_exists": true,
     "plan_json_exists": false,
     "plan_json_needs_review": false,
     "plan_json_steps_total": 4,

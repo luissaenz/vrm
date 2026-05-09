@@ -1,7 +1,7 @@
 # 🗺️ Phase State: mvp
 
 > Generado: 2026-05-05 vía 6_CONTEXTO.md
-> Actualizado: 2026-05-09 vía 6_CONTEXTO.md (Post-Paso 10)
+> Actualizado: 2026-05-09 vía 6_CONTEXTO.md (Post-Paso 11 — Contexto y Actualización Estado)
 
 ---
 
@@ -24,9 +24,10 @@
 | 08 | Migrar-debugPrint-residual-LoggerService | ✅ completed |
 | 09 | vrm-health-check-fix-real | ✅ completed |
 | 10 | Adaptive-icons-Android-13 | ✅ completed |
+| 11 | Contexto-y-Actualizacion-Estado | ✅ completed |
 
 **Dependencias entre pasos:**
-- 01 ← 02 ← 03 ← 04 ← 05 ← 06 ← 07 ← 08 ← 09 ← 10 (secuencial)
+- 01 ← 02 ← 03 ← 04 ← 05 ← 06 ← 07 ← 08 ← 09 ← 10 ← 11 (secuencial)
 
 ---
 
@@ -81,13 +82,13 @@
 | **F3 Idea Lab** | `script_studio_page.dart`, `script_fallback_service.dart` | Script generation usa 6 templates hardcodeados en español con `{{idea}}` placeholder. No hay IA real conectada. ✅ Notificación fallback implementada (SnackBar informativo cuando se usa generación local). |
 | **F4-F5 Generación IA** | `new_project_page.dart` (L68-226), `backend_script_plugin.dart` | `NewProjectPage` tiene API call comentado (L68-101), usa mock inline de 200 líneas con 8 segmentos hardcodeados. `BackendScriptPlugin` apunta a `localhost:8000` sin servidor. |
 | **F11 Exportación** | `lib/core/services/export_service.dart` (L125), `recording_end_page.dart` | ✅ ExportService con `Stream<double>` progreso. ✅ Overlay "Guardando en galería..." con `WidgetProgress`. ✅ Metrics reales vía SessionData (duración desde startedAt/lastUpdatedAt, takes desde takesPerChunk, progreso desde chunksRecorded/totalChunks). NO probado en dispositivo real. Permisos (`Permission.photos`) pueden tener edge cases en iOS 14+ / Android 13+. |
-| **Tests** | `test/repository_test.dart` (L156), `pipeline_test.dart` (L78), `error_handling_test.dart` (L76) | 3 tests reales: ProjectRepository (save/load/list/delete/search/count con FakePathProvider), Pipeline factory/execution/validation, PipelineException hierarchy. `widget_test.dart` reparado (renderiza VRMApp sin crash). `social_media_test.dart` usa mocks. 18/18 tests pasan. |
+| **Tests** | `test/repository_test.dart` (L156), `pipeline_test.dart` (L78), `error_handling_test.dart` (L76) | 3 tests reales: ProjectRepository (save/load/list/delete/search/count con FakePathProvider), Pipeline factory/execution/validation, PipelineException hierarchy. `widget_test.dart` reparado (renderiza VRMApp sin crash, 3 escenarios: onboarding, dashboard, themes). `social_media_test.dart` usa mocks. 21/21 tests pasan. |
 
 ### 🟡 No existe aún / stubbed
 
 | Componente | Archivo(s) | Problema |
 |---|---|---|
-| **F10 Auto-Stitch** | `lib/core/services/native_stitcher_service.dart` (L52), `lib/core/plugins/default/stitcher_plugin.dart` (L64), `lib/features/recording/pages/stitch_progress_page.dart` (L128) | **ROTO**: `MethodChannel('com.vrm.vrm_app/stitcher')` definido en Dart pero SIN handler nativo en Android (Java/Kotlin) ni iOS (Swift). `stitchVideos()` siempre lanza `MissingPluginException`. UI de progreso y orquestación (RecordingManager.startStitching) están completas. `pubspec.yaml` L71: `# ffmpeg_kit_flutter has been removed`. |
+| **F10 Auto-Stitch** | `lib/core/services/native_stitcher_service.dart` (L52), `android/.../MainActivity.kt` (L52), `ios/Runner/AppDelegate.swift` (L35), `lib/core/plugins/default/stitcher_plugin.dart` (L64), `lib/features/recording/pages/stitch_progress_page.dart` (L128) | ✅ IMPLEMENTADO: `MethodChannel('com.vrm.vrm_app/stitcher')` tiene handlers nativos en AMBAS plataformas. Android: `mergeVideos()` via `MediaMuxer` (L52-146). iOS: `mergeVideos()` via `AVMutableComposition` + `AVAssetExportSession` (L35-81). Dart side: `NativeStitcherService.stitchVideos()` invoca MethodChannel + fallback `MissingPluginException`. `pubspec.yaml` L71: `# ffmpeg_kit_flutter has been removed`. ⚠️ No probado end-to-end en dispositivo real. |
 | **Screenshots store-ready** | `assets/store/screenshots/step{1-5}.png` | 5 archivos existen pero 1024x1024. Android requiere 1080x1920+, iOS 1284x2778+. Pendiente capturar en dispositivo real. Tooling: `store_prep_cli.dart check/assets validate` ahora detecta resolución insuficiente via PNG IHDR header parsing. |
 | **Privacy Policy hosteada via GitHub Pages** | `settings_page.dart:8-9` | URL apunta a raw.githubusercontent.com (funciona). GitHub Pages no habilitado — post-MVP. |
 | **Mi Cuenta** | `account_profile_page.dart` | ✅ IMPLEMENTADO: DeviceInfoService con device_info_plus. Muestra modelo real, memberSince desde primer launch. |
@@ -112,7 +113,7 @@
 | D3 | F8 Overlay: ⚠️ 50% botones desconectados | ✅ COMPLETE: 9 botones conectados a CameraService | Plan desactualizado ~50% | ✅ Resuelto |
 | D4 | Mi Cuenta: ✅ 80% faltan acciones | 🟡 MOCK: Solo UI shells, toggles no-op | Plan sobreestimado ~65% | ✅ Resuelto (Paso 2) |
 | D5 | F12 Dashboard: ✅ 90% falta reemplazar mocks | ✅ COMPLETE: Proyectos reales desde ProjectRepository | Plan desactualizado ~10% | ✅ Resuelto |
-| D6 | Dependencia ffmpeg_kit_flutter: ^6.0.3 | Eliminado (`pubspec.yaml` L71). NativeStitcherService usa MethodChannel sin impl | Arquitectura cambió, stitch nativo sin implementar. ProGuard dead rules cleaned ✅ | ⏳ Pendiente |
+| D6 | Dependencia ffmpeg_kit_flutter: ^6.0.3 | Eliminado (`pubspec.yaml` L71). NativeStitcherService usa MethodChannel CON handlers nativos reales | Arquitectura cambió a stitch nativo. Android: MediaMuxer (MainActivity.kt:52-146). iOS: AVComposition (AppDelegate.swift:35-81). ✅ Resuelto |
 | D7 | Dependencia sqflite como necesaria | Declarada pero NUNCA importada en ningún .dart | Dependencia muerta. ✅ REMOVIDA de pubspec.yaml en Paso 03 | ✅ Resuelto |
 | D8 | Dependencia path: ^1.8.0 | `path: ^1.9.0` presente | Versión superior, compatible | ✅ Resuelto |
 | D9 | user_profile.json en disco | Perfil guardado en SharedPreferences, no como JSON file | Diferencia de implementación, funcionalmente equivalente | ✅ Resuelto |
@@ -153,13 +154,13 @@
 |---|---|---|---|---|---|
 | Backend Prompt | `POST /prompt/{category}/{name}` | HTTP | `{topic, context, profile_id, send_to_ai}` | `{formatted_prompt, ai_response, security}` | Código existe, servidor no desplegado |
 | API Service (Flutter) | `ApiService.callPrompt()` | Dart | `category, name, payload` | `Map<String, dynamic>` | Conecta a `localhost:8000`, usa Platform.isAndroid → 10.0.2.2 |
-| Native Stitcher | `MethodChannel('com.vrm.vrm_app/stitcher')` | Dart→Native | `{clips: [], outputPath: ""}` | `String` (output path) | MethodChannel sin handler nativo |
+| Native Stitcher | `MethodChannel('com.vrm.vrm_app/stitcher')` | Dart→Native | `{clips: [], outputPath: ""}` | `bool` (success) | ✅ Handlers nativos Android (MediaMuxer) + iOS (AVComposition) |
 
 ### Conexiones Flutter → Nativas
 
 | Channel | Namespace | Uso | Estado |
 |---|---|---|---|
-| Stitcher | `com.vrm.vrm_app/stitcher` | `stitchVideos(clips, outputPath)` | STUB — sin handler Android/iOS |
+| Stitcher | `com.vrm.vrm_app/stitcher` | `stitchVideos(clips, outputPath)` | ✅ IMPLEMENTADO — handlers nativos en Android (MediaMuxer) e iOS (AVComposition) |
 
 ### Patrones de código en uso
 
@@ -213,7 +214,7 @@
 |---|---|---|
 | **Persistencia JSON** en vez de SQLite | `ProjectRepository` escribe/lee JSON en filesystem. `sqflite` declarado pero 0 uso. | Simplicidad MVP. Datos son documento, no relacionales. Evita overhead de ORM para schemas que cambian rápido. |
 | **Plugin pipeline** (3 stages) | `VRMPipeline.execute()` = ManualInputPlugin → TemplateScriptPlugin/BackendScriptPlugin → StitcherPlugin | Separación clara ingest/procesamiento/post-procesamiento. Factory permite switchear entre local y backend. |
-| **MethodChannel para stitch** en vez de ffmpeg_kit_flutter | `NativeStitcherService` usa `MethodChannel('com.vrm.vrm_app/stitcher')`. `ffmpeg_kit_flutter` eliminado. | ffmpeg_kit_flutter tenía problemas de compilación nativa en iOS/Android. MethodChannel permite usar MediaMuxer (Android) o AVComposition (iOS) nativos. **Pendiente: implementar handlers nativos.** |
+| **MethodChannel para stitch** en vez de ffmpeg_kit_flutter | `NativeStitcherService` usa `MethodChannel('com.vrm.vrm_app/stitcher')`. Handlers nativos: Android `mergeVideos()` con `MediaMuxer` (MainActivity.kt:52-146), iOS `mergeVideos()` con `AVMutableComposition` + `AVAssetExportSession` (AppDelegate.swift:35-81). `ffmpeg_kit_flutter` eliminado. | ffmpeg_kit_flutter tenía problemas de compilación nativa. MethodChannel usa APIs nativas del OS (MediaMuxer/AVComposition). ⚠️ No probado end-to-end en dispositivo real. |
 | **Sin autenticación MVP** | No hay auth middleware, no hay RLS, no hay login. | MVP es 100% offline/single-user. Backend IA para V2. |
 | **Feature-based directories** | `lib/features/{feature}/{pages,services,models,widgets}/` | Escalabilidad y separación de concerns. Cada feature autocontenida. |
 | **Onboarding → Dashboard → Recording** como flujo principal | `main.dart` L45: onboarding condicional. Named routes para navegación profunda. | Flujo lineal simple para MVP. |
@@ -226,6 +227,13 @@
 | **Extender store_prep_cli.dart check [9]** en vez de script nuevo | 3 agentes propusieron scripts independientes (Grok → vrm-icon-regen, step → icons-generate, LagunaM1 → generate_adaptive_icons). Opción opus/glm (extender CLI existente) gana. | Consistente con patrón actual. 0 fragmentación. 1 comando para todo store prep. |
 | **No crear foreground transparente (Opción B) para MVP** | Requiere edición gráfica. Opción A (background negro) es suficiente para MVP. | Post-MVP crear `icon_foreground.png` con fondo transparente. |
 | **`android:roundIcon` no requerido** | Android 13+ resuelve adaptive icon sin roundIcon explícito. | Opus lo mencionó pero no bloquea. Post-MVP. |
+
+### Decisiones de Paso 11 (Contexto-y-Actualizacion-Estado)
+
+| Decisión | Detalle | Justificación |
+|---|---|---|
+| **Corrección CRÍTICA: Stitch handler nativo EXISTE** | Phase-state decía "STUB — sin handler Android/iOS". Verificación contra código fuente confirma: `MainActivity.kt:52-146` (Android MediaMuxer) y `AppDelegate.swift:35-81` (iOS AVComposition) implementados. Discrepancia D6 cambia de ⏳→✅. | 6_CONTEXTO.md requiere verificación contra código fuente. Error en phase-state previo propagaría info falsa a agentes downstream. |
+| **72 debugPrint residuales confirman deuda técnica** | Escaneo confirma 72+ debugPrint en 15 archivos de lib/. Documentado como post-MVP. | No bloquea release. debugPrint_scanner.dart disponible para migración gradual. |
 
 ### Decisiones de Paso 9 (vrm-health-check-fix-real)
 
@@ -267,7 +275,7 @@
 - **Plan dice F9 Revisión 40% → Realidad 100%**: `ClipReviewPage` ya reproduce clips reales con accept/reject.
 - **Plan dice F8 Overlay 50% → Realidad 100%**: Todos los botones del overlay conectados a hardware.
 - **Plan dice Mi Cuenta 80% → Realidad <20%**: Solo UI shell. Toggles, datos de perfil, persistencia de settings no existen. → **IMPLEMENTADO EN P2**
-- **Plan asume ffmpeg_kit_flutter → Realidad MethodChannel**: Arquitectura de stitch cambió. Plan debe actualizarse.
+- **Plan asume ffmpeg_kit_flutter → Realidad MethodChannel CON handlers nativos**: Arquitectura de stitch cambió a nativo. Android (MediaMuxer) e iOS (AVComposition) implementados. ⚠️ No probado E2E en dispositivo real.
 - **Plan dice Perfil Influencer no persiste → IMPLEMENTADO EN P2**: `SettingsService.setInfluencerProfile()` guarda en SharedPreferences.
 - **Plan dice Settings stubs → IMPLEMENTADO EN P2**: Theme switcher funciona, teleprompter persisten, cloud sync toggle funciona.
 
@@ -299,7 +307,7 @@
 | **store_prep_cli.dart como herramienta DX unificada** | CLI unificado con 5 subcomandos. Reemplaza propuestas individuales de 4 agentes (speed, ds, hy3, laguna). Sigue patron `vrm_health_check.dart`. | Reduce fragmentación. Unica CLI para todo el pipeline store readiness. |
 | **Dart sobre Python para DX** | CLI escrito en Dart. hy3 propuso Python — descartado. | Todos los scripts del proyecto usan Dart (`vrm_health_check.dart`, `validador_hardware.dart`). Consistencia del ecosistema. |
 | **docs/PRIVACY_POLICY.md como fuente de verdad** | Root PRIVACY_POLICY.md reemplazado con contenido de docs/ version. docs/ tiene datos reales, root era template genérico. | Unifica versiones. Elimina riesgo de placeholders en release. |
-| **Android stitch handler ya implementado** | `MainActivity.kt:52-146` tiene mergeVideos() con MediaMuxer. DS afirmó ausencia — FALSO. | Código existe. Implementador no toca. |
+| **Android stitch handler ya implementado** | `MainActivity.kt:52-146` tiene mergeVideos() con MediaMuxer. DS afirmó ausencia — FALSO. iOS handler también existe en AppDelegate.swift:35-81 con AVMutableComposition. | Código existe en AMBAS plataformas. Implementador no toca. |
 | **Capturas manuales + guía CLI** | `store_prep_cli.dart screenshots` guía captura manual. Capturas finales requieren dispositivo real. | Golden tests generan base, pero resolución store requiere dispositivo físico. |
 | **Corrección D7: key.properties passwords** | Passwords randomizadas via `_randomSuffix()` con `Random.secure()`. No más `vrm_password_123`. | Seguridad: passwords default expuestas en repo público. |
 
@@ -319,6 +327,7 @@
 | 08-Migrar-debugPrint-residual-LoggerService | ✅ completed | `DEVS/IMPLEMENTED/mvp/08-Migrar-debugPrint-residual-LoggerService/` | 7fa5dfa | Scope original (2 debugPrint en recording_page.dart L657,L662) YA COMPLETADO en Paso 05. 6/6 agentes confirmaron 0 debugPrint. Kilo migró 2 debugPrint extra en recording_end_page.dart (L95, L172). DX tool `scripts/debugprint_scanner.dart` (276L) creado con scan + --fix. 72 debugPrint residuales en 15 archivos documentados como roadmap post-MVP. | 5/5 criterios aceptacion. 3/3 correcciones D1-D3 aplicadas. 0 criticos. 2 mejoras. flutter analyze 0 errores. 18/18 tests. |
 | 09-vrm-health-check-fix-real | ✅ completed | `DEVS/IMPLEMENTED/mvp/09-vrm-health-check-fix-real/` | 378d54b | `--dry-run` flag agregado a `check --fix`. `_runFixCleanup({bool dryRun = false})` con preview completo. `_fixProguardDeadRules()` nuevo — realmente elimina reglas ffmpegkit (antes solo print warning). `_runCheck()` refactorizado para soportar dryRun. CLI help actualizado. 7/7 criterios aceptacion. Validacion 8/10 calidad. | Paso esencialmente verificacion — `_runFixCleanup()` ya existia desde Paso 05 (b603e48). `--dry-run` enhancement nuevo en este paso. 0 criticos, 0 importantes, 2 mejoras. flutter analyze 0 errores. 18/18 tests. |
 | 10-Adaptive-icons-Android-13 | ✅ completed | `DEVS/IMPLEMENTED/mvp/10-Adaptive-icons-Android-13/` | 4877955 | `pubspec.yaml:133` `adaptive_icon_background` corregido `#FFFFFF`→`#000000`. store_prep_cli.dart check [9] agregado (L303-323) verifica `mipmap-anydpi-v26/` existe con XML. `flutter pub run flutter_launcher_icons` ejecutado → XML generado con `<adaptive-icon>` + foreground/background layers. colors.xml `ic_launcher_background` = `#000000`. Iconos legacy PNGs regenerados en todas densidades. 14/15 criterios aceptacion. Validacion 9/10 calidad. | Correccion critica: plan decia "agregar config" pero ya existia. Tarea real = regenerar iconos + corregir color. D3 fondo negro integrado en icon_source.png detectado por opus. 0 criticos, 1 importante (screenshots pre-existente), 2 mejoras. flutter analyze 0 errores. 18/18 tests. |
+| 11-Contexto-y-Actualizacion-Estado | ✅ completed | `DEVS/IMPLEMENTED/mvp/11-Contexto-y-Actualizacion-Estado/` | f7b0527 | Corrección CRÍTICA: Stitch handler nativo EXISTE en Android (MediaMuxer, `MainActivity.kt:52-146`) e iOS (AVComposition, `AppDelegate.swift:35-81`). Phase-state decía "STUB sin handler" — falso. Discrepancia D6 corregida: ⏳→✅ Resuelto. 7 análisis archivados. Tests 21/21 pasan. | Sin cambios en lib/. Solo actualización de estado. Archivado de IN_PROGRESS → IMPLEMENTED. Nuevo DX tool: `scripts/test_coverage_report.dart`. |
 
 ---
 
@@ -326,7 +335,7 @@
 
 - [ ] Happy path: Idea → Script → Grabar → Revisar → Stitch → Exportar funciona end-to-end sin crash
 - [ ] Fallback IA offline: ScriptStudio genera guion con templates cuando backend no responde
-- [ ] Stitch: Clips se concatenan en `final.mp4` sin error (requiere implementar handler nativo)
+- [ ] Stitch: Clips se concatenan en `final.mp4` — handlers nativos implementados (Android MediaMuxer + iOS AVComposition), pendiente prueba end-to-end en dispositivo real
 - [ ] Export: `final.mp4` se guarda en galería nativa y share sheet se abre
 - [ ] Persistencia: Proyecto guardado en disco puede reanudarse después de cerrar app
 - [ ] Permisos: Cámara, micrófono y almacenamiento solicitados correctamente con mensaje explicativo
@@ -355,3 +364,4 @@
 | **Store Prep CLI (Pasos 4-5+10)** | `scripts/store_prep_cli.dart` (703L) | CLI unificado: `check` (11 checks pre-store + check [9] adaptive icons + validación resolución screenshots via PNG IHDR header), `keystore` (genera RSA 2048), `assets validate` (iconos/splash/screenshots + validación resolución), `privacy` (valida placeholders), `screenshots` (guía captura). Reduce preparación store de ~4h a ~15min. Detecta keystore faltante, passwords default, placeholders, permisos, gitignore, adaptive icons faltantes, resolución screenshots insuficiente. Check [9] evita icono recortado/cuadrado en Android 13+ detectable solo en dispositivo físico. |
 | **Validador Metricas Sesion (Paso 7)** | `scripts/validador_metrics_session.dart` (173L) | CLI: `check --project-id <uuid> [--progress-only]` y `demo`. Valida que RecordingEndPage use metricas reales (no hardcodeadas). Detecta `0.75` hardcodeado, duracion "42m", takes falsos en session_data.json. Reduce QA manual de metricas de 10min a ~1s. |
 | **DebugPrint Scanner (Paso 8)** | `scripts/debugprint_scanner.dart` (276L) | CLI: `dart run scripts/debugprint_scanner.dart` escanea 88+ archivos lib/ buscando debugPrint residuales en ~1s. `--fix` migra automaticamente a LoggerService.log(). QA automatizado de logging — evita regresion de debugPrint en Release. Reduce revision manual de ~15min a ~1s. |
+| **Test Coverage Report (Paso 11)** | `scripts/test_coverage_report.dart` (233L) | CLI: `dart run scripts/test_coverage_report.dart` escanea `lib/features/` y `test/` para generar reporte de cobertura por feature. Detecta features sin tests. UX DX para visibilidad de cobertura. |
