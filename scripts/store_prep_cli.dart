@@ -4,6 +4,8 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
+import 'utils.dart';
+
 const _projectRoot = '.';
 const _androidDir = '$_projectRoot/android';
 const _defaultKeystorePath = '$_androidDir/vrm-release-key.jks';
@@ -190,7 +192,8 @@ Future<void> _runCheck() async {
   final existingDirExists = await Directory(_existingScreenshotsDir).exists();
   var screenshotCount = 0;
   var resolutionOk = true;
-  var badResolution = <String>[];
+  var badFiles = <String>[];
+  var corruptFiles = <String>[];
 
   if (storeDirExists) {
     final files = await Directory(
@@ -200,7 +203,9 @@ Future<void> _runCheck() async {
     for (final f in files) {
       if (!_validateScreenshotResolution(f.path)) {
         resolutionOk = false;
-        badResolution.add(f.path.split('\\').last.split('/').last);
+        final name = f.path.split('\\').last.split('/').last;
+        badFiles.add(name);
+        if (File(f.path).lengthSync() <= 10240) corruptFiles.add(name);
       }
     }
   }
@@ -212,17 +217,27 @@ Future<void> _runCheck() async {
     for (final f in files) {
       if (!_validateScreenshotResolution(f.path)) {
         resolutionOk = false;
-        badResolution.add(f.path.split('\\').last.split('/').last);
+        final name = f.path.split('\\').last.split('/').last;
+        badFiles.add(name);
+        if (File(f.path).lengthSync() <= 10240) corruptFiles.add(name);
       }
     }
   }
 
   results['screenshots'] = screenshotCount >= 5 && resolutionOk;
-  details['screenshots'] = screenshotCount >= 5
-      ? (resolutionOk
-            ? '$screenshotCount screenshots OK (≥1080x1920)'
-            : 'Resolución insuficiente: ${badResolution.join(", ")}')
-      : 'Solo $screenshotCount screenshots (mínimo 5)';
+  if (screenshotCount >= 5) {
+    if (resolutionOk) {
+      details['screenshots'] = '$screenshotCount screenshots OK (≥1080x1920)';
+    } else if (corruptFiles.isNotEmpty) {
+      details['screenshots'] =
+          'Archivos corruptos o placeholder (<10KB): ${corruptFiles.join(", ")}';
+    } else {
+      details['screenshots'] =
+          'Resolución insuficiente: ${badFiles.join(", ")}';
+    }
+  } else {
+    details['screenshots'] = 'Solo $screenshotCount screenshots (mínimo 5)';
+  }
   print(
     '  ${(screenshotCount >= 5 && resolutionOk) ? "✅" : "❌"} ${details["screenshots"]}',
   );
@@ -232,7 +247,13 @@ Future<void> _runCheck() async {
   }
   if (!resolutionOk) {
     allOk = false;
-    print('    → Recapturar en dispositivo real a resolución ≥1080x1920');
+    if (corruptFiles.isNotEmpty) {
+      print(
+        '    → Archivos corruptos (<10KB) detectados. Recapturar en dispositivo real.',
+      );
+    } else {
+      print('    → Recapturar en dispositivo real a resolución ≥1080x1920');
+    }
   }
 
   // 6. .gitignore
@@ -645,27 +666,11 @@ Future<void> _runPrivacy() async {
 
 // ─── SCREENSHOTS ──────────────────────────────────────────────────────────────
 
-({int width, int height})? _getPngDimensionsSync(String path) {
-  try {
-    final file = File(path);
-    final bytes = file.readAsBytesSync();
-    if (bytes.length < 24) return null;
-    if (bytes[0] != 0x89 ||
-        bytes[1] != 0x50 ||
-        bytes[2] != 0x4E ||
-        bytes[3] != 0x47) {
-      return null;
-    }
-    final w = bytes[16] << 24 | bytes[17] << 16 | bytes[18] << 8 | bytes[19];
-    final h = bytes[20] << 24 | bytes[21] << 16 | bytes[22] << 8 | bytes[23];
-    return (width: w, height: h);
-  } catch (_) {
-    return null;
-  }
-}
-
 bool _validateScreenshotResolution(String path) {
-  final dims = _getPngDimensionsSync(path);
+  final file = File(path);
+  if (!file.existsSync()) return false;
+  if (file.lengthSync() <= 10240) return false;
+  final dims = getPngDimensions(path);
   if (dims == null) return false;
   return dims.width >= 1080 && dims.height >= 1920;
 }

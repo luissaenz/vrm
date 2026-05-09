@@ -1,7 +1,7 @@
 # 🗺️ Phase State: mvp
 
 > Generado: 2026-05-05 vía 6_CONTEXTO.md
-> Actualizado: 2026-05-09 vía 6_CONTEXTO.md (Post-Paso 11 — Contexto y Actualización Estado)
+> Actualizado: 2026-05-09 vía 6_CONTEXTO.md (Post-Paso 12 — Screenshots-store-ready)
 
 ---
 
@@ -25,9 +25,10 @@
 | 09 | vrm-health-check-fix-real | ✅ completed |
 | 10 | Adaptive-icons-Android-13 | ✅ completed |
 | 11 | Contexto-y-Actualizacion-Estado | ✅ completed |
+| 12 | Screenshots-store-ready | ✅ completed |
 
 **Dependencias entre pasos:**
-- 01 ← 02 ← 03 ← 04 ← 05 ← 06 ← 07 ← 08 ← 09 ← 10 ← 11 (secuencial)
+- 01 ← 02 ← 03 ← 04 ← 05 ← 06 ← 07 ← 08 ← 09 ← 10 ← 11 ← 12 (secuencial)
 
 ---
 
@@ -70,7 +71,9 @@
 | **Keystore generado** | `android/vrm-release-key.jks` (2760 bytes), `android/key.properties` | RSA 2048, alias vrm_upload_key, validez 10000d. Passwords randomizadas (no default). |
 | **Settings enlace Privacy Policy** | `lib/features/settings/settings_page.dart` (L8-9, L413-424) | `_privacyPolicyUrl` apunta a raw.githubusercontent.com/luissaenz/vrm/main/PRIVACY_POLICY.md → HTTP 200. `_openPrivacyPolicy()` con try/catch + SnackBar. |
 | **key.properties passwords randomizadas** | `android/key.properties` (L1-2) | `vrm_store_2kh`, `vrm_key_2kh`. No default. Verificado por store_prep_cli.dart check. |
-| **Screenshots en directorio store** | `assets/store/screenshots/step{1-5}.png` | 5 screenshots copiadas a directorio correcto segun diseño (1024x1024 — pendiente recapturar a 1080x1920+). |
+| **Screenshots store-ready** | `assets/store/screenshots/step{1-5}.png` | 5 PNGs reales 1080x2400 (Xiaomi 2201117TL). Headers `89 50 4E 47` verificados. No JPEG disguised. Nombres `step1.png..step5.png`. Legacy `assets/images/screenshots/` eliminado. Capturadas via `capture_store_screenshots.dart` con dogfooding. Validado por `store_prep_cli.dart check` (11/11). |
+| **Capture Store Screenshots DX tool** | `scripts/capture_store_screenshots.dart` (247L) | CLI interactivo ADB: captura secuencial 5 screenshots en dispositivo Android. Flags: `--device <id>`, `--clean`, `--help`. Valida PNG header + dimensiones + file size post-captura. Reduce ~30min manual a ~5min. |
+| **Shared PNG utils** | `scripts/utils.dart` (28L) | `getPngDimensions()` + `validatePngHeader()` compartidos entre `capture_store_screenshots.dart` y `store_prep_cli.dart`. Elimina duplicacion de PNG parser. |
 | **Play Store Data Safety documentado** | `DEVS/play_store_data_safety.md` | Checklist de respuestas para formulario Data Safety de Play Console. |
 | **.gitignore secreto** | `.gitignore` | Cubre `*.jks`, `*.keystore`, `/android/key.properties`. |
 | **Adaptive icons Android 13+** | `pubspec.yaml:133`, `android/app/src/main/res/mipmap-anydpi-v26/launcher_icon.xml` | `adaptive_icon_background: "#000000"` (corregido de `#FFFFFF`). XML generado con `<adaptive-icon>` → background `#000000` + foreground `icon_source.png`. Icono legacy intacto en mipmap-*/launcher_icon.png. store_prep_cli.dart check [9] verifica existencia post-generación. |
@@ -89,12 +92,11 @@
 | Componente | Archivo(s) | Problema |
 |---|---|---|
 | **F10 Auto-Stitch** | `lib/core/services/native_stitcher_service.dart` (L52), `android/.../MainActivity.kt` (L52), `ios/Runner/AppDelegate.swift` (L35), `lib/core/plugins/default/stitcher_plugin.dart` (L64), `lib/features/recording/pages/stitch_progress_page.dart` (L128) | ✅ IMPLEMENTADO: `MethodChannel('com.vrm.vrm_app/stitcher')` tiene handlers nativos en AMBAS plataformas. Android: `mergeVideos()` via `MediaMuxer` (L52-146). iOS: `mergeVideos()` via `AVMutableComposition` + `AVAssetExportSession` (L35-81). Dart side: `NativeStitcherService.stitchVideos()` invoca MethodChannel + fallback `MissingPluginException`. `pubspec.yaml` L71: `# ffmpeg_kit_flutter has been removed`. ⚠️ No probado end-to-end en dispositivo real. |
-| **Screenshots store-ready** | `assets/store/screenshots/step{1-5}.png` | 5 archivos existen pero 1024x1024. Android requiere 1080x1920+, iOS 1284x2778+. Pendiente capturar en dispositivo real. Tooling: `store_prep_cli.dart check/assets validate` ahora detecta resolución insuficiente via PNG IHDR header parsing. |
+| **Backend IA** | `backend/` (FastAPI), `lib/core/api_service.dart` | Backend FastAPI existe en código (POST `/prompt/{category}/{name}` con OpenAI/Anthropic/Gemini) pero requiere servidor corriendo en `localhost:8000`. Ningún servidor desplegado. |
 | **Privacy Policy hosteada via GitHub Pages** | `settings_page.dart:8-9` | URL apunta a raw.githubusercontent.com (funciona). GitHub Pages no habilitado — post-MVP. |
 | **Mi Cuenta** | `account_profile_page.dart` | ✅ IMPLEMENTADO: DeviceInfoService con device_info_plus. Muestra modelo real, memberSince desde primer launch. |
 | **Settings** | `settings_page.dart` | ✅ IMPLEMENTADO: SettingsService conecta a SharedPreferences. Theme switcher funciona (VRMApp carga desde prefs). Teleprompter sliders persisten prefs. Cloud sync toggle funciona. |
 | **Perfil Influencer** | `influencer_profile_page.dart` (L631) | ✅ IMPLEMENTADO: _saveProfile() persiste en SharedPreferences al hacer finalize. |
-| **Backend IA** | `backend/` (FastAPI), `lib/core/api_service.dart` | Backend FastAPI existe en código (POST `/prompt/{category}/{name}` con OpenAI/Anthropic/Gemini) pero requiere servidor corriendo en `localhost:8000`. Ningún servidor desplegado. |
 
 ### ❌ Discrepancias plan vs código (Paso 10)
 
@@ -228,6 +230,18 @@
 | **No crear foreground transparente (Opción B) para MVP** | Requiere edición gráfica. Opción A (background negro) es suficiente para MVP. | Post-MVP crear `icon_foreground.png` con fondo transparente. |
 | **`android:roundIcon` no requerido** | Android 13+ resuelve adaptive icon sin roundIcon explícito. | Opus lo mencionó pero no bloquea. Post-MVP. |
 
+### Decisiones de Paso 12 (Screenshots-store-ready)
+
+| Decisión | Detalle | Justificación |
+|---|---|---|
+| **Dart sobre Bash para DX tool** | `capture_store_screenshots.dart` en vez de script Bash. 5/6 agentes propusieron Dart. | Consistencia con ecosistema existente (`store_prep_cli.dart`, `vrm_health_check.dart`, etc). Sin dependencias externas. |
+| **ADB screencap como metodo captura** | `adb shell screencap -p` produce PNG nativo. No requiere plugins Flutter ni MethodChannel. | Simplicidad MVP. Resolucion nativa del dispositivo. Sin dependencias extras. |
+| **step1.png..step5.png (sin sufijo descriptivo)** | Naming coincide con guia CLI existente (`store_prep_cli.dart:699`). Consistencia. | Evita confusion entre script y realidad. Guia CLI = unica verdad. |
+| **Validacion corruptos <10KB** | `_validateScreenshotResolution()` chequea `file.lengthSync() <= 10240`. `_runCheck()` distingue corrupto vs resolucion insuficiente. | Propuesta DS aceptada. Previene falsos positivos (IHDR null sin mensaje). |
+| **Shared utils module** | `scripts/utils.dart` extrae `getPngDimensions()` + `validatePngHeader()`. Importado por ambos scripts. | Elimina duplicacion (ID-004). Previene drift entre parsers. |
+| **Captura en dispositivo real > emulador** | 5 screenshots capturadas en Xiaomi 2201117TL (1080x2400). PNG headers verificados. | Emuladores rechazados por Google Play/App Store. Dispositivo real obligatorio. |
+| **Eliminar legacy `assets/images/screenshots/`** | Directorio duplicado removido via `--clean`. No referenciado en codigo. | Evita falsos positivos en store_prep_cli check (contaba ambos dirs = 10 archivos). |
+
 ### Decisiones de Paso 11 (Contexto-y-Actualizacion-Estado)
 
 | Decisión | Detalle | Justificación |
@@ -328,6 +342,7 @@
 | 09-vrm-health-check-fix-real | ✅ completed | `DEVS/IMPLEMENTED/mvp/09-vrm-health-check-fix-real/` | 378d54b | `--dry-run` flag agregado a `check --fix`. `_runFixCleanup({bool dryRun = false})` con preview completo. `_fixProguardDeadRules()` nuevo — realmente elimina reglas ffmpegkit (antes solo print warning). `_runCheck()` refactorizado para soportar dryRun. CLI help actualizado. 7/7 criterios aceptacion. Validacion 8/10 calidad. | Paso esencialmente verificacion — `_runFixCleanup()` ya existia desde Paso 05 (b603e48). `--dry-run` enhancement nuevo en este paso. 0 criticos, 0 importantes, 2 mejoras. flutter analyze 0 errores. 18/18 tests. |
 | 10-Adaptive-icons-Android-13 | ✅ completed | `DEVS/IMPLEMENTED/mvp/10-Adaptive-icons-Android-13/` | 4877955 | `pubspec.yaml:133` `adaptive_icon_background` corregido `#FFFFFF`→`#000000`. store_prep_cli.dart check [9] agregado (L303-323) verifica `mipmap-anydpi-v26/` existe con XML. `flutter pub run flutter_launcher_icons` ejecutado → XML generado con `<adaptive-icon>` + foreground/background layers. colors.xml `ic_launcher_background` = `#000000`. Iconos legacy PNGs regenerados en todas densidades. 14/15 criterios aceptacion. Validacion 9/10 calidad. | Correccion critica: plan decia "agregar config" pero ya existia. Tarea real = regenerar iconos + corregir color. D3 fondo negro integrado en icon_source.png detectado por opus. 0 criticos, 1 importante (screenshots pre-existente), 2 mejoras. flutter analyze 0 errores. 18/18 tests. |
 | 11-Contexto-y-Actualizacion-Estado | ✅ completed | `DEVS/IMPLEMENTED/mvp/11-Contexto-y-Actualizacion-Estado/` | f7b0527 | Corrección CRÍTICA: Stitch handler nativo EXISTE en Android (MediaMuxer, `MainActivity.kt:52-146`) e iOS (AVComposition, `AppDelegate.swift:35-81`). Phase-state decía "STUB sin handler" — falso. Discrepancia D6 corregida: ⏳→✅ Resuelto. 7 análisis archivados. Tests 21/21 pasan. | Sin cambios en lib/. Solo actualización de estado. Archivado de IN_PROGRESS → IMPLEMENTED. Nuevo DX tool: `scripts/test_coverage_report.dart`. |
+| 12-Screenshots-store-ready | ✅ completed | `DEVS/IMPLEMENTED/mvp/12-Screenshots-store-ready/` | d9a4ef4 | DX tool: `capture_store_screenshots.dart` + `utils.dart` shared module. `store_prep_cli.dart` validacion corruptos <10KB. 5 PNGs 1080x2400 capturadas en Xiaomi 2201117TL. D1-D4 corregidas (JPEGs eliminados, legacy dir removido). ID-004 resuelta (shared utils). 12/12 criterios aceptacion. 11/11 store check. Dogfooding completo. | 8 analisis archivados. 3 scripts nuevos/modificados. Sin cambios en lib/. |
 
 ---
 
@@ -365,3 +380,5 @@
 | **Validador Metricas Sesion (Paso 7)** | `scripts/validador_metrics_session.dart` (173L) | CLI: `check --project-id <uuid> [--progress-only]` y `demo`. Valida que RecordingEndPage use metricas reales (no hardcodeadas). Detecta `0.75` hardcodeado, duracion "42m", takes falsos en session_data.json. Reduce QA manual de metricas de 10min a ~1s. |
 | **DebugPrint Scanner (Paso 8)** | `scripts/debugprint_scanner.dart` (276L) | CLI: `dart run scripts/debugprint_scanner.dart` escanea 88+ archivos lib/ buscando debugPrint residuales en ~1s. `--fix` migra automaticamente a LoggerService.log(). QA automatizado de logging — evita regresion de debugPrint en Release. Reduce revision manual de ~15min a ~1s. |
 | **Test Coverage Report (Paso 11)** | `scripts/test_coverage_report.dart` (233L) | CLI: `dart run scripts/test_coverage_report.dart` escanea `lib/features/` y `test/` para generar reporte de cobertura por feature. Detecta features sin tests. UX DX para visibilidad de cobertura. |
+| **Capture Store Screenshots (Paso 12)** | `scripts/capture_store_screenshots.dart` (247L) | CLI interactivo ADB: `dart run scripts/capture_store_screenshots.dart` guia paso a paso captura 5 pantallas. `--clean` elimina JPEGs existentes + dir legacy. `--device <id>` especifica dispositivo. Valida PNG header + dimensiones + file size. Reduce captura manual ~30min a ~5min. Dogfooding verificado (5/5 capturadas). |
+| **Shared PNG Utils (Paso 12)** | `scripts/utils.dart` (28L) | `getPngDimensions()` + `validatePngHeader()` compartidos. Evita duplicacion de PNG parser entre `capture_store_screenshots.dart` y `store_prep_cli.dart`. SRP aplicado: logica PNG en modulo unico. |
