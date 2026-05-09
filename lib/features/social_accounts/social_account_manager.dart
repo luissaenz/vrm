@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:flutter/foundation.dart';
 import 'domain/social_account.dart';
 import 'domain/social_media_service.dart';
 import 'domain/social_platform.dart';
@@ -29,7 +28,8 @@ class SocialAccountManager {
       final account = await service.authorize();
       if (account != null) {
         _accounts.add(account);
-        debugPrint(
+        LoggerService.log(
+          'SocialAccountManager',
           'Account connected: ${account.name} on ${platform.displayName}',
         );
       }

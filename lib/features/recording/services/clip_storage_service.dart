@@ -1,7 +1,6 @@
 import 'dart:io';
 import 'package:camera/camera.dart';
 import 'package:storage_space/storage_space.dart';
-import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import '../models/clip_metadata.dart';
@@ -165,7 +164,8 @@ class ClipStorageService {
           throw FileSystemException('Recorded clip is empty after fallback');
         }
 
-        debugPrint(
+        LoggerService.log(
+          'ClipStorageService',
           '[ClipStorage] Clip saved (fallback): $destPath ($size bytes)',
         );
         return destPath;

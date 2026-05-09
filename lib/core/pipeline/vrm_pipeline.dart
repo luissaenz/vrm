@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import '../plugins/i_idea_source.dart';
 import '../plugins/i_script_processor.dart';
 import '../plugins/i_post_processor.dart';
@@ -27,7 +26,8 @@ class VRMPipeline {
   Future<PipelineResult> execute(Map<String, dynamic> initialParams) async {
     try {
       // Fase 1: Ingesta
-      debugPrint(
+      LoggerService.log(
+        'VRMPipeline',
         '[Pipeline] Stage 1: Fetching idea with plugin ${ideaSource.pluginId}',
       );
       final input = await _executeStage(
@@ -40,7 +40,8 @@ class VRMPipeline {
       await SchemaValidator.validate('input_schema', input.toJson());
 
       // Fase 2: Procesar guion
-      debugPrint(
+      LoggerService.log(
+        'VRMPipeline',
         '[Pipeline] Stage 2: Processing script with plugin ${scriptProcessor.pluginId}',
       );
       final scriptConfig =
@@ -55,7 +56,8 @@ class VRMPipeline {
       await SchemaValidator.validate('script_bundle', script.toJson());
 
       // Fase 3: Post-procesar video
-      debugPrint(
+      LoggerService.log(
+        'VRMPipeline',
         '[Pipeline] Stage 3: Post-processing with plugin ${postProcessor.pluginId}',
       );
       // NOTA: En implementación real, aquí se graba el video primero

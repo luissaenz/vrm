@@ -359,3 +359,50 @@ Implementar try/catch individual por archivo en `_runFixCleanup()` dentro de `vr
 
 ### Notas
 Post-MVP. Aumenta la robustez del script de mantenimiento.
+
+---
+
+## 📥 Pasos incorporados desde sugerencias de validación
+> Incorporados el 2026-05-09 — Fase activa: mvp
+
+## Paso 16: Correccion-desvio-debugprint-detector
+
+**Origen:** Sugerencia 🟡 de validación — Paso ID-002
+**Prioridad:** Media
+**Fase:** mvp
+
+### Objetivo
+Alinear la implementación de `debugprint_detector.dart` con la especificación original, o actualizar la especificación (analisis-FINAL §3) para reflejar la decisión arquitectónica de usar funciones públicas en un módulo separado.
+
+### Tareas
+- [ ] Revisar la implementación actual de `debugprint_detector.dart` y su uso de funciones públicas (`isSameLineKDebugModeGuard`).
+- [ ] Decidir si renombrar a privadas (refactor) o mantener públicas y actualizar la documentación (`analisis-FINAL.md`).
+- [ ] Ejecutar el cambio elegido y verificar que la herramienta `debugprint_scanner.dart` siga funcionando correctamente.
+
+### Criterios de Aceptación
+- [ ] Implementación y especificación están 100% alineadas.
+- [ ] Pruebas o verificaciones del escáner siguen siendo exitosas.
+
+### Notas
+Desvío de diseño detectado durante validación.
+
+## Paso 17: Mejorar-debugprint-fix-multilinea
+
+**Origen:** Sugerencia 🔵 de validación — Paso ID-003
+**Prioridad:** Baja
+**Fase:** mvp
+
+### Objetivo
+Mejorar la capacidad de corrección automática (`--fix`) de `debugprint_scanner.dart` para que pueda manejar y migrar llamadas a `debugPrint()` que abarcan múltiples líneas, reduciendo la intervención manual.
+
+### Tareas
+- [ ] Analizar las 7 llamadas residuales de `debugPrint` multilínea para entender el patrón.
+- [ ] Modificar la lógica de escaneo/reemplazo en `debugprint_scanner.dart` para usar un parser multi-línea o enfoque basado en AST (Analyzer).
+- [ ] Ejecutar la corrección automática sobre los residuales y validar la sintaxis resultante.
+
+### Criterios de Aceptación
+- [ ] `--fix` migra correctamente llamadas `debugPrint` multilínea sin romper el código.
+- [ ] Menos de 7 (idealmente 0) llamadas residuales manuales requeridas por problemas multilínea.
+
+### Notas
+Mejora para Developer Experience (DX) y automatización.

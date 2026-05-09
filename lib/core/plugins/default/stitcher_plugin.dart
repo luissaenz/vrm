@@ -1,4 +1,4 @@
-import 'package:flutter/foundation.dart';
+import 'package:vrm_app/core/services/logger_service.dart';
 import '../../plugins/i_post_processor.dart';
 import '../../models/asset_manifest.dart';
 import '../../services/native_stitcher_service.dart';
@@ -34,7 +34,8 @@ class StitcherPlugin implements IPostProcessor {
         clipPaths: clips,
         onProgress: (progress) {
           // Progress callback - could be exposed to UI if needed
-          debugPrint(
+          LoggerService.log(
+            'StitcherPlugin',
             'Stitching progress: ${progress.progress} - ${progress.status}',
           );
         },

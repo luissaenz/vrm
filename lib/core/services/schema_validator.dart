@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'package:json_schema/json_schema.dart';
-import 'package:flutter/foundation.dart';
 import 'package:vrm_app/core/services/logger_service.dart';
 
 /// Servicio para validar contratos de datos contra esquemas JSON en tiempo real
@@ -33,7 +32,8 @@ class SchemaValidator {
           'El contrato "$schemaName" ha sido violado. Errores: ${validationResult.errors.join(", ")}',
         );
       }
-      debugPrint(
+      LoggerService.log(
+        'SchemaValidator',
         '✅ [SchemaValidator] Contrato "$schemaName" validado correctamente',
       );
     } catch (e) {
