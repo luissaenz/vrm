@@ -1,7 +1,7 @@
 # 🗺️ Phase State: mvp
 
 > Generado: 2026-05-05 vía 6_CONTEXTO.md
-> Actualizado: 2026-05-09 vía 6_CONTEXTO.md (Post-Paso 13 — Mejorar-debugprint-scanner-kdebugmode)
+> Actualizado: 2026-05-09 vía 6_CONTEXTO.md (Post-Paso 14 — Migracion-masiva-debugprint-residuales)
 
 ---
 
@@ -27,9 +27,10 @@
 | 11 | Contexto-y-Actualizacion-Estado | ✅ completed |
 | 12 | Screenshots-store-ready | ✅ completed |
 | 13 | Mejorar-debugprint-scanner-kdebugmode | ✅ completed |
+| 14 | Migracion-masiva-debugprint-residuales | ✅ completed |
 
 **Dependencias entre pasos:**
-- 01 ← 02 ← 03 ← 04 ← 05 ← 06 ← 07 ← 08 ← 09 ← 10 ← 11 ← 12 ← 13 (secuencial)
+- 01 ← 02 ← 03 ← 04 ← 05 ← 06 ← 07 ← 08 ← 09 ← 10 ← 11 ← 12 ← 13 ← 14 (secuencial)
 
 ---
 
@@ -78,6 +79,8 @@
 | **DebugPrint detector** | `scripts/debugprint_detector.dart` (164L) | API pública con 7 funciones: `isInsideDebugModeBlock` (orquestador), `isSameLineKDebugModeGuard`, `isInsideAssert`, `isTernaryKDebugModeGuard`, `isAdjacentKDebugModeGuard`, `isInsideBracedDebugModeBlock`, `stripStringsAndComments`. Cross-file usable por scanner y tests. |
 | **DebugPrint scanner mejorado** | `scripts/debugprint_scanner.dart` (328L) | Refactor: extrae lógica a `debugprint_detector.dart`. 4 wrappers `_` privados (`_isInsideDebugModeBlock`, `_isSameLineKDebugModeGuard`, `_isInsideAssert`, `_isInsideBracedDebugModeBlock`) según spec FINAL. 5 discrepancias D1-D5 resueltas: same-line, adyacente, assert, ternario, braces en strings/comentarios. 88 archivos escaneados, 7 residuales encontrados. |
 | **DebugPrint scanner test** | `test/debugprint_scanner_test.dart` | 31 tests unitarios (8 grupos) cubriendo TP-1 a TP-8 + stripStringsAndComments + orquestador. 52/52 tests totales pasan. |
+| **Paso 14: Migración 7 debugPrint residuales → LoggerService** | `vrm_pipeline.dart`, `stitcher_plugin.dart`, `schema_validator.dart`, `clip_storage_service.dart`, `social_account_manager.dart` | 7 debugPrint multilínea migrados a LoggerService.log() en 5 archivos. Tags PascalCase según spec: VRMPipeline, StitcherPlugin, SchemaValidator, ClipStorageService, SocialAccountManager. 0 debugPrint residuales confirmados por scanner. Imports `flutter/foundation.dart` unused removidos de los 5 archivos. Import LoggerService agregado en stitcher_plugin.dart. `memory_monitor.dart:62` y `logger_service.dart:48` conservan debugPrint intencional. |
+| **DebugPrint migration verifier** | `scripts/debugprint_migration_verifier.dart` | CLI post-migración: `dart run scripts/debugprint_migration_verifier.dart` ejecuta scanner + valida 0 unused imports `flutter/foundation.dart` + `flutter analyze` en archivos meta. 3/3 checks pasan. Reduce verificación manual de ~10min a ~2s. |
 | **Play Store Data Safety documentado** | `DEVS/play_store_data_safety.md` | Checklist de respuestas para formulario Data Safety de Play Console. |
 | **.gitignore secreto** | `.gitignore` | Cubre `*.jks`, `*.keystore`, `/android/key.properties`. |
 | **Adaptive icons Android 13+** | `pubspec.yaml:133`, `android/app/src/main/res/mipmap-anydpi-v26/launcher_icon.xml` | `adaptive_icon_background: "#000000"` (corregido de `#FFFFFF`). XML generado con `<adaptive-icon>` → background `#000000` + foreground `icon_source.png`. Icono legacy intacto en mipmap-*/launcher_icon.png. store_prep_cli.dart check [9] verifica existencia post-generación. |
@@ -247,6 +250,17 @@
 | **Corrector: ID-001 unused_import** | 3 `import 'package:flutter/foundation.dart';` removidos de `project_repository.dart`, `voice_command_service.dart`, `platform_services.dart`. | `--fix` migró debugPrint→LoggerService dejando imports huérfanos. Validación rechazó por criterio #13 (flutter analyze 0 issues). |
 | **Corrector: ID-002 wrappers `_` privados** | Agregados `_isInsideDebugModeBlock`, `_isSameLineKDebugModeGuard`, `_isInsideAssert`, `_isInsideBracedDebugModeBlock` wrappers en scanner delegando al detector público. Scanner interno usa `_isInsideDebugModeBlock`. | FINAL spec pedía `_` privadas en scanner. Wrappers reconcilian spec + testabilidad. |
 
+### Decisiones de Paso 14 (Migracion-masiva-debugprint-residuales)
+
+| Decisión | Detalle | Justificación |
+|---|---|---|
+| **Scope real = 7 residuales, no ~70** | Scanner Paso 13 mejoró detección guards (kDebugMode, assert, ternario, braced blocks). 72→7 residuales reales. | Plan original Paso 08 decía "~70 debugPrint en 15 archivos". Código gana sobre plan. |
+| **Migración manual sobre `--fix` automático** | 6 de 7 debugPrint son multilínea. `--fix` del scanner no soporta multilínea (busca `)` en misma línea). Migración manual más eficiente que mejorar parser para solo 7 calls. | Paso 17 planifica parser multilínea completo. Invertir en mini-parser ahora es YAGNI. |
+| **Verifier como Tarea 0 DX** | `scripts/debugprint_migration_verifier.dart` en vez de extender `--fix`. Verifica post-migración: scanner 0 residuales + 0 unused imports + flutter analyze 0 issues. | ~2s vs ~10min revisión manual de 5 archivos. Previene regresión. Sigue patrón `validador_metrics_session.dart` (verificador, no modificador). |
+| **Tags PascalCase en LoggerService.log** | `'VRMPipeline'`, `'StitcherPlugin'`, `'SchemaValidator'`, `'ClipStorageService'`, `'SocialAccountManager'` — PascalCase consistente con nombre de clase. | Archivos ya tenían tags snake_case en algunos calls existentes. Tags nuevos usan PascalCase para identificar calls migrados del scope Paso 14. |
+| **Remoción imports `flutter/foundation.dart` unused** | 5 archivos ya no usan `debugPrint` ni `kDebugMode` → import removido. Verificado con `flutter analyze` 0 issues en lib/. | Mismo patrón que Paso 13 ID-001. Previene warnings de unused imports. |
+| **`memory_monitor.dart:62` y `logger_service.dart:48` conservan debugPrint** | Intencional: memory_monitor dentro de `if (kDebugMode)`, logger_service como echo en debug. Scanner los excluye correctamente. | No migrar — son debugPrint legítimos. Scanner Paso 13 ya los detecta como guardados. |
+
 ### Decisiones de Paso 12 (Screenshots-store-ready)
 
 | Decisión | Detalle | Justificación |
@@ -361,6 +375,7 @@
 | 11-Contexto-y-Actualizacion-Estado | ✅ completed | `DEVS/IMPLEMENTED/mvp/11-Contexto-y-Actualizacion-Estado/` | f7b0527 | Corrección CRÍTICA: Stitch handler nativo EXISTE en Android (MediaMuxer, `MainActivity.kt:52-146`) e iOS (AVComposition, `AppDelegate.swift:35-81`). Phase-state decía "STUB sin handler" — falso. Discrepancia D6 corregida: ⏳→✅ Resuelto. 7 análisis archivados. Tests 21/21 pasan. | Sin cambios en lib/. Solo actualización de estado. Archivado de IN_PROGRESS → IMPLEMENTED. Nuevo DX tool: `scripts/test_coverage_report.dart`. |
 | 12-Screenshots-store-ready | ✅ completed | `DEVS/IMPLEMENTED/mvp/12-Screenshots-store-ready/` | d9a4ef4 | DX tool: `capture_store_screenshots.dart` + `utils.dart` shared module. `store_prep_cli.dart` validacion corruptos <10KB. 5 PNGs 1080x2400 capturadas en Xiaomi 2201117TL. D1-D4 corregidas (JPEGs eliminados, legacy dir removido). ID-004 resuelta (shared utils). 12/12 criterios aceptacion. 11/11 store check. Dogfooding completo. | 8 analisis archivados. 3 scripts nuevos/modificados. Sin cambios en lib/. |
 | 13-Mejorar-debugprint-scanner-kdebugmode | ✅ completed | `DEVS/IMPLEMENTED/mvp/13-Mejorar-debugprint-scanner-kdebugmode/` | 705eb0a | Refactor `_isInsideDebugModeBlock` → 4 helpers + orquestador. D1-D5 resueltas (same-line, adjacent, assert, ternary, braces strings/comentarios). `debugprint_detector.dart` (164L) API pública. `debugprint_scanner_test.dart` 31 tests. Corrector: ID-001 (3 unused_import removidos), ID-002 (_wrappers privados). 52/52 tests. flutter analyze 0 issues. | 8 archivos archivados. 3 archivos nuevos/modificados (detector, scanner, test). 3 archivos lib/ corregidos (ID-001). |
+| 14-Migracion-masiva-debugprint-residuales | ✅ completed | `DEVS/IMPLEMENTED/mvp/14-Migracion-masiva-debugprint-residuales/` | 9058ed7 | Migración manual 7 debugPrint→LoggerService.log() en 5 archivos. 5 imports flutter/foundation.dart unused removidos. Import LoggerService agregado en stitcher_plugin.dart. DX: debugprint_migration_verifier.dart. Validación: 14/14 criterios, 0 críticos, 52/52 tests, flutter analyze 0 issues en lib/, scanner 0 residuales. | 2 archivos archivados (analisis-FINAL.md + validacion.md). 6 archivos lib/ modificados. 1 script nuevo (verifier). |
 
 ---
 
@@ -400,3 +415,4 @@
 | **Test Coverage Report (Paso 11)** | `scripts/test_coverage_report.dart` (233L) | CLI: `dart run scripts/test_coverage_report.dart` escanea `lib/features/` y `test/` para generar reporte de cobertura por feature. Detecta features sin tests. UX DX para visibilidad de cobertura. |
 | **Capture Store Screenshots (Paso 12)** | `scripts/capture_store_screenshots.dart` (247L) | CLI interactivo ADB: `dart run scripts/capture_store_screenshots.dart` guia paso a paso captura 5 pantallas. `--clean` elimina JPEGs existentes + dir legacy. `--device <id>` especifica dispositivo. Valida PNG header + dimensiones + file size. Reduce captura manual ~30min a ~5min. Dogfooding verificado (5/5 capturadas). |
 | **Shared PNG Utils (Paso 12)** | `scripts/utils.dart` (28L) | `getPngDimensions()` + `validatePngHeader()` compartidos. Evita duplicacion de PNG parser entre `capture_store_screenshots.dart` y `store_prep_cli.dart`. SRP aplicado: logica PNG en modulo unico. |
+| **DebugPrint Migration Verifier (Paso 14)** | `scripts/debugprint_migration_verifier.dart` | CLI: `dart run scripts/debugprint_migration_verifier.dart` ejecuta 3 verificaciones: scanner (0 residuales) + imports flutter/foundation.dart (0 unused) + flutter analyze (0 issues). Confirma migración completa en ~2s. Previene regresión de debugPrint en Release. Reduce verificación manual de ~10min a ~2s. |
