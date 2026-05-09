@@ -218,6 +218,7 @@ Future<int> _fixProguardDeadRules({bool dryRun = false}) async {
 
 Future<void> _runFixCleanup({bool dryRun = false}) async {
   var cleaned = 0;
+  final failedFiles = <String>[];
 
   if (dryRun) {
     print('  ℹ️  Modo dry-run: listando acciones sin ejecutar');
@@ -238,10 +239,18 @@ Future<void> _runFixCleanup({bool dryRun = false}) async {
       }
     } else {
       await for (final entity in tmpDir.list()) {
-        await entity.delete(recursive: true);
-        cleaned++;
+        try {
+          await entity.delete(recursive: true);
+          cleaned++;
+        } catch (e) {
+          failedFiles.add(entity.path);
+          print('  ⚠️ No se pudo eliminar: ${entity.path} ($e)');
+        }
       }
-      print('  ✅ Eliminados $cleaned archivos temporales de vrm_data/tmp/');
+      print(
+        '  ✅ Eliminados $cleaned archivos temporales de vrm_data/tmp/'
+        '${failedFiles.isNotEmpty ? " (${failedFiles.length} fallaron)" : ""}',
+      );
     }
   } else {
     print('  ℹ️  vrm_data/tmp/ no existe — nada que limpiar');
@@ -259,14 +268,20 @@ Future<void> _runFixCleanup({bool dryRun = false}) async {
       if (await sessionFile.exists() && !await projectFile.exists()) {
         if (dryRun) {
           print('  📋 Se eliminaría sesión huérfana: ${sessionFile.path}');
+          cleaned++;
         } else {
-          await sessionFile.delete();
-          print(
-            '  ✅ Eliminada sesión huérfana: ${projDir.path}/session_data.json',
-          );
+          try {
+            await sessionFile.delete();
+            print(
+              '  ✅ Eliminada sesión huérfana: ${projDir.path}/session_data.json',
+            );
+            cleaned++;
+          } catch (e) {
+            failedFiles.add(sessionFile.path);
+            print('  ⚠️ No se pudo eliminar sesión: ${sessionFile.path} ($e)');
+          }
         }
         orphanSessions++;
-        cleaned++;
       }
       if (await clipsDir.exists()) {
         final clipFiles = await clipsDir.list().toList();
@@ -274,8 +289,15 @@ Future<void> _runFixCleanup({bool dryRun = false}) async {
           if (dryRun) {
             print('  📋 Se eliminaría clips/ vacío: ${clipsDir.path}/');
           } else {
-            await clipsDir.delete();
-            print('  ✅ Eliminado clips/ vacío: ${projDir.path}/clips/');
+            try {
+              await clipsDir.delete();
+              print('  ✅ Eliminado clips/ vacío: ${projDir.path}/clips/');
+            } catch (e) {
+              failedFiles.add(clipsDir.path);
+              print(
+                '  ⚠️ No se pudo eliminar clips vacío: ${clipsDir.path} ($e)',
+              );
+            }
           }
         }
       }
@@ -285,6 +307,14 @@ Future<void> _runFixCleanup({bool dryRun = false}) async {
     }
   } else {
     print('  ℹ️  vrm_data/projects/ no existe — nada que limpiar');
+  }
+
+  if (failedFiles.isNotEmpty) {
+    print('');
+    print('  ⚠️ ARCHIVOS NO ELIMINADOS:');
+    for (final f in failedFiles) {
+      print('    - $f');
+    }
   }
 
   if (dryRun) {

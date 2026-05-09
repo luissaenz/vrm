@@ -1,7 +1,7 @@
 # 🗺️ Phase State: mvp
 
 > Generado: 2026-05-05 vía 6_CONTEXTO.md
-> Actualizado: 2026-05-09 vía 6_CONTEXTO.md (Post-Paso 14 — Migracion-masiva-debugprint-residuales)
+> Actualizado: 2026-05-09 vía 6_CONTEXTO.md (Post-Paso 15 — Vrm-health-check-resiliencia-archivos)
 
 ---
 
@@ -28,9 +28,10 @@
 | 12 | Screenshots-store-ready | ✅ completed |
 | 13 | Mejorar-debugprint-scanner-kdebugmode | ✅ completed |
 | 14 | Migracion-masiva-debugprint-residuales | ✅ completed |
+| 15 | Vrm-health-check-resiliencia-archivos | ✅ completed |
 
 **Dependencias entre pasos:**
-- 01 ← 02 ← 03 ← 04 ← 05 ← 06 ← 07 ← 08 ← 09 ← 10 ← 11 ← 12 ← 13 ← 14 (secuencial)
+- 01 ← 02 ← 03 ← 04 ← 05 ← 06 ← 07 ← 08 ← 09 ← 10 ← 11 ← 12 ← 13 ← 14 ← 15 (secuencial)
 
 ---
 
@@ -67,7 +68,8 @@
 | **ProGuard limpio** | `android/app/proguard-rules.pro` (L1-12) | Reglas ffmpegkit muertas removidas (L9-12). Solo Flutter wrapper + JNI. |
 | **Integridad al iniciar grabación** | `lib/features/recording/services/recording_manager.dart` (L60) | `verifySessionIntegrity()` llamado al inicio de `startRecording()`. Alerta si clips faltantes. |
 | **SessionIntegrityException handlers (3 métodos)** | `lib/features/recording/recording_page.dart` (L541, L634, L683) | `on SessionIntegrityException catch` capturado en `_startActualRecording()`, `_stopRecording()`, `_applyHardwareSettings()` — todos antes de catch genérico. Reset idle + sin duplicar SnackBar. |
-| **VRM Health Check --dry-run + --fix real** | `scripts/vrm_health_check.dart` (L63-83, L189-217, L219-295) | Flag `--dry-run` previsualiza cleanup sin modificar archivos. `_fixProguardDeadRules()` elimina reglas ffmpegkit muertas (antes solo warning). `_runFixCleanup({bool dryRun})` con rama dry-run completa. |
+| **VRM Health Check --dry-run + --fix real + resiliencia** | `scripts/vrm_health_check.dart` (L63-83, L189-217, L219-328) | Flag `--dry-run` previsualiza cleanup sin modificar archivos. `_fixProguardDeadRules()` elimina reglas ffmpegkit muertas (antes solo warning). `_runFixCleanup({bool dryRun})` con rama dry-run completa. **Paso 15:** 3 `delete()` envueltos en try/catch individual + `failedFiles` lista + resumen `⚠️ ARCHIVOS NO ELIMINADOS`. No aborta con archivos bloqueados. |
+| **Health Check Resilience Test** | `scripts/health_check_resilience_test.dart` (234L) | DX CLI: simula archivo read-only (`attrib +R`) en `vrm_data/tmp/` real, ejecuta `check --fix`, verifica output contiene `⚠️ No se pudo eliminar...locked_temp.mp4` + `⚠️ ARCHIVOS NO ELIMINADOS`. 5 tests. Cleanup automático con `attrib -R` + delete. Reduce verificación manual de resiliencia a ~5s. |
 | **Store Prep CLI unificado** | `scripts/store_prep_cli.dart` (L703) | CLI con 5 subcomandos: check, keystore, assets, privacy, screenshots. Sigue patron `vrm_health_check.dart`. 11 checks (agregado check [9] adaptive icons). Detecta keystore faltante, passwords default, placeholders, permisos, gitignore. Valida resolución screenshots via PNG IHDR header. |
 | **PRIVACY_POLICY.md sin placeholders** | `PRIVACY_POLICY.md` (raíz), `docs/PRIVACY_POLICY.md` | Root reemplazado con version docs/. 0 placeholders. Email real: ludens.vrm@gmail.com. Fecha: April 18, 2026. |
 | **Keystore generado** | `android/vrm-release-key.jks` (2760 bytes), `android/key.properties` | RSA 2048, alias vrm_upload_key, validez 10000d. Passwords randomizadas (no default). |
@@ -261,6 +263,16 @@
 | **Remoción imports `flutter/foundation.dart` unused** | 5 archivos ya no usan `debugPrint` ni `kDebugMode` → import removido. Verificado con `flutter analyze` 0 issues en lib/. | Mismo patrón que Paso 13 ID-001. Previene warnings de unused imports. |
 | **`memory_monitor.dart:62` y `logger_service.dart:48` conservan debugPrint** | Intencional: memory_monitor dentro de `if (kDebugMode)`, logger_service como echo en debug. Scanner los excluye correctamente. | No migrar — son debugPrint legítimos. Scanner Paso 13 ya los detecta como guardados. |
 
+### Decisiones de Paso 15 (Vrm-health-check-resiliencia-archivos)
+
+| Decisión | Detalle | Justificación |
+|---|---|---|
+| **Catch genérico `catch (e)` sobre `on FileSystemException`** | 3 try/catch usan `catch (e)` no `on FileSystemException catch (e)`. | MVP: atrapa cualquier excepción de filesystem (race conditions, permisos, corruption). Post-MVP: catch específico para distinguir tipos. Ya documentado en Roadmap. |
+| **`failedFiles` lista local, no campo de clase** | `final failedFiles = <String>[];` declarado dentro de `_runFixCleanup()`. | Scope mínimo. Solo se usa dentro de la función. Sin estado compartido. |
+| **`cleaned++` dentro de try (post-delete exitoso)** | Movido de fuera del try (contaba fallidos) a dentro. | Previene conteo erróneo. Solo cuenta archivos realmente eliminados. |
+| **DX tool simula archivo bloqueado real** | `health_check_resilience_test.dart` usa `attrib +R` en Windows para crear archivo read-only en `vrm_data/tmp/` (dir real). Verifica output contiene `⚠️`. | Demuestra try/catch bajo presión real. Cleanup automático con `attrib -R`. Dir correcto = archivos procesados por health check. |
+| **5 tests en DX tool** | (1) exitCode=0, (2) output contiene ⚠️ locked_temp.mp4, (3) no Unhandled exception, (4) --dry-run OK, (5) resumen ARCHIVOS NO ELIMINADOS | Cobertura completa del comportamiento esperado. Maneja edge case admin (attrib no impide delete → test pasa gracefully). |
+
 ### Decisiones de Paso 12 (Screenshots-store-ready)
 
 | Decisión | Detalle | Justificación |
@@ -376,6 +388,7 @@
 | 12-Screenshots-store-ready | ✅ completed | `DEVS/IMPLEMENTED/mvp/12-Screenshots-store-ready/` | d9a4ef4 | DX tool: `capture_store_screenshots.dart` + `utils.dart` shared module. `store_prep_cli.dart` validacion corruptos <10KB. 5 PNGs 1080x2400 capturadas en Xiaomi 2201117TL. D1-D4 corregidas (JPEGs eliminados, legacy dir removido). ID-004 resuelta (shared utils). 12/12 criterios aceptacion. 11/11 store check. Dogfooding completo. | 8 analisis archivados. 3 scripts nuevos/modificados. Sin cambios en lib/. |
 | 13-Mejorar-debugprint-scanner-kdebugmode | ✅ completed | `DEVS/IMPLEMENTED/mvp/13-Mejorar-debugprint-scanner-kdebugmode/` | 705eb0a | Refactor `_isInsideDebugModeBlock` → 4 helpers + orquestador. D1-D5 resueltas (same-line, adjacent, assert, ternary, braces strings/comentarios). `debugprint_detector.dart` (164L) API pública. `debugprint_scanner_test.dart` 31 tests. Corrector: ID-001 (3 unused_import removidos), ID-002 (_wrappers privados). 52/52 tests. flutter analyze 0 issues. | 8 archivos archivados. 3 archivos nuevos/modificados (detector, scanner, test). 3 archivos lib/ corregidos (ID-001). |
 | 14-Migracion-masiva-debugprint-residuales | ✅ completed | `DEVS/IMPLEMENTED/mvp/14-Migracion-masiva-debugprint-residuales/` | 9058ed7 | Migración manual 7 debugPrint→LoggerService.log() en 5 archivos. 5 imports flutter/foundation.dart unused removidos. Import LoggerService agregado en stitcher_plugin.dart. DX: debugprint_migration_verifier.dart. Validación: 14/14 criterios, 0 críticos, 52/52 tests, flutter analyze 0 issues en lib/, scanner 0 residuales. | 2 archivos archivados (analisis-FINAL.md + validacion.md). 6 archivos lib/ modificados. 1 script nuevo (verifier). |
+| 15-Vrm-health-check-resiliencia-archivos | ✅ completed | `DEVS/IMPLEMENTED/mvp/15-Vrm-health-check-resiliencia-archivos/` | 6d7fa7b | 3 `delete()` en `_runFixCleanup()` envueltos en try/catch individual. `failedFiles` lista acumula paths fallidos. Resumen final `⚠️ ARCHIVOS NO ELIMINADOS`. `cleaned++` solo post-delete exitoso. Rama dryRun intacta. DX: `health_check_resilience_test.dart` (234L) simula archivo bloqueado real con `attrib +R`. Validación: 14/14 criterios, 0 críticos, 52/52 tests, 0 cambios lib/. Calidad 9.5/10. | 3 archivos archivados. 1 script modificado (`vrm_health_check.dart`). 1 script nuevo (`health_check_resilience_test.dart`). Sin cambios en lib/. |
 
 ---
 
@@ -407,7 +420,8 @@
 |---|---|---|
 | **Validador de pipeline end-to-end** | Script que ejecuta flujo completo en dispositivo real y reporta etapa a etapa ✅/❌ | Detecta MissingPluginException, permisos faltantes y errores filesystem antes de release |
 | **validador_hardware.dart (Paso 2)** | Script CLI que prueba focus lock, flash torch, exposure lock en dispositivo real. Reporta compatibilidad JSON. | QA automatizado de toggles de cámara. Elimina prueba manual por modelo. |
-| **VRM Health Check (Pasos 3+9)** | `scripts/vrm_health_check.dart` (598L) | CLI unificado: `check [--fix] [--dry-run]` (pre-flight + cleanup temp/sesiones huérfanas con preview), `validate` (recovery paths), `memory` (leak detection), `scaffold` (estructura datos). `--fix` ahora elimina reglas ProGuard muertas. `--dry-run` previsualiza acciones sin modificar. Reduce diagnóstico + limpieza de 30min a ~2s. Verifica LoggerService, MemoryMonitor, ProGuard, pipeline files. |
+| **VRM Health Check (Pasos 3+9+15)** | `scripts/vrm_health_check.dart` (632L) | CLI unificado: `check [--fix] [--dry-run]` (pre-flight + cleanup temp/sesiones huérfanas con preview), `validate` (recovery paths), `memory` (leak detection), `scaffold` (estructura datos). `--fix` ahora elimina reglas ProGuard muertas. `--dry-run` previsualiza acciones sin modificar. **Paso 15:** `_runFixCleanup()` resiliente — 3 `delete()` con try/catch individual, `failedFiles` acumula, resumen final reporta archivos no eliminados. No aborta con archivos bloqueados/read-only. Reduce diagnóstico + limpieza de 30min a ~2s. |
+| **Health Check Resilience Test (Paso 15)** | `scripts/health_check_resilience_test.dart` (234L) | DX CLI: simula archivo read-only (`attrib +R`) en `vrm_data/tmp/` real, ejecuta `check --fix`, 5 tests verifican: exitCode=0 + warning ⚠️ locked_temp.mp4 + no Unhandled exception + --dry-run OK + resumen ARCHIVOS NO ELIMINADOS. Cleanup automático. Reduce verificación de resiliencia de ~5min manual a ~5s automático. |
 | **Scripts Python existentes** | `scripts/fragmentation_test.py`, `scripts/verify_backend.py` | Útiles para validación backend, pero no cubren frontend |
 | **Store Prep CLI (Pasos 4-5+10)** | `scripts/store_prep_cli.dart` (703L) | CLI unificado: `check` (11 checks pre-store + check [9] adaptive icons + validación resolución screenshots via PNG IHDR header), `keystore` (genera RSA 2048), `assets validate` (iconos/splash/screenshots + validación resolución), `privacy` (valida placeholders), `screenshots` (guía captura). Reduce preparación store de ~4h a ~15min. Detecta keystore faltante, passwords default, placeholders, permisos, gitignore, adaptive icons faltantes, resolución screenshots insuficiente. Check [9] evita icono recortado/cuadrado en Android 13+ detectable solo en dispositivo físico. |
 | **Validador Metricas Sesion (Paso 7)** | `scripts/validador_metrics_session.dart` (173L) | CLI: `check --project-id <uuid> [--progress-only]` y `demo`. Valida que RecordingEndPage use metricas reales (no hardcodeadas). Detecta `0.75` hardcodeado, duracion "42m", takes falsos en session_data.json. Reduce QA manual de metricas de 10min a ~1s. |
