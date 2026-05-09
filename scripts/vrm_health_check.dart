@@ -10,14 +10,15 @@ USO:
   dart run scripts/vrm_health_check.dart <subcomando> [flags]
 
 SUBCOMANDOS:
-  check [--fix]         Pre-flight: permisos, espacio, cámara, temp huérfanos
-  validate [--device]   Test recovery paths: space, camera, stitch, export
-  memory                Memory leak detection (debug mode)
+  check [--fix] [--dry-run]  Pre-flight: permisos, espacio, cámara, temp huérfanos
+  validate [--device]        Test recovery paths: space, camera, stitch, export
+  memory                     Memory leak detection (debug mode)
   scaffold --project-id <uuid>  Crear estructura vrm_data/ para proyecto
-  --help                Muestra esta ayuda
+  --help                     Muestra esta ayuda
 
 FLAGS:
   --fix         Limpia temp si es seguro (check)
+  --dry-run     Lista acciones sin ejecutar (check --fix)
   --device      Conecta a dispositivo físico (validate)
   --project-id  UUID del proyecto (scaffold)
 ''';
@@ -33,7 +34,9 @@ void main(List<String> args) async {
 
   switch (subcommand) {
     case 'check':
-      await _runCheck(flags.contains('--fix'));
+      final fix = flags.contains('--fix');
+      final dryRun = flags.contains('--dry-run');
+      await _runCheck(fix, dryRun: dryRun);
     case 'validate':
       await _runValidate(flags.contains('--device'));
     case 'memory':
@@ -57,9 +60,15 @@ String? _extractFlagValue(List<String> args, String flag) {
 
 // ─── CHECK ───────────────────────────────────────────────────────────────────
 
-Future<void> _runCheck(bool fix) async {
+Future<void> _runCheck(bool fix, {bool dryRun = false}) async {
   print('=== VRM Health Check: Pre-flight ===');
-  if (fix) print('  (--fix mode: cleanup enabled)');
+  if (fix) {
+    if (dryRun) {
+      print('  (--dry-run mode: list only, no changes)');
+    } else {
+      print('  (--fix mode: cleanup enabled)');
+    }
+  }
   print('');
 
   final results = <String, bool>{};
@@ -134,7 +143,12 @@ Future<void> _runCheck(bool fix) async {
         : 'Limpio';
     print('  ${hasDeadRules ? "❌" : "✅"} ${details["proguard"]}');
     if (hasDeadRules && fix) {
-      print('  ⚠️  Usa Tarea 1 del plan de implementación para limpiar.');
+      final removed = await _fixProguardDeadRules(dryRun: dryRun);
+      if (removed > 0) {
+        print('  ✅ ProGuard: $removed líneas muertas removidas');
+      } else {
+        print('  ℹ️  No se encontraron reglas ffmpegkit para remover');
+      }
     }
   } else {
     results['proguard'] = false;
@@ -156,7 +170,7 @@ Future<void> _runCheck(bool fix) async {
   if (fix) {
     print('');
     print('[7] Ejecutando --fix cleanup...');
-    await _runFixCleanup();
+    await _runFixCleanup(dryRun: dryRun);
   }
 
   // Resumen
@@ -172,17 +186,63 @@ Future<void> _runCheck(bool fix) async {
   }
 }
 
-Future<void> _runFixCleanup() async {
+Future<int> _fixProguardDeadRules({bool dryRun = false}) async {
+  final file = File('android/app/proguard-rules.pro');
+  if (!await file.exists()) {
+    print('  ℹ️  proguard-rules.pro no encontrado');
+    return 0;
+  }
+
+  final content = await file.readAsString();
+  final lines = content.split('\n');
+  final filtered = <String>[];
+  var removed = 0;
+
+  for (final line in lines) {
+    if (line.contains('ffmpegkit')) {
+      removed++;
+      if (dryRun) {
+        print('  📋 Se removería: $line');
+      }
+    } else {
+      filtered.add(line);
+    }
+  }
+
+  if (removed > 0 && !dryRun) {
+    await file.writeAsString(filtered.join('\n'));
+  }
+
+  return removed;
+}
+
+Future<void> _runFixCleanup({bool dryRun = false}) async {
   var cleaned = 0;
+
+  if (dryRun) {
+    print('  ℹ️  Modo dry-run: listando acciones sin ejecutar');
+  }
 
   // Clean vrm_data/tmp/ orphan files
   final tmpDir = Directory('vrm_data/tmp');
   if (await tmpDir.exists()) {
-    await for (final entity in tmpDir.list()) {
-      await entity.delete(recursive: true);
-      cleaned++;
+    if (dryRun) {
+      await for (final entity in tmpDir.list()) {
+        cleaned++;
+        print('  📋 Se eliminaría: ${entity.path}');
+      }
+      if (cleaned == 0) {
+        print('  ℹ️  vrm_data/tmp/ está vacío');
+      } else {
+        print('  📋 Total: $cleaned archivos temporales en vrm_data/tmp/');
+      }
+    } else {
+      await for (final entity in tmpDir.list()) {
+        await entity.delete(recursive: true);
+        cleaned++;
+      }
+      print('  ✅ Eliminados $cleaned archivos temporales de vrm_data/tmp/');
     }
-    print('  ✅ Eliminados $cleaned archivos temporales de vrm_data/tmp/');
   } else {
     print('  ℹ️  vrm_data/tmp/ no existe — nada que limpiar');
   }
@@ -197,18 +257,26 @@ Future<void> _runFixCleanup() async {
       final sessionFile = File('${projDir.path}/session_data.json');
       final clipsDir = Directory('${projDir.path}/clips');
       if (await sessionFile.exists() && !await projectFile.exists()) {
-        await sessionFile.delete();
+        if (dryRun) {
+          print('  📋 Se eliminaría sesión huérfana: ${sessionFile.path}');
+        } else {
+          await sessionFile.delete();
+          print(
+            '  ✅ Eliminada sesión huérfana: ${projDir.path}/session_data.json',
+          );
+        }
         orphanSessions++;
         cleaned++;
-        print(
-          '  ✅ Eliminada sesión huérfana: ${projDir.path}/session_data.json',
-        );
       }
       if (await clipsDir.exists()) {
         final clipFiles = await clipsDir.list().toList();
         if (clipFiles.isEmpty) {
-          await clipsDir.delete();
-          print('  ✅ Eliminado clips/ vacío: ${projDir.path}/clips/');
+          if (dryRun) {
+            print('  📋 Se eliminaría clips/ vacío: ${clipsDir.path}/');
+          } else {
+            await clipsDir.delete();
+            print('  ✅ Eliminado clips/ vacío: ${projDir.path}/clips/');
+          }
         }
       }
     }
@@ -219,7 +287,13 @@ Future<void> _runFixCleanup() async {
     print('  ℹ️  vrm_data/projects/ no existe — nada que limpiar');
   }
 
-  print('  ✅ --fix completado: $cleaned elementos procesados');
+  if (dryRun) {
+    print(
+      '  ℹ️  dry-run completado: $cleaned elementos listados (no se eliminó nada)',
+    );
+  } else {
+    print('  ✅ --fix completado: $cleaned elementos procesados');
+  }
 }
 
 // ─── VALIDATE ────────────────────────────────────────────────────────────────

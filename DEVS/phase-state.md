@@ -1,7 +1,7 @@
 # 🗺️ Phase State: mvp
 
 > Generado: 2026-05-05 vía 6_CONTEXTO.md
-> Actualizado: 2026-05-07 vía 6_CONTEXTO.md (Post-Paso 08)
+> Actualizado: 2026-05-07 vía 6_CONTEXTO.md (Post-Paso 09)
 
 ---
 
@@ -22,9 +22,10 @@
 | 06 | MaterialBanner-notificacion-fallback-IA | ✅ completed |
 | 07 | Metricas-Reales-Sesion-RecordingEndPage | ✅ completed |
 | 08 | Migrar-debugPrint-residual-LoggerService | ✅ completed |
+| 09 | vrm-health-check-fix-real | ✅ completed |
 
 **Dependencias entre pasos:**
-- 01 ← 02 ← 03 ← 04 ← 05 ← 06 ← 07 ← 08 (secuencial)
+- 01 ← 02 ← 03 ← 04 ← 05 ← 06 ← 07 ← 08 ← 09 (secuencial)
 
 ---
 
@@ -61,6 +62,7 @@
 | **ProGuard limpio** | `android/app/proguard-rules.pro` (L1-12) | Reglas ffmpegkit muertas removidas (L9-12). Solo Flutter wrapper + JNI. |
 | **Integridad al iniciar grabación** | `lib/features/recording/services/recording_manager.dart` (L60) | `verifySessionIntegrity()` llamado al inicio de `startRecording()`. Alerta si clips faltantes. |
 | **SessionIntegrityException handlers (3 métodos)** | `lib/features/recording/recording_page.dart` (L541, L634, L683) | `on SessionIntegrityException catch` capturado en `_startActualRecording()`, `_stopRecording()`, `_applyHardwareSettings()` — todos antes de catch genérico. Reset idle + sin duplicar SnackBar. |
+| **VRM Health Check --dry-run + --fix real** | `scripts/vrm_health_check.dart` (L63-83, L189-217, L219-295) | Flag `--dry-run` previsualiza cleanup sin modificar archivos. `_fixProguardDeadRules()` elimina reglas ffmpegkit muertas (antes solo warning). `_runFixCleanup({bool dryRun})` con rama dry-run completa. |
 | **Store Prep CLI unificado** | `scripts/store_prep_cli.dart` (L642) | CLI con 5 subcomandos: check, keystore, assets, privacy, screenshots. Sigue patron `vrm_health_check.dart`. 10/10 checks. Detecta keystore faltante, passwords default, placeholders, permisos, gitignore. Valida resolución screenshots via PNG IHDR header. |
 | **PRIVACY_POLICY.md sin placeholders** | `PRIVACY_POLICY.md` (raíz), `docs/PRIVACY_POLICY.md` | Root reemplazado con version docs/. 0 placeholders. Email real: ludens.vrm@gmail.com. Fecha: April 18, 2026. |
 | **Keystore generado** | `android/vrm-release-key.jks` (2760 bytes), `android/key.properties` | RSA 2048, alias vrm_upload_key, validez 10000d. Passwords randomizadas (no default). |
@@ -206,6 +208,14 @@
 | **Feature-based directories** | `lib/features/{feature}/{pages,services,models,widgets}/` | Escalabilidad y separación de concerns. Cada feature autocontenida. |
 | **Onboarding → Dashboard → Recording** como flujo principal | `main.dart` L45: onboarding condicional. Named routes para navegación profunda. | Flujo lineal simple para MVP. |
 
+### Decisiones de Paso 9 (vrm-health-check-fix-real)
+
+| Decision | Detalle | Justificacion |
+|---|---|---|
+| **`--dry-run` como flag** en vez de subcomando separado | `check --fix --dry-run` muestra acciones sin ejecutar. Reutiliza toda la logica de `_runFixCleanup()` con condicional `if (dryRun)` ramificado. | Sin duplicacion. Preview natural sin estado. Mismo flag pattern que `--fix`. |
+| **`_fixProguardDeadRules()` como fn separada** | Extraida de `_runCheck()` L136-152 para soportar dry-run y reutilizacion. Lee/filtra/escribe archivo. | Mantiene `_runCheck()` limpio. Sigue SRP. |
+| **Paso 09 = verificacion + DX enhancement** | `_runFixCleanup()` ya implementado en Paso 05. Paso 09 agrega `--dry-run` y `_fixProguardDeadRules()` real. | Consistente con hallazgos de 6/6 agentes. Codigo existente gana. |
+
 ### Decisiones de Paso 8 (Migrar-debugPrint-residual-LoggerService)
 
 | Decision | Detalle | Justificacion |
@@ -288,6 +298,7 @@
 | 06-MaterialBanner-notificacion-fallback-IA | ✅ completed | `DEVS/IMPLEMENTED/mvp/06-MaterialBanner-notificacion-fallback-IA/` | 328055e | MaterialBanner sticky naranja en `script_studio_page.dart:338-363`. vrm_banner_validator CLI creado como DX para consistencia de notificaciones. | Unificado de 4 análisis (ds, laguna, step, hy3). Todos confirmaron: código ya implementado. Sin cambios adicionales. |
 | 07-Metricas-Reales-Sesion-RecordingEndPage | ✅ completed | `DEVS/IMPLEMENTED/mvp/07-Metricas-Reales-Sesion-RecordingEndPage/` | 88df3de | `progress: 0.75` → getter `_progress` (chunksRecorded/totalChunks). `stitch_progress_page.dart` pasa sessionData en route args (L91, L134). `recording_page.dart` pasa finalVideoPath (L826). `validador_metrics_session.dart` con flag `--progress-only` (173L). | 3 correcciones aplicadas (D1-D3). 8/8 criterios aceptacion. 0 criticos. 1 importante (dogfooding). 18/18 tests. flutter analyze 0 errores. |
 | 08-Migrar-debugPrint-residual-LoggerService | ✅ completed | `DEVS/IMPLEMENTED/mvp/08-Migrar-debugPrint-residual-LoggerService/` | 7fa5dfa | Scope original (2 debugPrint en recording_page.dart L657,L662) YA COMPLETADO en Paso 05. 6/6 agentes confirmaron 0 debugPrint. Kilo migró 2 debugPrint extra en recording_end_page.dart (L95, L172). DX tool `scripts/debugprint_scanner.dart` (276L) creado con scan + --fix. 72 debugPrint residuales en 15 archivos documentados como roadmap post-MVP. | 5/5 criterios aceptacion. 3/3 correcciones D1-D3 aplicadas. 0 criticos. 2 mejoras. flutter analyze 0 errores. 18/18 tests. |
+| 09-vrm-health-check-fix-real | ✅ completed | `DEVS/IMPLEMENTED/mvp/09-vrm-health-check-fix-real/` | 378d54b | `--dry-run` flag agregado a `check --fix`. `_runFixCleanup({bool dryRun = false})` con preview completo. `_fixProguardDeadRules()` nuevo — realmente elimina reglas ffmpegkit (antes solo print warning). `_runCheck()` refactorizado para soportar dryRun. CLI help actualizado. 7/7 criterios aceptacion. Validacion 8/10 calidad. | Paso esencialmente verificacion — `_runFixCleanup()` ya existia desde Paso 05 (b603e48). `--dry-run` enhancement nuevo en este paso. 0 criticos, 0 importantes, 2 mejoras. flutter analyze 0 errores. 18/18 tests. |
 
 ---
 
@@ -319,7 +330,7 @@
 |---|---|---|
 | **Validador de pipeline end-to-end** | Script que ejecuta flujo completo en dispositivo real y reporta etapa a etapa ✅/❌ | Detecta MissingPluginException, permisos faltantes y errores filesystem antes de release |
 | **validador_hardware.dart (Paso 2)** | Script CLI que prueba focus lock, flash torch, exposure lock en dispositivo real. Reporta compatibilidad JSON. | QA automatizado de toggles de cámara. Elimina prueba manual por modelo. |
-| **VRM Health Check (Paso 3)** | `scripts/vrm_health_check.dart` (415L) | CLI unificado: `check` (pre-flight permisos/espacio/cámara), `validate` (recovery paths), `memory` (leak detection), `scaffold` (estructura datos). Reduce diagnóstico de 30min a ~2s. Verifica LoggerService, MemoryMonitor, ProGuard, pipeline files. |
+| **VRM Health Check (Pasos 3+9)** | `scripts/vrm_health_check.dart` (598L) | CLI unificado: `check [--fix] [--dry-run]` (pre-flight + cleanup temp/sesiones huérfanas con preview), `validate` (recovery paths), `memory` (leak detection), `scaffold` (estructura datos). `--fix` ahora elimina reglas ProGuard muertas. `--dry-run` previsualiza acciones sin modificar. Reduce diagnóstico + limpieza de 30min a ~2s. Verifica LoggerService, MemoryMonitor, ProGuard, pipeline files. |
 | **Scripts Python existentes** | `scripts/fragmentation_test.py`, `scripts/verify_backend.py` | Útiles para validación backend, pero no cubren frontend |
 | **Store Prep CLI (Pasos 4-5)** | `scripts/store_prep_cli.dart` (671L) | CLI unificado: `check` (8 checks pre-store + validación resolución screenshots via PNG IHDR header), `keystore` (genera RSA 2048), `assets validate` (iconos/splash/screenshots + validación resolución), `privacy` (valida placeholders), `screenshots` (guía captura). Reduce preparación store de ~4h a ~15min. Detecta keystore faltante, passwords default, placeholders, permisos, gitignore, resolución screenshots insuficiente. |
 | **Validador Metricas Sesion (Paso 7)** | `scripts/validador_metrics_session.dart` (173L) | CLI: `check --project-id <uuid> [--progress-only]` y `demo`. Valida que RecordingEndPage use metricas reales (no hardcodeadas). Detecta `0.75` hardcodeado, duracion "42m", takes falsos en session_data.json. Reduce QA manual de metricas de 10min a ~1s. |

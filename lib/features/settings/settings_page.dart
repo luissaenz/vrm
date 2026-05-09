@@ -91,9 +91,12 @@ class _SettingsPageState extends State<SettingsPage> {
                 brightness: _teleprompterPrefs.brightness,
               );
               await _settings.setTeleprompterPrefs(newPrefs);
-              if (context.mounted)
+              if (context.mounted) {
                 setState(() => _teleprompterPrefs = newPrefs);
-              if (context.mounted) Navigator.pop(context);
+              }
+              if (context.mounted) {
+                Navigator.pop(context);
+              }
             },
             child: const Text('Guardar'),
           ),
@@ -137,9 +140,12 @@ class _SettingsPageState extends State<SettingsPage> {
                 brightness: _teleprompterPrefs.brightness,
               );
               await _settings.setTeleprompterPrefs(newPrefs);
-              if (context.mounted)
+              if (context.mounted) {
                 setState(() => _teleprompterPrefs = newPrefs);
-              if (context.mounted) Navigator.pop(context);
+              }
+              if (context.mounted) {
+                Navigator.pop(context);
+              }
             },
             child: const Text('Guardar'),
           ),

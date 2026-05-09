@@ -7,3 +7,10 @@
 - **M-002:** 70 debugPrint residuales fuera de scope en lib/. Roadmap post-MVP. Scanner `--fix` puede migrarlos.
 
 > Incorporado desde validacion Paso 08 (2026-05-07).
+
+## Paso 09 — vrm-health-check-fix-real
+
+### 🔵 Mejoras
+- **M-001:** Sin try/catch individual por archivo en `_runFixCleanup()`. Si archivo bloqueado, `entity.delete()` lanza excepción no capturada y aborta todo cleanup. Post-MVP: try/catch por archivo con reporte individual.
+
+> Incorporado desde validacion Paso 09 (2026-05-07).

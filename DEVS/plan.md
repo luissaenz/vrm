@@ -213,17 +213,20 @@ Fix trivial (<5 lineas). LoggerService singleton ya disponible.
 Implementar cleanup real en `vrm_health_check.dart --fix` en vez de solo imprimir advertencia.
 
 ### Tareas
-- [ ] Implementar logica de reparacion en `vrm_health_check.dart:120-122`
-- [ ] Eliminar archivos temporales huerfanos en `vrm_data/tmp/`
-- [ ] Resetear sesiones huerfanas sin proyecto padre
+- [x] Implementar logica de reparacion en `vrm_health_check.dart:175-223` (old plan L120-122 — corregido)
+- [x] Eliminar archivos temporales huerfanos en `vrm_data/tmp/`
+- [x] Resetear sesiones huerfanas sin proyecto padre
+- [x] Agregar flag `--dry-run` para previsualizar acciones sin ejecutar
 
 ### Criterios de Aceptacion
-- [ ] `--fix` ejecuta acciones concretas, no solo print
-- [ ] Acciones documentadas en output
-- [ ] No elimina datos de proyectos validos
+- [x] `--fix` ejecuta acciones concretas, no solo print
+- [x] Acciones documentadas en output
+- [x] No elimina datos de proyectos validos
+- [x] Flag `--dry-run` lista acciones sin modificar archivos
 
 ### Notas
 Sigue patron de `store_prep_cli.dart` donde los subcomandos ejecutan acciones reales.
+Implementado en Paso 09 vía analisis-FINAL (commit pendiente).
 
 ## Paso 10: Adaptive-icons-Android-13
 
