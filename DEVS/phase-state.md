@@ -1,7 +1,7 @@
 # 🗺️ Phase State: mvp
 
 > Generado: 2026-05-05 vía 6_CONTEXTO.md
-> Actualizado: 2026-05-09 vía 6_CONTEXTO.md (Post-Paso 15 — Vrm-health-check-resiliencia-archivos)
+> Actualizado: 2026-05-09 vía 6_CONTEXTO.md (Post-Paso 16 — Correccion-desvio-debugprint-detector [RECHAZADO])
 
 ---
 
@@ -29,6 +29,7 @@
 | 13 | Mejorar-debugprint-scanner-kdebugmode | ✅ completed |
 | 14 | Migracion-masiva-debugprint-residuales | ✅ completed |
 | 15 | Vrm-health-check-resiliencia-archivos | ✅ completed |
+| 16 | Correccion-desvio-debugprint-detector | ❌ rejected (ID-001 regex bug DX tool) |
 
 **Dependencias entre pasos:**
 - 01 ← 02 ← 03 ← 04 ← 05 ← 06 ← 07 ← 08 ← 09 ← 10 ← 11 ← 12 ← 13 ← 14 ← 15 (secuencial)
@@ -79,8 +80,9 @@
 | **Capture Store Screenshots DX tool** | `scripts/capture_store_screenshots.dart` (247L) | CLI interactivo ADB: captura secuencial 5 screenshots en dispositivo Android. Flags: `--device <id>`, `--clean`, `--help`. Valida PNG header + dimensiones + file size post-captura. Reduce ~30min manual a ~5min. |
 | **Shared PNG utils** | `scripts/utils.dart` (28L) | `getPngDimensions()` + `validatePngHeader()` compartidos entre `capture_store_screenshots.dart` y `store_prep_cli.dart`. Elimina duplicacion de PNG parser. |
 | **DebugPrint detector** | `scripts/debugprint_detector.dart` (164L) | API pública con 7 funciones: `isInsideDebugModeBlock` (orquestador), `isSameLineKDebugModeGuard`, `isInsideAssert`, `isTernaryKDebugModeGuard`, `isAdjacentKDebugModeGuard`, `isInsideBracedDebugModeBlock`, `stripStringsAndComments`. Cross-file usable por scanner y tests. |
-| **DebugPrint scanner mejorado** | `scripts/debugprint_scanner.dart` (328L) | Refactor: extrae lógica a `debugprint_detector.dart`. 4 wrappers `_` privados (`_isInsideDebugModeBlock`, `_isSameLineKDebugModeGuard`, `_isInsideAssert`, `_isInsideBracedDebugModeBlock`) según spec FINAL. 5 discrepancias D1-D5 resueltas: same-line, adyacente, assert, ternario, braces en strings/comentarios. 88 archivos escaneados, 7 residuales encontrados. |
-| **DebugPrint scanner test** | `test/debugprint_scanner_test.dart` | 31 tests unitarios (8 grupos) cubriendo TP-1 a TP-8 + stripStringsAndComments + orquestador. 52/52 tests totales pasan. |
+| **DebugPrint scanner mejorado** | `scripts/debugprint_scanner.dart` (314L) | Refactor: extrae lógica a `debugprint_detector.dart`. 1 wrapper `_` privado (`_isInsideDebugModeBlock`) delegando a detector público. 3 wrappers dead code eliminados en Paso 16 (`_isSameLineKDebugModeGuard`, `_isInsideAssert`, `_isInsideBracedDebugModeBlock`). L1: `// ignore_for_file: avoid_print` (sin `unused_element`). 5 discrepancias D1-D5 resueltas: same-line, adyacente, assert, ternario, braces en strings/comentarios. 88 archivos escaneados, 0 residuales. |
+| **DebugPrint scanner test** | `test/debugprint_scanner_test.dart` | 31 tests unitarios (8 grupos) cubriendo TP-1 a TP-8 + stripStringsAndComments + orquestador. 31/31 tests pasan. |
+| **DebugPrint alignment checker** | `scripts/debugprint_alignment_check.dart` (153L) | DX CLI: `dart run scripts/debugprint_alignment_check.dart` verifica alineación detector↔scanner post-cambios. 4 checks: wrappers scanner, imports, detector exports (7 fn), flutter analyze. ❌ Bug ID-001: regex `bool\\s+fn\\(` no matcha `String stripStringsAndComments`. False positive. |
 | **Paso 14: Migración 7 debugPrint residuales → LoggerService** | `vrm_pipeline.dart`, `stitcher_plugin.dart`, `schema_validator.dart`, `clip_storage_service.dart`, `social_account_manager.dart` | 7 debugPrint multilínea migrados a LoggerService.log() en 5 archivos. Tags PascalCase según spec: VRMPipeline, StitcherPlugin, SchemaValidator, ClipStorageService, SocialAccountManager. 0 debugPrint residuales confirmados por scanner. Imports `flutter/foundation.dart` unused removidos de los 5 archivos. Import LoggerService agregado en stitcher_plugin.dart. `memory_monitor.dart:62` y `logger_service.dart:48` conservan debugPrint intencional. |
 | **DebugPrint migration verifier** | `scripts/debugprint_migration_verifier.dart` | CLI post-migración: `dart run scripts/debugprint_migration_verifier.dart` ejecuta scanner + valida 0 unused imports `flutter/foundation.dart` + `flutter analyze` en archivos meta. 3/3 checks pasan. Reduce verificación manual de ~10min a ~2s. |
 | **Play Store Data Safety documentado** | `DEVS/play_store_data_safety.md` | Checklist de respuestas para formulario Data Safety de Play Console. |
@@ -273,6 +275,18 @@
 | **DX tool simula archivo bloqueado real** | `health_check_resilience_test.dart` usa `attrib +R` en Windows para crear archivo read-only en `vrm_data/tmp/` (dir real). Verifica output contiene `⚠️`. | Demuestra try/catch bajo presión real. Cleanup automático con `attrib -R`. Dir correcto = archivos procesados por health check. |
 | **5 tests en DX tool** | (1) exitCode=0, (2) output contiene ⚠️ locked_temp.mp4, (3) no Unhandled exception, (4) --dry-run OK, (5) resumen ARCHIVOS NO ELIMINADOS | Cobertura completa del comportamiento esperado. Maneja edge case admin (attrib no impide delete → test pasa gracefully). |
 
+### Decisiones de Paso 16 (Correccion-desvio-debugprint-detector)
+
+| Decisión | Detalle | Justificación |
+|---|---|---|
+| **Eliminar 3 wrappers dead code en scanner** | `_isSameLineKDebugModeGuard`, `_isInsideAssert`, `_isInsideBracedDebugModeBlock` removidos de scanner L162-165. Solo `_isInsideDebugModeBlock` permanece (L160-161). | Wrappers nunca invocados. `unused_element` ignore los suprimía. Dead code = fricción para futuros desarrolladores. |
+| **Quitar `unused_element` del ignore L1** | scanner L1: `// ignore_for_file: avoid_print` (solo avoid_print). | Ya no hay elementos unused que suprimir. Limpieza de ignore directive. |
+| **Mantener detector público + wrapper privado único** | detector.dart 7 fn públicas intactas. Scanner delega vía `_isInsideDebugModeBlock` → detector `isInsideDebugModeBlock`. | Dart no permite testear `_` cross-file. Detector público = testabilidad. Wrapper privado = spec compliance. |
+| **Actualizar spec archivada (Paso 13) con decisión real** | `DEVS/IMPLEMENTED/mvp/13-.../analisis-FINAL.md` L97: nota `[Actualizado Paso 16]` documentando detector público + wrapper único. | Evita discrepancia entre spec histórica y código real. Futuros agentes ven la decisión. |
+| **DX tool: alignment checker** | `scripts/debugprint_alignment_check.dart` (153L) — 4 checks: wrappers scanner, imports, detector exports, flutter analyze. | Reduce verificación post-cambio de ~2min a ~1s. Patrón verificador existente (migration_verifier, health_check_resilience_test). |
+
+> ⚠️ **Paso 16 RECHAZADO** — Validación detectó ID-001: regex bug en alignment_check L69. Regex `bool\\s+stripStringsAndComments\\s*\\(` no matcha porque fn retorna `String`. False positive reporta "detector NO exporta stripStringsAndComments" cuando SÍ existe (detector L101). Fix: cambiar regex a `(bool|String)\\s+stripStringsAndComments\\s*\\(`. Implementador debe corregir y re-validar.
+
 ### Decisiones de Paso 12 (Screenshots-store-ready)
 
 | Decisión | Detalle | Justificación |
@@ -389,6 +403,7 @@
 | 13-Mejorar-debugprint-scanner-kdebugmode | ✅ completed | `DEVS/IMPLEMENTED/mvp/13-Mejorar-debugprint-scanner-kdebugmode/` | 705eb0a | Refactor `_isInsideDebugModeBlock` → 4 helpers + orquestador. D1-D5 resueltas (same-line, adjacent, assert, ternary, braces strings/comentarios). `debugprint_detector.dart` (164L) API pública. `debugprint_scanner_test.dart` 31 tests. Corrector: ID-001 (3 unused_import removidos), ID-002 (_wrappers privados). 52/52 tests. flutter analyze 0 issues. | 8 archivos archivados. 3 archivos nuevos/modificados (detector, scanner, test). 3 archivos lib/ corregidos (ID-001). |
 | 14-Migracion-masiva-debugprint-residuales | ✅ completed | `DEVS/IMPLEMENTED/mvp/14-Migracion-masiva-debugprint-residuales/` | 9058ed7 | Migración manual 7 debugPrint→LoggerService.log() en 5 archivos. 5 imports flutter/foundation.dart unused removidos. Import LoggerService agregado en stitcher_plugin.dart. DX: debugprint_migration_verifier.dart. Validación: 14/14 criterios, 0 críticos, 52/52 tests, flutter analyze 0 issues en lib/, scanner 0 residuales. | 2 archivos archivados (analisis-FINAL.md + validacion.md). 6 archivos lib/ modificados. 1 script nuevo (verifier). |
 | 15-Vrm-health-check-resiliencia-archivos | ✅ completed | `DEVS/IMPLEMENTED/mvp/15-Vrm-health-check-resiliencia-archivos/` | 6d7fa7b | 3 `delete()` en `_runFixCleanup()` envueltos en try/catch individual. `failedFiles` lista acumula paths fallidos. Resumen final `⚠️ ARCHIVOS NO ELIMINADOS`. `cleaned++` solo post-delete exitoso. Rama dryRun intacta. DX: `health_check_resilience_test.dart` (234L) simula archivo bloqueado real con `attrib +R`. Validación: 14/14 criterios, 0 críticos, 52/52 tests, 0 cambios lib/. Calidad 9.5/10. | 3 archivos archivados. 1 script modificado (`vrm_health_check.dart`). 1 script nuevo (`health_check_resilience_test.dart`). Sin cambios en lib/. |
+| 16-Correccion-desvio-debugprint-detector | ❌ rejected | — | — | 3 wrappers dead code eliminados de scanner. `unused_element` removido del ignore. detector.dart 7 fn públicas intactas + wrapper `_isInsideDebugModeBlock` único en scanner. Spec Paso 13 actualizada con decisión real. DX: `debugprint_alignment_check.dart` (153L). 10/11 criterios aceptacion. | 1 🔴 crítico: ID-001 regex bug en alignment_check L69. Regex `bool\\s+stripStringsAndComments\\s*\\(` no matcha porque fn retorna `String`. False positive. Fix trivial (1 línea). Implementador debe corregir y re-validar. |
 
 ---
 

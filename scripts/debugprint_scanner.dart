@@ -1,4 +1,4 @@
-// ignore_for_file: avoid_print, unused_element
+// ignore_for_file: avoid_print
 
 import 'dart:io';
 
@@ -156,13 +156,9 @@ List<_DebugPrintMatch> _findDebugPrintCalls(List<String> lines) {
   return result;
 }
 
-// ── FINAL-spec private wrappers (delegate to debugprint_detector.dart) ──
+// ── Wrapper privado (delega a debugprint_detector.dart) ── [Actualizado Paso 16]
 bool _isInsideDebugModeBlock(List<String> lines, int lineIdx) =>
     isInsideDebugModeBlock(lines, lineIdx);
-bool _isSameLineKDebugModeGuard(String line) => isSameLineKDebugModeGuard(line);
-bool _isInsideAssert(String line) => isInsideAssert(line);
-bool _isInsideBracedDebugModeBlock(List<String> lines, int lineIdx) =>
-    isInsideBracedDebugModeBlock(lines, lineIdx);
 
 int _fixDebugPrintCalls(File file, String content, List<String> lines) {
   final tag = _deriveTag(file.path);

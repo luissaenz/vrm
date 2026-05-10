@@ -94,6 +94,8 @@
   ```
 - **Patrones a seguir:** Funciones privadas `_` ya existentes en `scripts/`. Mismo patrón que `_deriveTag`, `_printResults`.
 
+> **[Actualizado Paso 16] Decisión real:** Funciones públicas en `debugprint_detector.dart` para testabilidad cross-file (Dart no permite testear funciones `_` de otro archivo). Scanner usa wrapper `_isInsideDebugModeBlock` único delegando al detector. Wrappers `_isSameLineKDebugModeGuard`, `_isInsideAssert`, `_isInsideBracedDebugModeBlock` eliminados (dead code). Patrón: módulo público para test + wrapper privado en CLI.
+
 #### **`test/debugprint_scanner_test.dart`** — Creación
 
 - **Ruta real:** `D:\Develop\Personal\vrm\test\debugprint_scanner_test.dart`
