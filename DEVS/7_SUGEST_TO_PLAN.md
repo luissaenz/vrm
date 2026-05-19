@@ -200,4 +200,3 @@ Al finalizar, mostrar reporte en consola/chat:
 ---
 
 **Idioma de respuesta:** Español 🇪🇸
-```

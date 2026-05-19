@@ -9,7 +9,7 @@ Actúa como **Arquitecto de Software Senior** especializado en planificación t�
 Desarrollamos **"{project_name}"**. Existe un plan general en `{project_root}/DEVS/plan.md`. Este proceso genera y mantiene `{project_root}/DEVS/phase-state.md` que todos los agentes consumen.
 
 > [!IMPORTANT]
-> **ANTES DE EJECUTAR:** Leer `proyecto-config.json` en la raíz del proyecto. Todas las rutas, convenciones y comandos se obtienen de ahí — no hardcodear paths.
+> **ANTES DE EJECUTAR:** Leer `proyecto-config.json` en la raíz del proyecto. Todas las rutas, convenciones y comandos se obtienen de ahí — no hardcodear paths. Si existe `{paths.devs_constitution}/`, leer `quality.md` siempre y los demás archivos según lo que requiera el paso a documentar.
 
 ---
 
@@ -29,12 +29,14 @@ Desarrollamos **"{project_name}"**. Existe un plan general en `{project_root}/DE
 ## 📥 Entradas
 
 1. **`proyecto-config.json`** (raíz del proyecto) — fuente de verdad de rutas y convenciones
-2. **Plan General:** `{project_root}/DEVS/plan.md`
-3. **Fase Objetivo:** [FASE_N] (indicada por usuario o inferida del contexto)
-4. **Código fuente:** `{paths.backend}` (fuente de verdad para §2 y §3)
-5. **Migraciones DB:** `{paths.migrations}` (fuente de verdad para schema)
-6. **Dependencias:** `{dependency_file}` (fuente de verdad para deps)
-7. **`{project_root}/DEVS/phase-state.md` existente** (puede o no existir)
+2. **`{paths.devs_constitution}/quality.md`** — siempre; §7 Calidad Mínima se referencia en §6 del phase-state
+   - **Otros archivos** (`security.md`, `architecture.md`, `style.md`) según el contenido del paso completado
+3. **Plan General:** `{project_root}/DEVS/plan.md`
+4. **Fase Objetivo:** [FASE_N] (indicada por usuario o inferida del contexto)
+5. **Código fuente:** `{paths.backend}` (fuente de verdad para §2 y §3)
+6. **Migraciones DB:** `{paths.migrations}` (fuente de verdad para schema)
+7. **Dependencias:** `{dependency_file}` (fuente de verdad para deps)
+8. **`{project_root}/DEVS/phase-state.md` existente** (puede o no existir)
 
 ---
 
@@ -68,7 +70,7 @@ Desarrollamos **"{project_name}"**. Existe un plan general en `{project_root}/DE
 
 ## 🎯 Lógica de Ejecución
 
-### Paso 0: Leer `proyecto-config.json`
+### Paso 0: Leer `proyecto-config.json` y constitution files relevantes
 
 > [!WARNING]
 > Primera acción = leer `proyecto-config.json`. Extraer:
@@ -78,6 +80,7 @@ Desarrollamos **"{project_name}"**. Existe un plan general en `{project_root}/DE
 > - `conventions.*` → naming, patrones, imports
 > - `commands.*` → comandos de test, lint, migrate
 > - `stack.*` → tecnologías detectadas
+> - `paths.devs_constitution` → si existe el directorio, leer `quality.md` siempre. Cargar `security.md`, `architecture.md` o `style.md` según el contenido del paso completado
 
 ---
 
@@ -218,6 +221,7 @@ Desarrollamos **"{project_name}"**. Existe un plan general en `{project_root}/DE
 - Datos se persisten correctamente.
 - Validaciones de input presentes.
 - Código ejecuta sin errores ni warnings nuevos.
+- **Estándares de `constitution/quality.md §7`** cumplidos — son criterios de aceptación implícitos en todo paso.
 - **Herramientas DX detectadas/propuestas** que simplifiquen el flujo para el usuario final.
 - **NO se requiere para MVP:** retry con backoff, caching avanzado, rate limiting, observabilidad avanzada, optimización de performance extrema.
 
@@ -232,6 +236,8 @@ Desarrollamos **"{project_name}"**. Existe un plan general en `{project_root}/DE
 > 1. `{project_root}/DEVS/phase-state.md`
 > 2. Directorio `{paths.devs_implemented}/{phase_name}/{XX-nombre}/` (creación del directorio + archivos movidos desde IN_PROGRESS)
 > 3. Un único commit git con mensaje `{phase_name} / {XX-nombre}`
+>
+> **NOTA:** Si el directorio `constitution/` no existe y el proyecto ya tiene código → sugerir ejecutar `0_SETUP.md` para generarlo. No crear los archivos manualmente en este proceso.
 
 ---
 
@@ -240,6 +246,7 @@ Desarrollamos **"{project_name}"**. Existe un plan general en `{project_root}/DE
 | Métrica | Mínimo Aceptable |
 |:---|:---|
 | `proyecto-config.json` leído antes de generar | 100% — sin esto no hay rutas válidas |
+| `constitution/quality.md` leído si existe | 100% — §7 referenciado en §6 del phase-state |
 | Archivado de IN_PROGRESS ejecutado | 100% — siempre, antes de generar phase-state |
 | Único commit realizado con formato `{phase_name} / {XX-nombre}` | 100% — siempre, después del archivado |
 | Hash de commit registrado en §5 | 100% |
@@ -281,4 +288,3 @@ Desarrollamos **"{project_name}"**. Existe un plan general en `{project_root}/DE
 ---
 
 **Idioma de respuesta:** Español 🇪🇸
-```

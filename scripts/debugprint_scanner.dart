@@ -165,6 +165,7 @@ int _fixDebugPrintCalls(File file, String content, List<String> lines) {
   int replacements = 0;
   final newLines = <String>[];
   bool needsImport = true;
+  int skipUntil = 0;
 
   // Check if already imported
   for (final line in lines) {
@@ -179,9 +180,12 @@ int _fixDebugPrintCalls(File file, String content, List<String> lines) {
   }
 
   for (int i = 0; i < lines.length; i++) {
+    if (i < skipUntil) continue;
+
     final line = lines[i];
     var modified = line;
     int searchFrom = 0;
+    bool didMultiLineFix = false;
 
     while (true) {
       final idx = modified.indexOf('debugPrint(', searchFrom);
@@ -202,7 +206,7 @@ int _fixDebugPrintCalls(File file, String content, List<String> lines) {
         continue;
       }
 
-      // Find matching closing paren
+      // Find matching closing paren (single-line first)
       int depth = 0;
       int endIdx = -1;
       for (int j = idx + 'debugPrint('.length; j < modified.length; j++) {
@@ -217,9 +221,38 @@ int _fixDebugPrintCalls(File file, String content, List<String> lines) {
       }
 
       if (endIdx == -1) {
-        // Malformed, skip
-        searchFrom = idx + 1;
-        continue;
+        // Multi-line: search across subsequent lines
+        final result = findClosingParenMultiLine(
+          lines,
+          i,
+          idx + 'debugPrint('.length,
+        );
+        if (result.$1 == -1) {
+          // SUPUESTO: truly malformed call, skip
+          searchFrom = idx + 1;
+          continue;
+        }
+
+        final endLine = result.$1;
+        final endCol = result.$2;
+        final arg = extractMultiLineArg(
+          lines,
+          i,
+          idx + 'debugPrint('.length - 1,
+          endLine,
+          endCol,
+        );
+        final replacement = "LoggerService.log('$tag', $arg)";
+
+        final firstLine =
+            line.substring(0, idx) +
+            replacement +
+            lines[endLine].substring(endCol + 1);
+        newLines.add(firstLine);
+        skipUntil = endLine + 1;
+        replacements++;
+        didMultiLineFix = true;
+        break;
       }
 
       final arg = modified.substring(idx + 'debugPrint('.length, endIdx).trim();
@@ -233,7 +266,9 @@ int _fixDebugPrintCalls(File file, String content, List<String> lines) {
       replacements++;
     }
 
-    newLines.add(modified);
+    if (!didMultiLineFix) {
+      newLines.add(modified);
+    }
   }
 
   if (replacements > 0) {
@@ -264,9 +299,12 @@ int _fixDebugPrintCalls(File file, String content, List<String> lines) {
 }
 
 String _deriveTag(String path) {
-  // Extract filename without extension, PascalCase
-  final name = path.split('/').last.split('\\').last;
-  return name.replaceAll('.dart', '');
+  final name = path.split('/').last.split('\\').last.replaceAll('.dart', '');
+  return name
+      .split('_')
+      .where((w) => w.isNotEmpty)
+      .map((w) => '${w[0].toUpperCase()}${w.substring(1)}')
+      .join();
 }
 
 void _printResults(List<_MatchResult> results, int totalFiles) {

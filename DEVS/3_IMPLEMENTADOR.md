@@ -9,7 +9,7 @@ Actúa como **Ingeniero de Software Senior orientado a la ejecución**. Traslad�
 Partís de `analisis-FINAL.md` que define qué construir. Tu misión = transformar ese diseño en código funcional usando las rutas y convenciones reales del proyecto.
 
 > [!IMPORTANT]
-> **ANTES DE EJECUTAR:** Leer `proyecto-config.json` en la raíz del proyecto. Todas las rutas, comandos y convenciones salen de ahí — no hardcodear paths.
+> **ANTES DE EJECUTAR:** Leer `proyecto-config.json` y `{paths.devs_constitution}/quality.md`. Rutas y comandos salen del config; §7 Calidad Mínima define los estándares del código entregado. Leer §9 del `analisis-FINAL.md` antes de escribir la primera línea — contiene interfaces reales y decisiones ya tomadas.
 
 ---
 
@@ -30,6 +30,10 @@ Partís de `analisis-FINAL.md` que define qué construir. Tu misión = transform
 ## 📥 Entradas (en orden de prioridad)
 
 1. **🥇 `proyecto-config.json`** (raíz) — rutas, convenciones y comandos reales
+   - **🥇 `{paths.devs_constitution}/quality.md`** — siempre; estándares mínimos exigibles
+   - **🥇 `{paths.devs_constitution}/security.md`** — si el paso toca auth, RLS, DB
+   - **🥇 `{paths.devs_constitution}/architecture.md`** — si el paso crea módulos o modifica capas
+   - **🥇 `{paths.devs_constitution}/style.md`** — si el paso crea archivos nuevos
 2. **🥇 `{paths.devs_in_progress}/analisis-FINAL.md`** — TODO lo que implementés debe salir de aquí
 3. **🥈 Código fuente existente** (`{paths.backend}`, `{paths.frontend}`, `{paths.migrations}`) — interfaces, patrones y convenciones reales
 4. **🥉 `{project_root}/DEVS/phase-state.md`** — contratos y decisiones vigentes
@@ -45,9 +49,16 @@ Partís de `analisis-FINAL.md` que define qué construir. Tu misión = transform
 > [!WARNING]
 > Antes de escribir la primera línea, verificar estos puntos. 10-15 min → evita horas de debugging.
 
-### Paso 0: Leer `proyecto-config.json`
+### Paso 0: Leer `proyecto-config.json` y constitution files relevantes
 ```
 cat {project_root}/proyecto-config.json
+cat {paths.devs_constitution}/quality.md          # siempre — estándares mínimos exigibles
+```
+Luego, según el contenido del paso:
+```
+cat {paths.devs_constitution}/architecture.md     # si el paso crea módulos o modifica capas
+cat {paths.devs_constitution}/security.md         # si el paso toca auth, RLS, permisos o DB
+cat {paths.devs_constitution}/style.md            # si el paso crea archivos nuevos
 ```
 Extraer y anotar:
 - `paths.*` → rutas reales a usar en imports y referencias
@@ -55,10 +66,12 @@ Extraer y anotar:
 - `commands.*` → lint, test, migrate
 - `stack.*` → tecnologías activas
 - `phase.phase_name` → nombre de la fase activa
+- `quality.md §7` → estándares de calidad mínima que el código entregado debe cumplir
 
 ### Checklist de verificación:
 
-- [ ] **Interfaces reales:** Para cada clase/función a usar del código existente → verificar firma real coincide con `analisis-FINAL.md`
+- [ ] **§9 Contexto de Sesión leído:** Interfaces reales, patrones de referencia y decisiones embebidas en el FINAL identificadas y anotadas
+- [ ] **Interfaces reales:** Para cada clase/función a usar del código existente → verificar firma real coincide con §9 del `analisis-FINAL.md`
 - [ ] **Imports reales:** Para cada import → verificar que módulo y función/clase existen en la ruta indicada
 - [ ] **Patrones de código:** Si creás archivo similar a uno existente → leer UN ejemplo existente para copiar el patrón exacto
 - [ ] **Sección de correcciones:** Leer "Decisiones Tecnológicas / Correcciones al plan" del `analisis-FINAL.md` ANTES de empezar — son las trampas del plan original
@@ -96,7 +109,10 @@ MVP listo para producción:
 
 ## 🚀 Proceso de Ejecución
 
-1. **Lectura:** Leer `proyecto-config.json`, `analisis-FINAL.md` y `phase-state.md` completos. Atención especial a correcciones al plan y decisiones tecnológicas.
+1. **Lectura:** Leer `proyecto-config.json`, constitution files relevantes, `analisis-FINAL.md` y `phase-state.md` completos.
+   - Leer **§9 Contexto de Sesión** del `analisis-FINAL.md` primero — contiene interfaces reales, patrones de referencia y decisiones ya tomadas. Seguirlo al pie de la letra.
+   - Leer "Decisiones Tecnológicas / Correcciones al plan" — son las trampas del plan original.
+   - Leer `quality.md` — §7 Calidad Mínima define los estándares del código entregado.
 2. **Verificación previa:** Ejecutar checklist de verificación pre-implementación.
 3. **Plan mental:** Identificar orden de implementación según dependencias del análisis.
 4. **Tarea 0 — DX & Tooling (PRIMERO, SIEMPRE):**
@@ -160,6 +176,8 @@ Por cada archivo modificado:
 Solo DESPUÉS de completar la auto-revisión:
 
 - [ ] **`proyecto-config.json` leído** — rutas y convenciones aplicadas correctamente.
+- [ ] **`constitution/quality.md §7` cumplido** — estándares de calidad mínima aplicados al código entregado.
+- [ ] **§9 Contexto de Sesión respetado** — interfaces usadas coinciden con las declaradas en §9, decisiones no reconsideradas.
 - [ ] **`phase.phase_name` verificado** — implementación corresponde a la fase activa.
 - [ ] **Tarea 0 completada** — herramienta DX funcional.
 - [ ] **Dogfooding verificado** — herramienta DX usada para tareas 1..N.
@@ -222,4 +240,3 @@ Código implementado directamente en el proyecto. Al finalizar, resumen en conso
 ---
 
 **Idioma de respuesta:** Español 🇪🇸
-```

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:vrm_app/l10n/app_localizations.dart';
 import 'package:vrm_app/core/theme.dart';
+import '../../shared/widgets/header.dart';
+import '../../shared/widgets/step_indicator.dart';
 import 'services/settings_service.dart';
 import '../recording/models/teleprompter_prefs.dart';
 
@@ -17,7 +19,7 @@ class SettingsPage extends StatefulWidget {
 
 class _SettingsPageState extends State<SettingsPage> {
   final SettingsService _settings = SettingsService.instance;
-  ThemeMode _themeMode = ThemeMode.system;
+  ThemeMode _themeMode = ThemeMode.light;
   bool _cloudSyncEnabled = false;
   TeleprompterPrefs _teleprompterPrefs = TeleprompterPrefs.defaults();
   bool _isLoading = true;
@@ -160,132 +162,138 @@ class _SettingsPageState extends State<SettingsPage> {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
-    final colors = context.appColors;
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      backgroundColor: colors.background,
-      appBar: AppBar(
-        title: Text(l10n.settings),
-        backgroundColor: colors.background,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back_ios_new),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
-      body: SingleChildScrollView(
+      backgroundColor: context.colorScheme.surface,
+      body: SafeArea(
         child: Column(
           children: [
-            _buildSection(
-              context,
-              title: l10n.appearance,
-              children: [_buildThemeSwitcher(context)],
+            VRMHeader(
+              title: l10n.settings,
+              onBack: () => Navigator.pop(context),
+              icon: Icons.arrow_back_ios_new,
+              iconOnRight: false,
             ),
-            _buildSection(
-              context,
-              title: l10n.recording,
-              children: [
-                _buildSettingsTile(
-                  context,
-                  icon: Icons.timer_outlined,
-                  title: l10n.defaultRecordingDuration,
-                  subtitle: l10n.configureDefaultTime,
-                  onTap: () => _showComingSoon(context),
+            Expanded(
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                child: Column(
+                  children: [
+                    _buildSection(
+                      context,
+                      title: l10n.appearance,
+                      children: [_buildThemeSwitcher(context)],
+                    ),
+                    _buildSection(
+                      context,
+                      title: l10n.recording,
+                      children: [
+                        _buildSettingsTile(
+                          context,
+                          icon: Icons.timer_outlined,
+                          title: l10n.defaultRecordingDuration,
+                          subtitle: l10n.configureDefaultTime,
+                          onTap: () => _showComingSoon(context),
+                        ),
+                        _buildDivider(),
+                        _buildSettingsTile(
+                          context,
+                          icon: Icons.camera_alt_outlined,
+                          title: l10n.cameraSettings,
+                          subtitle: l10n.resolutionAndQuality,
+                          onTap: () => _showComingSoon(context),
+                        ),
+                      ],
+                    ),
+                    _buildSection(
+                      context,
+                      title: l10n.teleprompter,
+                      children: [
+                        _buildSettingsTile(
+                          context,
+                          icon: Icons.text_fields,
+                          title: l10n.fontSize,
+                          subtitle: '${_teleprompterPrefs.fontSize.toInt()}px',
+                          onTap: _showFontSizeDialog,
+                        ),
+                        _buildDivider(),
+                        _buildSettingsTile(
+                          context,
+                          icon: Icons.speed_outlined,
+                          title: l10n.scrollSpeed,
+                          subtitle:
+                              '${_teleprompterPrefs.readingSpeed.toInt()} PPM',
+                          onTap: _showSpeedDialog,
+                        ),
+                      ],
+                    ),
+                    _buildSection(
+                      context,
+                      title: l10n.dataAndStorage,
+                      children: [
+                        _buildSettingsTile(
+                          context,
+                          icon: Icons.cloud_outlined,
+                          title: l10n.cloudSync,
+                          subtitle: _cloudSyncEnabled
+                              ? 'Enabled'
+                              : l10n.cloudSyncDisabled,
+                          trailing: Switch(
+                            value: _cloudSyncEnabled,
+                            onChanged: _onCloudSyncChanged,
+                          ),
+                          onTap: () => _showComingSoon(context),
+                        ),
+                        _buildDivider(),
+                        _buildSettingsTile(
+                          context,
+                          icon: Icons.storage_outlined,
+                          title: l10n.manageStorage,
+                          subtitle: l10n.clearCacheAndData,
+                          onTap: () => _showComingSoon(context),
+                        ),
+                      ],
+                    ),
+                    _buildSection(
+                      context,
+                      title: l10n.about,
+                      children: [
+                        _buildSettingsTile(
+                          context,
+                          icon: Icons.info_outlined,
+                          title: l10n.appVersion,
+                          subtitle: '1.0.0',
+                          onTap: () => _showComingSoon(context),
+                        ),
+                        _buildDivider(),
+                        _buildSettingsTile(
+                          context,
+                          icon: Icons.description_outlined,
+                          title: l10n.termsOfService,
+                          onTap: () => _showComingSoon(context),
+                        ),
+                        _buildDivider(),
+                        _buildSettingsTile(
+                          context,
+                          icon: Icons.privacy_tip_outlined,
+                          title: l10n.privacyPolicy,
+                          onTap: () => _openPrivacyPolicy(context),
+                        ),
+                        _buildDivider(),
+                        _buildSettingsTile(
+                          context,
+                          icon: Icons.help_outline,
+                          title: l10n.helpAndSupport,
+                          onTap: () => _showComingSoon(context),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                  ],
                 ),
-                _buildDivider(),
-                _buildSettingsTile(
-                  context,
-                  icon: Icons.camera_alt_outlined,
-                  title: l10n.cameraSettings,
-                  subtitle: l10n.resolutionAndQuality,
-                  onTap: () => _showComingSoon(context),
-                ),
-              ],
+              ),
             ),
-            _buildSection(
-              context,
-              title: l10n.teleprompter,
-              children: [
-                _buildSettingsTile(
-                  context,
-                  icon: Icons.text_fields,
-                  title: l10n.fontSize,
-                  subtitle: '${_teleprompterPrefs.fontSize.toInt()}px',
-                  onTap: _showFontSizeDialog,
-                ),
-                _buildDivider(),
-                _buildSettingsTile(
-                  context,
-                  icon: Icons.speed_outlined,
-                  title: l10n.scrollSpeed,
-                  subtitle: '${_teleprompterPrefs.readingSpeed.toInt()} PPM',
-                  onTap: _showSpeedDialog,
-                ),
-              ],
-            ),
-            _buildSection(
-              context,
-              title: l10n.dataAndStorage,
-              children: [
-                _buildSettingsTile(
-                  context,
-                  icon: Icons.cloud_outlined,
-                  title: l10n.cloudSync,
-                  subtitle: _cloudSyncEnabled
-                      ? 'Enabled'
-                      : l10n.cloudSyncDisabled,
-                  trailing: Switch(
-                    value: _cloudSyncEnabled,
-                    onChanged: _onCloudSyncChanged,
-                  ),
-                  onTap: () => _showComingSoon(context),
-                ),
-                _buildDivider(),
-                _buildSettingsTile(
-                  context,
-                  icon: Icons.storage_outlined,
-                  title: l10n.manageStorage,
-                  subtitle: l10n.clearCacheAndData,
-                  onTap: () => _showComingSoon(context),
-                ),
-              ],
-            ),
-            _buildSection(
-              context,
-              title: l10n.about,
-              children: [
-                _buildSettingsTile(
-                  context,
-                  icon: Icons.info_outlined,
-                  title: l10n.appVersion,
-                  subtitle: '1.0.0',
-                  onTap: () => _showComingSoon(context),
-                ),
-                _buildDivider(),
-                _buildSettingsTile(
-                  context,
-                  icon: Icons.description_outlined,
-                  title: l10n.termsOfService,
-                  onTap: () => _showComingSoon(context),
-                ),
-                _buildDivider(),
-                _buildSettingsTile(
-                  context,
-                  icon: Icons.privacy_tip_outlined,
-                  title: l10n.privacyPolicy,
-                  onTap: () => _openPrivacyPolicy(context),
-                ),
-                _buildDivider(),
-                _buildSettingsTile(
-                  context,
-                  icon: Icons.help_outline,
-                  title: l10n.helpAndSupport,
-                  onTap: () => _showComingSoon(context),
-                ),
-              ],
-            ),
-            const SizedBox(height: 20),
           ],
         ),
       ),
@@ -304,21 +312,20 @@ class _SettingsPageState extends State<SettingsPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.only(left: 4, bottom: 12),
-            child: Text(
-              title.toUpperCase(),
-              style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: colors.forest.withValues(alpha: 0.6),
-                fontWeight: FontWeight.w700,
-                letterSpacing: 1.2,
-              ),
-            ),
-          ),
+          VRMStepIndicator(stepNumber: '', title: title.toUpperCase()),
+          const SizedBox(height: 12),
           Container(
             decoration: BoxDecoration(
               color: context.isDarkMode ? colors.cardBackground : Colors.white,
               borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: colors.cardBorder),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.03),
+                  blurRadius: 10,
+                  offset: const Offset(0, 4),
+                ),
+              ],
             ),
             child: Column(children: children),
           ),
@@ -346,10 +353,6 @@ class _SettingsPageState extends State<SettingsPage> {
           ButtonSegment<ThemeMode>(
             value: ThemeMode.dark,
             icon: const Icon(Icons.dark_mode, size: 18),
-          ),
-          ButtonSegment<ThemeMode>(
-            value: ThemeMode.system,
-            icon: const Icon(Icons.settings_brightness, size: 18),
           ),
         ],
         selected: {_themeMode},

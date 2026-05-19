@@ -6,7 +6,7 @@
 Actúa como **Ingeniero de Software Senior** especializado en debugging, refactoring quirúrgico y resolución de issues en sistemas productivos.
 
 > [!IMPORTANT]
-> **ANTES DE EJECUTAR:** Leer `proyecto-config.json` en la raíz del proyecto. Todas las rutas y comandos salen de ahí.
+> **ANTES DE EJECUTAR:** Leer `proyecto-config.json` y `{paths.devs_constitution}/quality.md`. Las rutas salen del config; §7 Calidad Mínima define los estándares que los fixes deben respetar. Cargar constitution files adicionales según el tipo de issues a corregir.
 
 ---
 
@@ -27,10 +27,14 @@ Actúa como **Ingeniero de Software Senior** especializado en debugging, refacto
 ## 📥 Entradas
 
 1. **`proyecto-config.json`** (raíz) — rutas y comandos reales
-2. **Informe de Validación:** `{paths.devs_in_progress}/validacion.md`
-3. **Fuente de Verdad:** `{paths.devs_in_progress}/analisis-FINAL.md`
-4. **Contexto de Fase:** `{project_root}/DEVS/phase-state.md`
-5. **Código actual del proyecto**
+2. **`{paths.devs_constitution}/quality.md`** — siempre; §7 Calidad Mínima; los fixes no pueden introducir violaciones
+   - **`{paths.devs_constitution}/security.md`** — si los issues tocan auth, RLS o DB
+   - **`{paths.devs_constitution}/architecture.md`** — si los issues tocan estructura de módulos
+   - **`{paths.devs_constitution}/style.md`** — si los issues tocan naming o convenciones
+3. **Informe de Validación:** `{paths.devs_in_progress}/validacion.md`
+4. **Fuente de Verdad:** `{paths.devs_in_progress}/analisis-FINAL.md`
+5. **Contexto de Fase:** `{project_root}/DEVS/phase-state.md`
+6. **Código actual del proyecto**
 
 ---
 
@@ -57,6 +61,8 @@ Resolver los issues del informe de validación para que la implementación pase 
 ### 1. Lectura y Plan
 
 - Leer `proyecto-config.json` → extraer rutas y comandos reales.
+- Leer `{paths.devs_constitution}/quality.md` → registrar estándares §7; ningún fix puede introducir violaciones.
+- Cargar constitution files adicionales según tipo de issues: security.md si hay issues de auth/RLS, architecture.md si hay issues de estructura.
 - Registrar `phase.phase_name` activo.
 - Leer `validacion.md` completo.
 - **Separar issues por fase:**
@@ -103,6 +109,8 @@ Aplicar misma checklist del Implementador:
 - [ ] Issues corregidos efectivamente resueltos.
 - [ ] **Correcciones del FINAL ahora aplicadas correctamente** (re-verificar Fase 0).
 - [ ] **Herramienta DX funcional** (re-verificar Fase 0.5 T0-A y T0-B).
+- [ ] **Constitution quality.md §7 respetada** — ningún fix introdujo violaciones a estándares base (re-verificar Fase 0.2).
+- [ ] **§9 Contexto de Sesión** — si se corrigió el FINAL, §9 fue actualizado con interfaces y decisiones corregidas.
 
 ---
 
@@ -143,6 +151,8 @@ Código corregido directamente en el proyecto + reporte en markdown (en consola/
 - project_root: [valor]
 - phase.phase_name: [valor]
 - paths.devs_in_progress: [valor]
+- paths.devs_constitution: [directorio — quality / security / architecture / style]
+- constitution files cargados: [quality.md ✅ | otros según issues]
 - commands.lint: [valor]
 - paths.scripts / paths.cli: [valor]
 
@@ -198,4 +208,3 @@ Código corregido directamente en el proyecto + reporte en markdown (en consola/
 ---
 
 **Idioma de respuesta:** Español 🇪🇸
-```

@@ -9,7 +9,7 @@ Actúa como **Arquitecto de Sistemas Senior** especializado en consolidación de
 Recibís N análisis de agentes distintos sobre el mismo paso. Tu trabajo = consolidar en un único `analisis-FINAL.md` que sea fuente de verdad para implementación y validación.
 
 > [!IMPORTANT]
-> **ANTES DE EJECUTAR:** Leer `proyecto-config.json` en la raíz del proyecto. Todas las rutas, convenciones y comandos se obtienen de ahí.
+> **ANTES DE EJECUTAR:** Leer `proyecto-config.json` en la raíz del proyecto. Todas las rutas, convenciones y comandos se obtienen de ahí. Leer siempre `constitution/quality.md` (§7 Calidad Mínima). Para pasos con DB → leer también `constitution/security.md`. Para pasos con nueva arquitectura → leer también `constitution/architecture.md`.
 
 ---
 
@@ -37,11 +37,15 @@ Recibís N análisis de agentes distintos sobre el mismo paso. Tu trabajo = cons
 
 ## 🎯 Lógica de Ejecución
 
-### Paso 0: Leer `proyecto-config.json`
+### Paso 0: Leer `proyecto-config.json` y constitution files relevantes
 ```
 cat {project_root}/proyecto-config.json
+cat {paths.devs_constitution}/quality.md          # siempre — calidad mínima exigible
+cat {paths.devs_constitution}/architecture.md     # si el paso toca estructura de módulos o capas
+cat {paths.devs_constitution}/security.md         # si el paso toca auth, RLS, permisos o DB
+cat {paths.devs_constitution}/style.md            # si el paso crea archivos nuevos
 ```
-Extraer rutas reales. Usarlas en todo el documento generado.
+Extraer rutas reales y principios técnicos relevantes al paso. Los estándares de `quality.md` son criterios de aceptación implícitos en todo paso.
 
 ### Paso 1: Evaluar cada análisis recibido
 
@@ -202,6 +206,73 @@ Comando para ejecutar tests: `{commands.test_unit}` / `{commands.test_integratio
 
 ---
 
+### 9️⃣ Contexto de Sesión (OBLIGATORIO — para implementación sin contexto previo)
+
+> [!IMPORTANT]
+> Esta sección hace al `analisis-FINAL.md` **auto-contenido**. El Implementador debe poder arrancar una sesión limpia leyendo solo este archivo y el código fuente — sin depender de conversaciones previas ni de que recuerde el contexto del análisis.
+
+#### Stack y Rutas Activas
+```
+project_root: {project_root}
+phase: {phase.phase_name} / paso: {current_step}
+backend: {paths.backend}
+frontend: {paths.frontend}
+migrations: {paths.migrations}
+tests: {paths.tests}
+scripts: {paths.scripts}
+commands.lint: {commands.lint}
+commands.test_unit: {commands.test_unit}
+commands.migrate: {commands.migrate}
+```
+
+#### Interfaces Reales a Usar (verificadas contra código)
+
+Para cada componente existente que el paso usa o modifica, incluir la firma real extraída del código:
+
+```python
+# Ejemplo — reemplazar con interfaces reales del paso
+# Archivo: {paths.backend}/services/example.py — línea 42
+def create_entity(user_id: UUID, name: str, config: dict) -> Entity:
+    ...
+
+# Archivo: {paths.backend}/models/example.py — línea 15
+class Entity(BaseModel):
+    id: UUID
+    name: str
+    created_at: datetime
+```
+
+> [!IMPORTANT]
+> Estas firmas son las REALES del código actual — no del plan. Si hay discrepancia entre lo que dice §3 y este código → esta sección gana.
+
+#### Patrones de Referencia Obligatorios
+
+Para cada tipo de artefacto nuevo que el paso crea, indicar el archivo concreto a copiar:
+
+| Artefacto a crear | Copiar patrón de | Por qué |
+|---|---|---|
+| [tipo — ej: endpoint POST] | `{paths.api_routes}/[archivo_existente].py` | [patrón que define] |
+| [tipo — ej: migración RLS] | `{paths.migrations}/[migración_existente].sql` | [patrón que define] |
+| [tipo — ej: service function] | `{paths.backend}/services/[servicio_existente].py` | [patrón que define] |
+
+#### Decisiones que el Implementador NO debe tomar
+
+Lista explícita de decisiones ya tomadas para que el implementador no las reconsidere:
+
+- **Naming:** [decisión tomada — ej: la función se llama `create_webhook`, no `add_webhook`]
+- **Patrón de imports:** [decisión — ej: imports absolutos desde `app.`]
+- **Estructura de respuesta:** [decisión — ej: siempre retornar `{"data": ..., "error": null}`]
+- **[Decisión adicional del paso]:** [valor]
+
+#### Razonamiento Clave Embebido
+
+Por qué se tomaron las decisiones más importantes del paso (para que el implementador entienda el contexto sin leer el historial):
+
+- **[Decisión A]:** [razonamiento — ej: se usa RPC en lugar de query directa porque el RLS de Supabase requiere contexto de usuario en cada request]
+- **[Decisión B]:** [razonamiento]
+
+---
+
 ## 💾 Archivo de Salida
 
 **Destino:** `{paths.devs_in_progress}/analisis-FINAL.md`
@@ -216,15 +287,16 @@ Comando para ejecutar tests: `{commands.test_unit}` / `{commands.test_integratio
 | Métrica | Mínimo |
 |:---|:---|
 | `proyecto-config.json` leído antes de generar | 100% |
+| `constitution/quality.md` leído y §7 reflejado en criterios de aceptación | 100% |
 | Discrepancias consolidadas con resolución | 100% de las detectadas |
 | Correcciones al plan documentadas | Todas las encontradas |
 | Propuesta DX incluida en §3 y Tarea 0 en §6 | Obligatorio |
 | Criterio DX en §5 | Obligatorio |
-| Secciones completadas | 9 secciones (0-8) |
+| Secciones completadas | 10 secciones (0-9) |
+| §9 Contexto de Sesión completo (interfaces reales, patrones, decisiones) | Obligatorio |
 | Casos de testing | ≥ 3 casos concretos |
 | Tiempo estimado por tarea | 100% |
 
 ---
 
 **Idioma de respuesta:** Español 🇪🇸
-```

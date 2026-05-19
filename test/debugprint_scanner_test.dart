@@ -192,4 +192,129 @@ void main() {
       expect(isInsideDebugModeBlock(lines, 2), isTrue);
     });
   });
+
+  group('multi-line debugPrint', () {
+    test('TP-M1: findClosingParenMultiLine detects closing ) across lines', () {
+      final lines = [
+        '  debugPrint(',
+        "    '[Pipeline] Stage 1: Fetching idea...',",
+        '  );',
+      ];
+
+      final dpIdx = lines[0].indexOf('debugPrint(');
+      final result = findClosingParenMultiLine(
+        lines,
+        0,
+        dpIdx + 'debugPrint('.length,
+      );
+      expect(result.$1, equals(2));
+      expect(result.$2, equals(2));
+    });
+
+    test(
+      'TP-M2: extractMultiLineArg extracts argument from multi-line call',
+      () {
+        final lines = [
+          '  debugPrint(',
+          "    '[Pipeline] Stage 1: Fetching idea...',",
+          '  );',
+        ];
+
+        final dpIdx = lines[0].indexOf('debugPrint(');
+        final openParenCol = dpIdx + 'debugPrint('.length - 1;
+        final arg = extractMultiLineArg(lines, 0, openParenCol, 2, 2);
+        expect(arg, equals("'[Pipeline] Stage 1: Fetching idea...',"));
+      },
+    );
+
+    test('TP-M3: extractMultiLineArg handles interpolation', () {
+      final lines = [
+        '  debugPrint(',
+        "    'Processing \${widget.name}...',",
+        '  );',
+      ];
+
+      final dpIdx = lines[0].indexOf('debugPrint(');
+      final openParenCol = dpIdx + 'debugPrint('.length - 1;
+      final arg = extractMultiLineArg(lines, 0, openParenCol, 2, 2);
+      expect(arg, equals("'Processing \${widget.name}...',"));
+    });
+
+    test(
+      'TP-M4: parens inside string do not break findClosingParenMultiLine',
+      () {
+        final lines = ['  debugPrint(', "    'func(x) result: y',", '  );'];
+
+        final dpIdx = lines[0].indexOf('debugPrint(');
+        final result = findClosingParenMultiLine(
+          lines,
+          0,
+          dpIdx + 'debugPrint('.length,
+        );
+        expect(result.$1, equals(2));
+        expect(result.$2, equals(2));
+      },
+    );
+
+    test(
+      'TP-M5: multi-line debugPrint inside kDebugMode guard is detected',
+      () {
+        final lines = [
+          'if (kDebugMode) {',
+          '  debugPrint(',
+          "    'should not fix',",
+          '  );',
+          '}',
+        ];
+
+        expect(isInsideDebugModeBlock(lines, 1), isTrue);
+      },
+    );
+
+    test(
+      'TP-M6: findClosingParenMultiLine handles multiple multi-line calls',
+      () {
+        final lines = [
+          '  debugPrint(',
+          "    'first call',",
+          '  );',
+          "  debugPrint('single line');",
+          '  debugPrint(',
+          "    'second call',",
+          '  );',
+        ];
+
+        final dpIdx0 = lines[0].indexOf('debugPrint(');
+        final r1 = findClosingParenMultiLine(
+          lines,
+          0,
+          dpIdx0 + 'debugPrint('.length,
+        );
+        expect(r1.$1, equals(2));
+        expect(r1.$2, equals(2));
+
+        final dpIdx4 = lines[4].indexOf('debugPrint(');
+        final r2 = findClosingParenMultiLine(
+          lines,
+          4,
+          dpIdx4 + 'debugPrint('.length,
+        );
+        expect(r2.$1, equals(6));
+        expect(r2.$2, equals(2));
+      },
+    );
+
+    test('TP-M7: findClosingParenMultiLine returns (-1, -1) for malformed', () {
+      final lines = ['  debugPrint(', "    'no closing paren',"];
+
+      final dpIdx = lines[0].indexOf('debugPrint(');
+      final result = findClosingParenMultiLine(
+        lines,
+        0,
+        dpIdx + 'debugPrint('.length,
+      );
+      expect(result.$1, equals(-1));
+      expect(result.$2, equals(-1));
+    });
+  });
 }

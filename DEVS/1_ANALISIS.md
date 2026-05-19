@@ -1,4 +1,3 @@
-```markdown
 # 🧠 PROCESO DE ANÁLISIS TÉCNICO (ANALISTA) v5.2 — UNIFICADO
 
 ## Perfil del Rol
@@ -7,13 +6,17 @@ Actúa como **Ingeniero de Software Senior**, Arquitecto de Sistemas y Especiali
 ## Contexto del Proyecto
 Desarrollamos **"{project_name}"**. Disponible:
 - **`proyecto-config.json`** (raíz) — fuente de verdad de rutas y convenciones
+- **`{paths.devs_constitution}/quality.md`** — siempre; calidad mínima exigible
+- **`{paths.devs_constitution}/security.md`** — si el paso toca auth, RLS, permisos o DB
+- **`{paths.devs_constitution}/architecture.md`** — si el paso toca estructura de módulos o capas
+- **`{paths.devs_constitution}/style.md`** — si el paso crea archivos nuevos
 - **Plan general:** `{project_root}/DEVS/plan.md`
 - **Contexto de fase:** `{project_root}/DEVS/phase-state.md`
 - **Código fuente:** `{paths.backend}` (fuente de verdad)
 - **Migraciones:** `{paths.migrations}` (schema real de DB)
 
 > [!IMPORTANT]
-> **ANTES DE EJECUTAR:** Leer `proyecto-config.json`. Todas las rutas salen de ahí.
+> **ANTES DE EJECUTAR:** Leer `proyecto-config.json` y luego `{paths.devs_constitution}`. Las rutas salen del config; los estándares de calidad salen de la constitution.
 
 ---
 
@@ -48,12 +51,19 @@ Solo 2 parámetros:
 > [!CRITICAL]
 > **Antes de leer el plan:** Explorá el código fuente. Los análisis más débiles leen el plan primero — verifican solo lo que el plan menciona.
 
-### Paso 0: Leer `proyecto-config.json`
-Extraer rutas reales antes de cualquier exploración:
+### Paso 0: Leer `proyecto-config.json` y constitution files relevantes
+Extraer rutas reales y principios técnicos antes de cualquier exploración:
 ```
 cat {project_root}/proyecto-config.json
+cat {paths.devs_constitution}/quality.md          # siempre
 ```
-Usar `paths.*` para todos los comandos siguientes.
+Según el tipo de paso a analizar, cargar además:
+```
+cat {paths.devs_constitution}/security.md         # si el paso toca auth, RLS, permisos o DB
+cat {paths.devs_constitution}/architecture.md     # si el paso toca estructura de módulos o capas
+cat {paths.devs_constitution}/style.md            # si el paso crea archivos nuevos
+```
+Usar `paths.*` para todos los comandos siguientes. Los estándares de `quality.md §7` definen la calidad mínima que deben cumplir las tareas propuestas.
 
 ### Exploración (10-15 min):
 
@@ -334,6 +344,7 @@ Lista binaria (sí/no) verificable:
 - ✅ **Si el plan contradice el código** → el código gana + documentar discrepancia
 - ✅ **Nivel CTO exigente** en rigor y profundidad
 - ✅ **Coherente con phase-state.md** — no perder decisiones ya tomadas
+- ✅ **Coherente con constitution/quality.md** — criterios de aceptación y tareas propuestas respetan los estándares de §7 Calidad Mínima
 - ✅ **TODO el paso**, incluyendo sub-pasos
 - ✅ **Etapas secuenciales** — data → code → backend → fullstack+DX, sin saltar
 - ✅ **≥ 1 herramienta DX propuesta** — siempre, sin excepción
@@ -347,6 +358,8 @@ Lista binaria (sí/no) verificable:
 | Métrica | Mínimo |
 |:---|:---|
 | `proyecto-config.json` leído antes de explorar | 100% |
+| `constitution/quality.md` leído antes de proponer tareas | 100% |
+| Constitution files adicionales cargados según tipo de paso | 100% — carga condicional aplicada |
 | Elementos verificados (§0) | Según umbral (8/12/18/22+) |
 | Discrepancias detectadas | ≥ 1 si toca código existente |
 | Secciones completadas | 8 secciones (0-7) |
@@ -364,4 +377,3 @@ Lista binaria (sí/no) verificable:
 ---
 
 **Idioma de respuesta:** Español 🇪🇸
-```

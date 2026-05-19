@@ -33,7 +33,6 @@ class VRMApp extends StatefulWidget {
 }
 
 class _VRMAppState extends State<VRMApp> {
-  ThemeMode _themeMode = ThemeMode.dark;
   bool _isLoading = true;
 
   @override
@@ -43,10 +42,9 @@ class _VRMAppState extends State<VRMApp> {
   }
 
   Future<void> _loadThemeMode() async {
-    final mode = await SettingsService.instance.getThemeMode();
+    await SettingsService.instance.getThemeMode();
     if (mounted) {
       setState(() {
-        _themeMode = mode;
         _isLoading = false;
       });
     }
@@ -62,55 +60,61 @@ class _VRMAppState extends State<VRMApp> {
       );
     }
 
-    return MaterialApp(
-      title: 'VRM App - Cámara Atómica',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: _themeMode,
-      localizationsDelegates: const [
-        AppLocalizations.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      supportedLocales: const [Locale('en'), Locale('es')],
-      home: widget.startWithOnboarding
-          ? const OnboardingFlow()
-          : const DashboardPage(),
-      routes: {
-        '/dashboard': (context) => const DashboardPage(),
-        '/onboarding': (context) => const OnboardingFlow(),
-      },
-      onGenerateRoute: (settings) {
-        if (settings.name == '/stitch-progress') {
-          final args = settings.arguments as Map<String, dynamic>;
-          return MaterialPageRoute(
-            builder: (context) => StitchProgressPage(
-              projectId: args['projectId'] as String,
-              approvedClips: args['approvedClips'] as List<String>,
-              sessionData: args['sessionData'] as SessionData?,
-            ),
-          );
-        } else if (settings.name == '/recording') {
-          final args = settings.arguments as Map<String, dynamic>;
-          return MaterialPageRoute(
-            builder: (context) => RecordingPage(
-              analysis: args['analysis'] as ScriptAnalysis,
-              projectId: args['projectId'] as String,
-              currentFragmentIndex: args['currentFragmentIndex'] as int? ?? 0,
-            ),
-          );
-        } else if (settings.name == '/recording-end') {
-          final args = settings.arguments as Map<String, dynamic>?;
-          return MaterialPageRoute(
-            builder: (context) => RecordingEndPage(
-              finalVideoPath: args?['finalVideoPath'] as String?,
-              sessionData: args?['sessionData'] as SessionData?,
-            ),
-          );
-        }
-        return null;
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: SettingsService.instance.themeNotifier,
+      builder: (context, themeMode, child) {
+        return MaterialApp(
+          title: 'VRM App - Cámara Atómica',
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: themeMode,
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: const [Locale('en'), Locale('es')],
+          home: widget.startWithOnboarding
+              ? const OnboardingFlow()
+              : const DashboardPage(),
+          routes: {
+            '/dashboard': (context) => const DashboardPage(),
+            '/onboarding': (context) => const OnboardingFlow(),
+          },
+          onGenerateRoute: (settings) {
+            if (settings.name == '/stitch-progress') {
+              final args = settings.arguments as Map<String, dynamic>;
+              return MaterialPageRoute(
+                builder: (context) => StitchProgressPage(
+                  projectId: args['projectId'] as String,
+                  approvedClips: args['approvedClips'] as List<String>,
+                  sessionData: args['sessionData'] as SessionData?,
+                ),
+              );
+            } else if (settings.name == '/recording') {
+              final args = settings.arguments as Map<String, dynamic>;
+              return MaterialPageRoute(
+                builder: (context) => RecordingPage(
+                  analysis: args['analysis'] as ScriptAnalysis,
+                  projectId: args['projectId'] as String,
+                  currentFragmentIndex:
+                      args['currentFragmentIndex'] as int? ?? 0,
+                ),
+              );
+            } else if (settings.name == '/recording-end') {
+              final args = settings.arguments as Map<String, dynamic>?;
+              return MaterialPageRoute(
+                builder: (context) => RecordingEndPage(
+                  finalVideoPath: args?['finalVideoPath'] as String?,
+                  sessionData: args?['sessionData'] as SessionData?,
+                ),
+              );
+            }
+            return null;
+          },
+        );
       },
     );
   }

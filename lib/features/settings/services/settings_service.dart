@@ -17,6 +17,8 @@ class SettingsService {
     return _instance!;
   }
 
+  final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.light);
+
   Future<void> setTeleprompterPrefs(TeleprompterPrefs teleprompterPrefs) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(
@@ -35,13 +37,16 @@ class SettingsService {
   Future<void> setThemeMode(ThemeMode mode) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(_keyThemeMode, mode.index);
+    themeNotifier.value = mode;
   }
 
   Future<ThemeMode> getThemeMode() async {
     final prefs = await SharedPreferences.getInstance();
     final index = prefs.getInt(_keyThemeMode);
-    if (index == null) return ThemeMode.system;
-    return ThemeMode.values[index];
+    if (index == null) return ThemeMode.light;
+    final mode = ThemeMode.values[index];
+    themeNotifier.value = mode;
+    return mode;
   }
 
   Future<void> setCloudSyncEnabled(bool enabled) async {

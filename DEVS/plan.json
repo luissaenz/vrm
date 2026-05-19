@@ -2,12 +2,12 @@
   "project": "VRM Atomic Camera",
   "phase": "mvp",
   "source": "plan.md",
-  "generated_at": "2026-05-05",
+  "generated_at": "2026-05-18",
   "steps": [
     {
       "id": "01",
       "name": "01-Core-de-Grabacion",
-      "status": "pending",
+      "status": "done",
       "objective": "Implementar el flujo completo grabación-revisión-unión-exportación: que el usuario logre ir desde Idea → Guion → Grabar → Unir → Exportar",
       "scope": [
         "lib/features/recording/",
@@ -32,7 +32,7 @@
     {
       "id": "02",
       "name": "02-Interfaz-Reactiva",
-      "status": "pending",
+      "status": "done",
       "objective": "Conectar toggles de hardware (modo calle/fantasma, bloqueo auto-focus) a la librería de cámara y las preferencias del teleprompter. Implementar datos reales de cuenta de usuario.",
       "scope": [
         "lib/features/recording/services/camera_service.dart",
@@ -56,7 +56,7 @@
     {
       "id": "03",
       "name": "03-Estabilidad-y-Performance",
-      "status": "pending",
+      "status": "done",
       "objective": "Blindar la app con manejo de errores críticos (memoria, cámara), optimizar performance en dispositivo físico y pulir estados de carga/transición UX.",
       "scope": [
         "lib/core/exceptions/",
@@ -79,7 +79,7 @@
     {
       "id": "04",
       "name": "04-Puerta-de-Tiendas",
-      "status": "pending",
+      "status": "done",
       "objective": "Preparar la app para publicación en App Store y Google Play: documentos legales, branding visual y paquetes de release firmados.",
       "scope": [
         "PRIVACY_POLICY.md",

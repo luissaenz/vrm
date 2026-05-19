@@ -25,17 +25,29 @@ void main(List<String> args) async {
   }
   final scannerContent = await scannerFile.readAsString();
 
-  exitCode += _checkWrapper(scannerContent, '_isInsideDebugModeBlock',
-      'wrapper usado por _findDebugPrintCalls y _fixDebugPrintCalls');
+  exitCode += _checkWrapper(
+    scannerContent,
+    '_isInsideDebugModeBlock',
+    'wrapper usado por _findDebugPrintCalls y _fixDebugPrintCalls',
+  );
 
-  exitCode += _checkNotExists(scannerContent, '_isSameLineKDebugModeGuard',
-      'dead code wrapper eliminado en Paso 16');
+  exitCode += _checkNotExists(
+    scannerContent,
+    '_isSameLineKDebugModeGuard',
+    'dead code wrapper eliminado en Paso 16',
+  );
 
-  exitCode += _checkNotExists(scannerContent, '_isInsideAssert',
-      'dead code wrapper eliminado en Paso 16');
+  exitCode += _checkNotExists(
+    scannerContent,
+    '_isInsideAssert',
+    'dead code wrapper eliminado en Paso 16',
+  );
 
-  exitCode += _checkNotExists(scannerContent, '_isInsideBracedDebugModeBlock',
-      'dead code wrapper eliminado en Paso 16');
+  exitCode += _checkNotExists(
+    scannerContent,
+    '_isInsideBracedDebugModeBlock',
+    'dead code wrapper eliminado en Paso 16',
+  );
 
   print('');
   print('[2/4] Verificando imports scanner...');
@@ -67,7 +79,7 @@ void main(List<String> args) async {
   ];
 
   for (final fn in requiredFunctions) {
-    final regex = RegExp('$fn\\s*\\(');
+    final regex = RegExp('(bool|String|int|void)\\s+$fn\\s*\\(');
     if (regex.hasMatch(detectorContent)) {
       print('  ✅ detector exporta $fn');
     } else {

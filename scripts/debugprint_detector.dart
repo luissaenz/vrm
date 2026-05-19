@@ -162,3 +162,87 @@ String stripStringsAndComments(String line) {
 
   return buf.toString();
 }
+
+/// Returns (lineIndex, columnIndex) of matching `)` across lines, or (-1, -1).
+///
+/// Ignores parens inside string literals ('...', "..." with escape handling).
+(int, int) findClosingParenMultiLine(
+  List<String> lines,
+  int startLine,
+  int startCol,
+) {
+  int depth = 0;
+  bool inSingleQuote = false;
+  bool inDoubleQuote = false;
+
+  for (int li = startLine; li < lines.length; li++) {
+    final line = lines[li];
+    int j = (li == startLine) ? startCol : 0;
+    for (; j < line.length; j++) {
+      final ch = line[j];
+
+      if (inSingleQuote) {
+        if (ch == '\\') {
+          j++;
+          continue;
+        }
+        if (ch == "'") {
+          inSingleQuote = false;
+        }
+        continue;
+      }
+      if (inDoubleQuote) {
+        if (ch == '\\') {
+          j++;
+          continue;
+        }
+        if (ch == '"') {
+          inDoubleQuote = false;
+        }
+        continue;
+      }
+
+      if (ch == "'") {
+        inSingleQuote = true;
+        continue;
+      }
+      if (ch == '"') {
+        inDoubleQuote = true;
+        continue;
+      }
+
+      if (ch == '(') depth++;
+      if (ch == ')') {
+        if (depth == 0) return (li, j);
+        depth--;
+      }
+    }
+  }
+  return (-1, -1);
+}
+
+/// Extracts the argument string between opening paren and closing paren.
+///
+/// Handles both single-line and multi-line arguments.
+String extractMultiLineArg(
+  List<String> lines,
+  int startLine,
+  int openParenCol,
+  int endLine,
+  int endCol,
+) {
+  if (startLine == endLine) {
+    return lines[startLine].substring(openParenCol + 1, endCol).trim();
+  }
+  final buf = StringBuffer();
+  buf.write(lines[startLine].substring(openParenCol + 1));
+  for (int li = startLine + 1; li < endLine; li++) {
+    buf.write('\n');
+    buf.write(lines[li]);
+  }
+  if (endLine > startLine) {
+    buf.write('\n');
+    buf.write(lines[endLine].substring(0, endCol));
+  }
+  return buf.toString().trim();
+}
